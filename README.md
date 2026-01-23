@@ -15,7 +15,7 @@
 | **React**        | Frontend library             |
 | **TypeScript**   | Static typing for JavaScript |
 | **Vite**         | Fast build tool & dev server |
-| **Ant Design**   | UI component library         |
+| **Shadcn**       | UI component library         |
 | **Tailwind CSS** | Utility-first CSS framework  |
 
 ---
@@ -39,7 +39,7 @@ git -v
 ## 📥 Clone the Repository
 
 ```bash
-git clone https://github.com/your-org/skinnavi-frontend.git
+git clone https://github.com/KaPhuDong/skinnavi-frontend.git
 cd skinnavi-frontend
 ```
 
