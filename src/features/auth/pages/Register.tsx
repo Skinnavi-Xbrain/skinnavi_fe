@@ -8,14 +8,14 @@ import registerImg from '@/shared/assets/images/register.png'
 const Register = () => {
   return (
     <AuthLayout imageSrc={registerImg}>
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-blue-500 mb-2">Create Account</h1>
-        <p className="text-slate-500 text-sm font-medium">
+      <div className="text-center mb-5">
+        <h1 className="text-2xl font-bold text-blue-500 mb-1">Create Account</h1>
+        <p className="text-slate-500 text-xs font-medium">
           Join SkinTech for personalized skincare
         </p>
       </div>
 
-      <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         <InputWithIcon
           label="Full Name"
           placeholder="John Doe"
@@ -63,12 +63,12 @@ const Register = () => {
 
         <Button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-6 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
         >
           Create Account
         </Button>
 
-        <div className="mt-8 text-center text-sm text-slate-500">
+        <div className="mt-4 text-center text-xs text-slate-500">
           Already have an account?
           <Link to="/login" className="text-blue-500 font-semibold hover:underline ml-1">
             Sign In
