@@ -15,11 +15,12 @@ const Register = () => {
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
         <InputWithIcon
           label="Full Name"
           placeholder="John Doe"
           icon={<User className="w-5 h-5" />}
+          className="py-2"
         />
 
         <InputWithIcon
@@ -27,6 +28,7 @@ const Register = () => {
           type="email"
           placeholder="john@email.com"
           icon={<Mail className="w-5 h-5" />}
+          className="py-2"
         />
 
         <InputWithIcon
@@ -34,6 +36,7 @@ const Register = () => {
           type="password"
           placeholder="Create a password"
           icon={<Lock className="w-5 h-5" />}
+          className="py-2"
         />
 
         <InputWithIcon
@@ -41,6 +44,7 @@ const Register = () => {
           type="password"
           placeholder="Confirm your password"
           icon={<ShieldCheck className="w-5 h-5" />}
+          className="py-2"
         />
 
         <div className="flex items-start space-x-2 pt-2">
