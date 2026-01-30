@@ -67,7 +67,7 @@ const Register = () => {
       })
 
       toast({
-        title: 'Registered successfully',
+        title: 'Registration Complete',
         description: response.data?.message || 'Registration successful! Please log in.',
         variant: 'success'
       })
@@ -82,7 +82,7 @@ const Register = () => {
         errorMessage = Array.isArray(message) ? message[0] : message || 'Registration failed'
 
         toast({
-          title: 'Registration Error',
+          title: 'Registration Failed',
           description: errorMessage,
           variant: 'destructive'
         })
@@ -173,7 +173,7 @@ const Register = () => {
           <FieldError errors={[errors.confirmPassword]} />
         </Field>
 
-        <div className="flex items-start gap-2 pt-1 pb-1">
+        <div className="flex item-center gap-2 pb-1">
           <input
             type="checkbox"
             id="agreeToTerms"
@@ -192,7 +192,7 @@ const Register = () => {
           </label>
         </div>
         {errors.agreeToTerms && (
-          <p className="text-xs text-red-500 -mt-1">{errors.agreeToTerms.message}</p>
+          <p className="text-sm text-red-500 -mt-1">{errors.agreeToTerms.message}</p>
         )}
 
         <Button
