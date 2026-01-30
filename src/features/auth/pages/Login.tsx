@@ -48,10 +48,8 @@ const Login = () => {
         email: data.email,
         password: data.password
       })
-
       const { accessToken } = response.data.data
       localStorage.setItem('accessToken', accessToken)
-
       toast({
         title: 'Welcome back!',
         description: 'Login successful.',
@@ -151,5 +149,4 @@ const Login = () => {
     </AuthLayout>
   )
 }
-
 export default Login
