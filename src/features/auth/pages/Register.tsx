@@ -62,24 +62,33 @@ const Register = () => {
         email: data.email,
         password: data.password,
         full_name: data.full_name,
-        avatar_url: ''
+        avatar_url: '',
+        confirm_password: data.confirmPassword
       })
 
       toast({
-        title: 'Thành công',
-        description: response.data?.message || 'Registration successful! Please log in.'
+        title: 'Registered successfully',
+        description: response.data?.message || 'Registration successful! Please log in.',
+        variant: 'success'
       })
 
       navigate('/login')
     } catch (error: unknown) {
+      let errorMessage = 'An unexpected error occurred'
+
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ApiErrorResponse>
         const message = axiosError.response?.data?.message
+        errorMessage = Array.isArray(message) ? message[0] : message || 'Registration failed'
 
-        setServerError(Array.isArray(message) ? message[0] : message || 'Registration failed')
-      } else {
-        setServerError('An unexpected error occurred')
+        toast({
+          title: 'Registration Error',
+          description: errorMessage,
+          variant: 'destructive'
+        })
       }
+
+      setServerError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -93,11 +102,7 @@ const Register = () => {
       </div>
 
       <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-        {serverError && (
-          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg font-medium">
-            {serverError}
-          </div>
-        )}
+        {serverError && <div className="">{/* {serverError} */}</div>}
 
         <Field className="gap-0">
           <InputWithIcon
@@ -105,6 +110,7 @@ const Register = () => {
             placeholder="John Doe"
             icon={<User className="w-5 h-5" />}
             {...register('full_name')}
+            className="py-2"
           />
           <FieldError errors={[errors.full_name]} />
         </Field>
@@ -116,6 +122,7 @@ const Register = () => {
             placeholder="your@email.com"
             icon={<Mail className="w-5 h-5" />}
             {...register('email')}
+            className="py-2"
           />
           <FieldError errors={[errors.email]} />
         </Field>
@@ -128,14 +135,15 @@ const Register = () => {
               placeholder="Create a password"
               icon={<Lock className="w-5 h-5" />}
               {...register('password')}
+              className="py-2"
             />
 
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-11 text-gray-400 hover:text-gray-600 "
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600 "
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
 
@@ -150,14 +158,15 @@ const Register = () => {
               placeholder="Confirm your password"
               icon={<ShieldCheck className="w-5 h-5" />}
               {...register('confirmPassword')}
+              className="py-2"
             />
 
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-11 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
             >
-              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
 
