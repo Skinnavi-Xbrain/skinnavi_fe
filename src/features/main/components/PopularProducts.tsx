@@ -1,35 +1,53 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Loader2 } from 'lucide-react'
 
-const products = [
-  {
-    id: 1,
-    name: '50% Off on Creams',
-    description: 'Grab exclusive discount curated for you.',
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&q=80',
-    bgColor: 'bg-[#E3F2ED]' // Màu xanh lá nhạt
-  },
-  {
-    id: 2,
-    name: '50% Off on Creams',
-    description: 'Grab exclusive discount curated for you.',
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&q=80',
-    bgColor: 'bg-[#E7F0F8]' // Màu xanh dương nhạt
-  },
-  {
-    id: 3,
-    name: '50% Off on Creams',
-    description: 'Grab exclusive discount curated for you.',
-    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=500&q=80',
-    bgColor: 'bg-[#F9E8E8]' // Màu hồng nhạt
-  }
-]
+// Định nghĩa Interface chuẩn theo dữ liệu Postman
+interface Product {
+  id: string
+  name: string
+  display_price: string | number
+  image_url: string
+  affiliate_url: string
+}
+
+const BG_COLORS = ['bg-[#E3F2ED]', 'bg-[#E7F0F8]', 'bg-[#F9E8E8]']
 
 export const PopularProducts = () => {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/products/affiliate')
+        const result = await response.json()
+
+        if (result.success && result.data && Array.isArray(result.data.items)) {
+          setProducts(result.data.items.slice(0, 3))
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+      </div>
+    )
+  }
+
   return (
     <section className="container mx-auto px-6 py-16 md:py-24 bg-white relative">
-      {/* Nút New Arrival nằm tuyệt đối ở góc phải trên Desktop */}
+      {/* Header Button Desktop */}
       <div className="absolute top-16 md:top-24 right-6 hidden md:block">
         <Button 
           variant="outline" 
@@ -39,7 +57,7 @@ export const PopularProducts = () => {
         </Button>
       </div>
 
-      {/* Header căn giữa hoàn toàn */}
+      {/* Title Section */}
       <div className="flex flex-col items-center text-center mb-16 space-y-3">
         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
           Popular Products
@@ -48,7 +66,7 @@ export const PopularProducts = () => {
           Discover unbeatable offers on top beauty essentials.
         </p>
         
-        {/* Nút hiện ra dưới mô tả khi ở màn hình Mobile */}
+        {/* Mobile Button */}
         <div className="md:hidden pt-2 w-full">
           <Button 
             variant="outline" 
@@ -61,7 +79,7 @@ export const PopularProducts = () => {
 
       {/* Grid sản phẩm */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <motion.div 
             key={product.id}
             initial={{ opacity: 0, y: 20 }}
@@ -69,26 +87,33 @@ export const PopularProducts = () => {
             viewport={{ once: true }}
             whileHover={{ y: -10 }}
             className="group cursor-pointer"
+            onClick={() => window.open(product.affiliate_url, '_blank')}
           >
-            {/* Thẻ sản phẩm hình vòm */}
-            <div className={`${product.bgColor} rounded-[48px] rounded-t-full p-8 transition-all duration-300 flex flex-col items-center h-full`}>
+            {/* Card UI */}
+            <div className={`${BG_COLORS[index % BG_COLORS.length]} rounded-[48px] rounded-t-full p-8 transition-all duration-300 flex flex-col items-center h-full`}>
               
-              {/* Ảnh sản phẩm hình tròn sạch sẽ */}
+              {/* Image Circle */}
               <div className="relative w-full aspect-square rounded-full bg-white overflow-hidden shadow-sm border-[6px] border-white/40">
                 <img 
-                  src={product.image} 
+                  src={product.image_url} 
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                 />
               </div>
 
-              {/* Thông tin căn lề trái như hình mẫu */}
+              {/* Product Info */}
               <div className="mt-8 w-full text-left px-2">
-                <h3 className="font-bold text-slate-900 text-lg mb-1 group-hover:text-[#67AEFF] transition-colors">
+                <h3 className="font-bold text-slate-900 text-lg mb-1 group-hover:text-[#67AEFF] transition-colors line-clamp-1">
                   {product.name}
                 </h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                  {product.description}
+                <p className="text-sm text-slate-500 font-medium leading-relaxed mb-3">
+                  Exclusive skincare deal
+                </p>
+                <p className="text-lg font-bold text-slate-900">
+                  {new Intl.NumberFormat('vi-VN', { 
+                    style: 'currency', 
+                    currency: 'VND' 
+                  }).format(Number(product.display_price))}
                 </p>
               </div>
             </div>

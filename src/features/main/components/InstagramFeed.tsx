@@ -20,7 +20,6 @@ export const InstagramFeed = () => {
       </div>
 
       <div className="relative">
-        {/* Container: Tăng kích thước w-[190px] cho mobile và w-[280px] cho desktop */}
         <div className="flex gap-4 md:gap-5 overflow-x-auto pb-10 px-6 no-scrollbar snap-x snap-mandatory scrollbar-hide">
           {instagramImages.map((imgUrl, i) => (
             <div 
@@ -34,7 +33,6 @@ export const InstagramFeed = () => {
                 loading="lazy"
               />
               
-              {/* Overlay Instagram Icon */}
               <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                 <div className="w-12 h-12 border-2 border-white rounded-2xl flex items-center justify-center backdrop-blur-sm bg-white/10">
                   <div className="w-6 h-6 border-2 border-white rounded-full relative">
@@ -46,7 +44,6 @@ export const InstagramFeed = () => {
           ))}
         </div>
         
-        {/* Gradient mờ nhẹ 2 đầu để tăng chiều sâu */}
         <div className="absolute top-0 left-0 bottom-10 w-16 bg-gradient-to-r from-white via-white/20 to-transparent pointer-events-none hidden sm:block" />
         <div className="absolute top-0 right-0 bottom-10 w-16 bg-gradient-to-l from-white via-white/20 to-transparent pointer-events-none hidden sm:block" />
       </div>

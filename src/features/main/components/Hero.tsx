@@ -2,8 +2,8 @@ import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { Upload, Sparkles, Camera, ArrowRight } from 'lucide-react'
 import Image from '@/shared/assets/images/image.png'
+import { UploadDialog } from './UploadDialog'
 
-// Tối ưu các biến Variants để tránh render lại không cần thiết
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -21,29 +21,21 @@ const itemVariants = {
   }
 }
 
-const pulseVariants = (scaleMax: number, delay = 0) => ({
-  animate: {
-    scale: [1, scaleMax, 1],
-    opacity: [0.4, 0, 0.4],
-  },
-  transition: { duration: 2, repeat: Infinity, delay }
-})
-
 export const Hero = () => {
   return (
-    <section className="relative container mx-auto px-6 py-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16 overflow-hidden">
+    <section className="relative container mx-auto px-6 py-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16 overflow-hidden font-sans">
       
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
         <motion.div
           animate={{ scale: [1, 1.1, 1], opacity: [0.15, 0.25, 0.15] }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 left-0 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-blue-400/20 rounded-full blur-3xl"
+          className="absolute top-0 left-0 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#67AEFF]/20 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 10, repeat: Infinity, delay: 2 }}
-          className="absolute bottom-0 right-0 w-[350px] md:w-[500px] h-[350px] md:h-[500px] bg-purple-400/15 rounded-full blur-3xl"
+          className="absolute bottom-0 right-0 w-[350px] md:w-[500px] h-[350px] md:h-[500px] bg-purple-400/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -55,12 +47,12 @@ export const Hero = () => {
         className="max-w-xl space-y-8 md:space-y-10 text-center md:text-left z-10"
       >
         <motion.div variants={itemVariants} className="space-y-4">
-          <h1 className="text-4xl sm:text-5xl md:text-[72px] lg:text-[80px] font-extrabold leading-[1.1] tracking-tight text-slate-900">
-            <span className="bg-gradient-to-r from-[#67AEFF] via-[#5BA0EB] to-[#4A8FE0] bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-5xl md:text-[72px] lg:text-[80px] font-black leading-[1.1] tracking-tight text-foreground">
+            <span className="bg-gradient-to-r from-[#67AEFF] via-[#85C1FF] to-[#4A8FE0] bg-clip-text text-transparent">
               Discover your skin
             </span>
             <br />
-            in one scan
+            <span className="text-foreground">in one scan</span>
             <motion.span
               animate={{ rotate: [0, 10, -10, 10, 0] }}
               transition={{ duration: 0.6, delay: 1, repeat: Infinity, repeatDelay: 4 }}
@@ -72,33 +64,35 @@ export const Hero = () => {
         </motion.div>
 
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 items-center justify-center md:justify-start">
-          <Button className="group relative bg-gradient-to-r from-[#67AEFF] to-[#5BA0EB] hover:to-[#4A8FE0] text-white px-10 md:px-12 py-7 md:py-8 rounded-2xl text-base md:text-lg font-bold shadow-xl shadow-blue-200/50 transition-all w-full sm:w-auto border-0 overflow-hidden">
-            <motion.div
-              animate={{ x: [-200, 200] }}
-              transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-              className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-            />
-            <Upload className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-            Upload Your Photo
-            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <UploadDialog>
+            <Button className="group relative bg-[#67AEFF] hover:bg-[#5BA0EB] text-white px-10 md:px-12 py-7 md:py-8 rounded-2xl text-base md:text-lg font-bold shadow-xl shadow-blue-200/50 transition-all w-full sm:w-auto border-0 overflow-hidden">
+              <motion.div
+                animate={{ x: [-200, 200] }}
+                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+              />
+              <Upload className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+            Start Skin Scan 
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </UploadDialog>
         </motion.div>
       </motion.div>
 
-      {/* Right Content - Image - ĐƠN GIẢN HÓA */}
+      {/* Right Content - Visual Section */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.3 }}
         className="relative flex-shrink-0 md:ml-20"
       >
-        {/* Floating Icons - GIỮ NGUYÊN */}
+        {/* Floating Icons */}
         <motion.div
           animate={{ opacity: [0.4, 1, 0.4], y: [0, -12, 0], rotate: [0, 180, 360] }}
           transition={{ duration: 4, repeat: Infinity }}
           className="absolute -top-6 -right-4 md:-top-10 md:right-4 z-20"
         >
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-[#67AEFF] to-[#5BA0EB] rounded-2xl rotate-45 shadow-lg flex items-center justify-center">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-[#67AEFF] rounded-2xl rotate-45 shadow-lg flex items-center justify-center">
             <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-white -rotate-45" />
           </div>
         </motion.div>
@@ -113,14 +107,14 @@ export const Hero = () => {
           </div>
         </motion.div>
 
+        {/* Image Frame with Flat Bottom Oval */}
         <div className="relative">
-          {/* Blue OVAL background với đáy HOÀN TOÀN PHẲNG - nhỏ hơn */}
           <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-[320px] md:h-[360px] lg:w-[360px] lg:h-[400px]">
-            {/* Khung bầu dục đáy phẳng 100% - màu EDF5FF */}
-            <div className="absolute inset-0 bg-[#EDF5FF] shadow-inner"
-                 style={{ borderRadius: '50% 50% 0 0' }}></div>
+            <div 
+              className="absolute inset-0 bg-[#F0F7FF] shadow-inner"
+              style={{ borderRadius: '50% 50% 0 0' }}
+            ></div>
 
-            {/* Ảnh - đáy ngang khung, phía trên cao hơn */}
             <motion.img
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

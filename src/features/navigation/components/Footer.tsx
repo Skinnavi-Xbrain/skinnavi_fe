@@ -17,7 +17,7 @@ export default function Footer() {
         <div className="py-10 md:py-14 border-b border-[#67AEFF]/20">
           <div className="max-w-2xl mx-auto text-center">
             <h3 className="text-xl md:text-3xl font-black tracking-tight text-slate-900 mb-3 px-4">
-              Stay Connected with <span className="text-[#67AEFF]">Skinnavi</span>
+              Stay Connected with <span className="text-[#67AEFF]">SkinNavi</span>
             </h3>
             <p className="text-slate-600 mb-6 md:mb-8 text-base md:text-lg px-2">
               Get updates on new products and exclusive skincare tips.
@@ -108,7 +108,7 @@ export default function Footer() {
         <div className="py-6 md:py-8 border-t border-[#67AEFF]/20">
           <div className="flex flex-col-reverse md:flex-row justify-between items-center gap-6">
             <p className="text-slate-500 text-xs md:text-sm font-semibold text-center">
-              © 2026 <span className="text-[#67AEFF]">Skinnavi</span>. Crafted for your beauty.
+              © 2026 <span className="text-[#67AEFF]">SkinNavi</span>. Crafted for your beauty.
             </p>
             <div className="flex gap-6 md:gap-8 items-center text-xs md:text-sm font-semibold">
               <a href="#" className="text-slate-500 hover:text-[#67AEFF] transition-colors">Terms</a>

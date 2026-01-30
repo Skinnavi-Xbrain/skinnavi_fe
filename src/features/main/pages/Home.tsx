@@ -8,7 +8,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-[#67AEFF]/30">
       <main>
-
         <Hero />
 
         <div className="py-8">
