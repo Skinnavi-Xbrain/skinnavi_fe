@@ -18,7 +18,7 @@ export const AuthLayout = ({ children, imageSrc }: AuthLayoutProps) => {
 
         {/* FORM */}
         <div className="w-full md:w-[65%] flex items-center justify-center bg-[#f8faff]">
-          <div className="w-full md:w-[65%] bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <div className="w-full md:w-[65%] bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
             {children}
           </div>
         </div>

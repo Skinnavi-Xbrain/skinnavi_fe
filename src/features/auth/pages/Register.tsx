@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { User, Mail, Lock, ShieldCheck, Loader2 } from 'lucide-react'
+import { User, Mail, Lock, ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,7 +20,10 @@ const registerSchema = z
     full_name: z.string().min(1, 'Full name is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password')
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: 'You must agree to the terms and privacy policy'
+    })
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -33,6 +36,8 @@ const Register = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<boolean>(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const {
     register,
@@ -40,7 +45,13 @@ const Register = () => {
     formState: { errors }
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { full_name: '', email: '', password: '', confirmPassword: '' }
+    defaultValues: {
+      full_name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      agreeToTerms: false
+    }
   })
 
   const onSubmit = async (data: RegisterFormValues): Promise<void> => {
@@ -51,24 +62,33 @@ const Register = () => {
         email: data.email,
         password: data.password,
         full_name: data.full_name,
-        avatar_url: ''
+        avatar_url: '',
+        confirm_password: data.confirmPassword
       })
 
       toast({
-        title: 'Thành công',
-        description: response.data?.message || 'Registration successful! Please log in.'
+        title: 'Registered successfully',
+        description: response.data?.message || 'Registration successful! Please log in.',
+        variant: 'success'
       })
 
       navigate('/login')
     } catch (error: unknown) {
+      let errorMessage = 'An unexpected error occurred'
+
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ApiErrorResponse>
         const message = axiosError.response?.data?.message
+        errorMessage = Array.isArray(message) ? message[0] : message || 'Registration failed'
 
-        setServerError(Array.isArray(message) ? message[0] : message || 'Registration failed')
-      } else {
-        setServerError('An unexpected error occurred')
+        toast({
+          title: 'Registration Error',
+          description: errorMessage,
+          variant: 'destructive'
+        })
       }
+
+      setServerError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -76,70 +96,125 @@ const Register = () => {
 
   return (
     <AuthLayout imageSrc={registerImg}>
-      <div className="text-center mb-5">
-        <h1 className="text-2xl font-bold text-blue-500 mb-1">Create Account</h1>
-        <p className="text-slate-500 text-xs font-medium">
-          Join SkinTech for personalized skincare
-        </p>
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-bold text-blue-400 mb-1">Create Account</h1>
+        <p className="text-gray-500 text-sm">Join SkinNavi for personalized skincare</p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        {serverError && (
-          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg font-medium">
-            {serverError}
-          </div>
-        )}
+      <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
+        {serverError && <div className="">{/* {serverError} */}</div>}
 
-        <Field>
+        <Field className="gap-0">
           <InputWithIcon
             label="Full Name"
             placeholder="John Doe"
             icon={<User className="w-5 h-5" />}
             {...register('full_name')}
+            className="py-2"
           />
           <FieldError errors={[errors.full_name]} />
         </Field>
 
-        <Field>
+        <Field className="gap-0">
           <InputWithIcon
             label="Email"
             type="email"
-            placeholder="john@email.com"
+            placeholder="your@email.com"
             icon={<Mail className="w-5 h-5" />}
             {...register('email')}
+            className="py-2"
           />
           <FieldError errors={[errors.email]} />
         </Field>
 
-        <Field>
-          <InputWithIcon
-            label="Password"
-            type="password"
-            placeholder="Create a password"
-            icon={<Lock className="w-5 h-5" />}
-            {...register('password')}
-          />
+        <Field className="gap-0">
+          <div className="relative">
+            <InputWithIcon
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Create a password"
+              icon={<Lock className="w-5 h-5" />}
+              {...register('password')}
+              className="py-2"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600 "
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
           <FieldError errors={[errors.password]} />
         </Field>
 
-        <Field>
-          <InputWithIcon
-            label="Confirm Password"
-            type="password"
-            placeholder="Confirm your password"
-            icon={<ShieldCheck className="w-5 h-5" />}
-            {...register('confirmPassword')}
-          />
+        <Field className="gap-0">
+          <div className="relative">
+            <InputWithIcon
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Confirm your password"
+              icon={<ShieldCheck className="w-5 h-5" />}
+              {...register('confirmPassword')}
+              className="py-2"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
           <FieldError errors={[errors.confirmPassword]} />
         </Field>
+
+        <div className="flex items-start gap-2 pt-1 pb-1">
+          <input
+            type="checkbox"
+            id="agreeToTerms"
+            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-400 focus:ring-blue-400"
+            {...register('agreeToTerms')}
+          />
+          <label htmlFor="agreeToTerms" className="text-xs text-gray-600">
+            I agree to the{' '}
+            <a href="/terms" className="text-blue-400 hover:underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>
+          </label>
+        </div>
+        {errors.agreeToTerms && (
+          <p className="text-xs text-red-500 -mt-1">{errors.agreeToTerms.message}</p>
+        )}
 
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl"
+          className="w-full bg-blue-400 hover:bg-blue-500 text-white font-medium py-4 rounded-xl text-base"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Create Account'}
         </Button>
+
+        <div className="text-center pt-1">
+          <p className="text-gray-600 text-xs">
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="text-blue-400 hover:underline font-medium"
+            >
+              Sign in
+            </button>
+          </p>
+        </div>
       </form>
     </AuthLayout>
   )
