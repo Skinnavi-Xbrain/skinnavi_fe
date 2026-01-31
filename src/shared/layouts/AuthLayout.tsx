@@ -7,15 +7,18 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, imageSrc }: AuthLayoutProps) => {
   return (
-    <div className="min-h-screen w-full flex">
-      <div className="sm:hidden md:flex w-[40%] bg-[#f3f6ff] items-center justify-center p-8">
-        <div className="relative w-full max-w-md aspect-4/5 overflow-hidden rounded-2xl">
+    <div className="w-screen h-screen overflow-hidden flex items-center justify-center bg-slate-50">
+      <div className="w-full h-full bg-white shadow-xl overflow-hidden flex flex-col md:flex-row bg-[#f3f4f6]">
+        <div className="hidden md:block md:w-[35%] relative bg-[#f3f4f6]">
           <img src={imageSrc} alt="Auth Illustration" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-blue-50/10" />
         </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-white">
-        <div className="w-full max-w-sm space-y-8">{children}</div>
+        <div className="w-full md:w-[65%] flex items-center justify-center bg-[#f8faff]">
+          <div className="w-full md:w-[65%] bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   )
