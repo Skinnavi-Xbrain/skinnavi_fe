@@ -1,102 +1,218 @@
-import { User, Mail, Lock } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { User, Mail, Lock, ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import axios, { AxiosError } from 'axios'
+
 import { Button } from '@/shared/components/ui/button'
 import { AuthLayout } from '@/shared/layouts/AuthLayout'
-import { Input } from '@/shared/components/ui/input'
-import { Field, FieldGroup, FieldLabel } from '@/shared/components/ui/field'
+import { InputWithIcon } from '@/shared/components/ui/input-with-icon'
+import { Field, FieldError } from '@/shared/components/ui/field'
+import { env } from '@/config/env'
+import type { ApiErrorResponse } from '@/shared/types/api'
 import registerImg from '@/shared/assets/images/register.png'
+import { toast } from '@/shared/hooks/use-toast'
+
+const registerSchema = z
+  .object({
+    full_name: z.string().min(1, 'Full name is required'),
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: 'You must agree to the terms and privacy policy'
+    })
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword']
+  })
+
+type RegisterFormValues = z.infer<typeof registerSchema>
 
 const Register = () => {
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState<boolean>(false)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      full_name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      agreeToTerms: false
+    }
+  })
+
+  const onSubmit = async (data: RegisterFormValues): Promise<void> => {
+    setLoading(true)
+    setServerError(null)
+    try {
+      const response = await axios.post(`${env.API_URL}/auth/register`, {
+        email: data.email,
+        password: data.password,
+        full_name: data.full_name,
+        avatar_url: '',
+        confirm_password: data.confirmPassword
+      })
+
+      toast({
+        title: 'Registration Complete',
+        description: response.data?.message || 'Registration successful! Please log in.',
+        variant: 'success'
+      })
+
+      navigate('/login')
+    } catch (error: unknown) {
+      let errorMessage = 'An unexpected error occurred'
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ApiErrorResponse>
+        const message = axiosError.response?.data?.message
+        errorMessage = Array.isArray(message) ? message[0] : message || 'Registration failed'
+
+        toast({
+          title: 'Registration Failed',
+          description: errorMessage,
+          variant: 'destructive'
+        })
+      }
+
+      setServerError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AuthLayout imageSrc={registerImg}>
-      {/* Header section căn giữa */}
-      <div className="text-center space-y-2 mb-6">
-        <h2 className="text-3xl font-bold text-[#A5C9FF] tracking-tight">Create Account</h2>
-        <p className="text-muted-foreground text-sm">Join SkinNavi for personalized skincare</p>
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-bold text-blue-400 mb-1">Create Account</h1>
+        <p className="text-gray-500 text-sm">Join SkinNavi for personalized skincare</p>
       </div>
 
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-        <FieldGroup className="space-y-4">
-          {/* Full Name Field */}
-          <Field className="space-y-1.5">
-            <FieldLabel className="text-sm font-medium text-slate-700 ml-1">Full Name</FieldLabel>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="John Doe"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-[#A5C9FF] transition-all"
-              />
-            </div>
-          </Field>
+      <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
+        {serverError && <div className="">{/* {serverError} */}</div>}
 
-          {/* Email Field */}
-          <Field className="space-y-1.5">
-            <FieldLabel className="text-sm font-medium text-slate-700 ml-1">Email</FieldLabel>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                type="email"
-                placeholder="your@email.com"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-[#A5C9FF] transition-all"
-              />
-            </div>
-          </Field>
+        <Field className="gap-0">
+          <InputWithIcon
+            label="Full Name"
+            placeholder="John Doe"
+            icon={<User className="w-5 h-5" />}
+            {...register('full_name')}
+            className="py-2"
+          />
+          <FieldError errors={[errors.full_name]} />
+        </Field>
 
-          {/* Password Field */}
-          <Field className="space-y-1.5">
-            <FieldLabel className="text-sm font-medium text-slate-700 ml-1">Password</FieldLabel>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                type="password"
-                placeholder="Create a password"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-[#A5C9FF] transition-all"
-              />
-            </div>
-          </Field>
+        <Field className="gap-0">
+          <InputWithIcon
+            label="Email"
+            type="email"
+            placeholder="your@email.com"
+            icon={<Mail className="w-5 h-5" />}
+            {...register('email')}
+            className="py-2"
+          />
+          <FieldError errors={[errors.email]} />
+        </Field>
 
-          {/* Confirm Password Field */}
-          <Field className="space-y-1.5">
-            <FieldLabel className="text-sm font-medium text-slate-700 ml-1">
-              Confirm Password
-            </FieldLabel>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                type="password"
-                placeholder="Confirm your password"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-[#A5C9FF] transition-all"
-              />
-            </div>
-          </Field>
-        </FieldGroup>
+        <Field className="gap-0">
+          <div className="relative">
+            <InputWithIcon
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Create a password"
+              icon={<Lock className="w-5 h-5" />}
+              {...register('password')}
+              className="py-2"
+            />
 
-        {/* Terms and conditions */}
-        <div className="flex items-center gap-2 px-1">
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600 "
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <FieldError errors={[errors.password]} />
+        </Field>
+
+        <Field className="gap-0">
+          <div className="relative">
+            <InputWithIcon
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Confirm your password"
+              icon={<ShieldCheck className="w-5 h-5" />}
+              {...register('confirmPassword')}
+              className="py-2"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <FieldError errors={[errors.confirmPassword]} />
+        </Field>
+
+        <div className="flex item-center gap-2 pb-1">
           <input
             type="checkbox"
-            id="terms"
-            className="h-4 w-4 rounded-full border-slate-300 text-[#A5C9FF] focus:ring-[#A5C9FF] transition-all"
+            id="agreeToTerms"
+            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-400 focus:ring-blue-400"
+            {...register('agreeToTerms')}
           />
-          <label htmlFor="terms" className="text-xs text-slate-500">
+          <label htmlFor="agreeToTerms" className="text-xs text-gray-600">
             I agree to the{' '}
-            <span className="text-[#A5C9FF] font-semibold cursor-pointer">Terms of Service</span>{' '}
-            and <span className="text-[#A5C9FF] font-semibold cursor-pointer">Privacy Policy</span>
+            <a href="/terms" className="text-blue-400 hover:underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>
           </label>
         </div>
+        {errors.agreeToTerms && (
+          <p className="text-sm text-red-500 -mt-1">{errors.agreeToTerms.message}</p>
+        )}
 
-        {/* Primary Action */}
-        <Button className="w-full h-12 text-base font-semibold rounded-2xl bg-[#A5C9FF] hover:bg-[#94B8FF] text-white shadow-md shadow-[#A5C9FF]/20 transition-all active:scale-[0.98]">
-          Create Account
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-400 hover:bg-blue-500 text-white font-medium py-4 rounded-xl text-base"
+        >
+          {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Create Account'}
         </Button>
 
-        {/* Footer */}
-        <div className="text-center pt-2">
-          <p className="text-sm text-slate-500">
+        <div className="text-center pt-1">
+          <p className="text-gray-600 text-xs">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#A5C9FF] font-bold hover:underline">
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="text-blue-400 hover:underline font-medium"
+            >
               Sign in
-            </Link>
+            </button>
           </p>
         </div>
       </form>
