@@ -56,7 +56,7 @@ const Login = () => {
         variant: 'success'
       })
 
-      navigate('/homepage')
+      navigate('/home')
     } catch (error: unknown) {
       let errorMessage = 'Login failed. Please try again.'
 
