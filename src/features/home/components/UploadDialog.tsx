@@ -1,4 +1,5 @@
 import { Upload, Info, CheckCircle2, Camera, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,8 @@ import {
 import { Button } from '@/shared/components/ui/button'
 
 export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate()
+
   const guidelines = [
     'Ensure face is centered and clearly visible.',
     'Find a well-lit area, avoid harsh shadows.',
@@ -16,9 +19,22 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     'Keep a neutral expression for analysis.'
   ]
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    console.log('File selected:', file.name)
+
+    // 👉 Nếu cần upload BE thì làm tại đây
+    // await uploadImage(file)
+
+    navigate('/analysis-result', { replace: true })
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
+
       <DialogContent className="sm:max-w-[800px] w-[95vw] max-h-[90vh] rounded-[1.5rem] sm:rounded-[2rem] p-0 border-none shadow-2xl bg-white overflow-hidden flex flex-col md:flex-row">
         <div className="w-full md:w-2/5 bg-[#F0F7FF] flex items-center justify-center p-6 md:p-10 relative shrink-0">
           <div className="absolute top-4 left-6 md:top-6 md:left-8 text-[#67AEFF]/20 font-black text-xl md:text-2xl italic tracking-tighter uppercase select-none">
@@ -74,11 +90,7 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
                 type="file"
                 className="hidden"
                 accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    console.log('File selected:', e.target.files[0].name)
-                  }
-                }}
+                onChange={handleFileChange}
               />
             </div>
           </div>
