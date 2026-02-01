@@ -4,6 +4,7 @@ import Register from '@/features/auth/pages/Register'
 import Home from '@/features/home/pages/Home'
 import Login from './features/auth/pages/Login'
 import { Toaster } from './shared/components/ui/toaster'
+import TrialPlan from './features/Detail Packages/Trialplan'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/detail-package" element={<TrialPlan />} />
         </Route>
 
         <Route
