@@ -5,10 +5,13 @@ import Login from './features/auth/pages/Login'
 import Home from '@/features/home/pages/Home'
 import { Toaster } from './shared/components/ui/toaster'
 import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
+import DetailedRoutine from './features/detail-packages/pages/DetailedRoutine'
+import ScrollToTop from './shared/components/ui/ScrollToTop'
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Navigate to="/register" replace />} />
 
@@ -19,6 +22,7 @@ function App() {
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/analysis-result" element={<AnalysisResult />} />
+          <Route path="/routine-detail/:packageId" element={<DetailedRoutine />} />
         </Route>
 
         <Route
