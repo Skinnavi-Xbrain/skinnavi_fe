@@ -5,6 +5,7 @@ import Login from './features/auth/pages/Login'
 import Home from '@/features/home/pages/Home'
 import { Toaster } from './shared/components/ui/toaster'
 import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
+import Tracking from '@/features/home/pages/Tracking'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/analysis-result" element={<AnalysisResult />} />
+          <Route path="tracking" element={<Tracking />} />
         </Route>
 
         <Route
