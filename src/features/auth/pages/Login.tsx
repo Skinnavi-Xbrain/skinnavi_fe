@@ -90,7 +90,7 @@ const Login = () => {
           <InputWithIcon
             label="Email"
             type="email"
-            placeholder="yifang@gmail.com"
+            placeholder="Enter your email"
             icon={<Mail className="w-5 h-5" />}
             {...register('email')}
           />
@@ -102,7 +102,7 @@ const Login = () => {
             <InputWithIcon
               label="Password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               icon={<Lock className="w-5 h-5" />}
               {...register('password')}
             />
