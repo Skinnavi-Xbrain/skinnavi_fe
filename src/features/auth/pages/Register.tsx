@@ -107,7 +107,7 @@ const Register = () => {
         <Field className="gap-0">
           <InputWithIcon
             label="Full Name"
-            placeholder="John Doe"
+            placeholder="Enter your full name"
             icon={<User className="w-5 h-5" />}
             {...register('full_name')}
             className="py-2"
@@ -119,7 +119,7 @@ const Register = () => {
           <InputWithIcon
             label="Email"
             type="email"
-            placeholder="your@email.com"
+            placeholder="Enter your email"
             icon={<Mail className="w-5 h-5" />}
             {...register('email')}
             className="py-2"
