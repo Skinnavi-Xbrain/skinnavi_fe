@@ -1,4 +1,6 @@
-import { Upload, Info, CheckCircle2, Camera, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import axios, { AxiosError } from 'axios'
+import { Upload, Info, CheckCircle2, Camera, Sparkles, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -7,8 +9,15 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog'
 import { Button } from '@/shared/components/ui/button'
+import { env } from '@/config/env'
+import { useToast } from '@/shared/hooks/use-toast'
+import type { ApiErrorResponse } from '@/shared/types/api'
 
 export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
+  const [isUploading, setIsUploading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const { toast } = useToast()
+
   const guidelines = [
     'Ensure face is centered and clearly visible.',
     'Find a well-lit area, avoid harsh shadows.',
@@ -16,33 +25,84 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     'Keep a neutral expression for analysis.'
   ]
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024
+    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        variant: 'destructive',
+        title: 'Lỗi dung lượng',
+        description: 'Vui lòng chọn ảnh dưới 5MB.'
+      })
+      return
+    }
+
+    if (!ALLOWED_MIMES.includes(file.type)) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Unsupported Format',
+        description: 'Just a heads up, we only accept JPEG, PNG, or WEBP images.'
+      })
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('image', file)
+
+    try {
+      setIsUploading(true)
+
+      const response = await axios.post(`${env.API_URL}/upload/image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      if (response.data) {
+        toast({
+          title: 'Upload Successful',
+          description: 'Your image has been uploaded successfully.',
+          variant: 'success'
+        })
+        setIsOpen(false)
+      }
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorResponse>
+
+      const serverError = axiosError.response?.data
+      const message = serverError?.message || 'Upload failed. Please try again.'
+
+      toast({
+        variant: 'destructive',
+        title: 'Upload Failed',
+        description: Array.isArray(message) ? message[0] : message
+      })
+    } finally {
+      setIsUploading(false)
+      event.target.value = ''
+    }
+  }
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      {/* sm:max-w-[800px] cho desktop, w-[95vw] cho mobile để tránh sát mép màn hình */}
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px] w-[95vw] max-h-[90vh] rounded-[1.5rem] sm:rounded-[2rem] p-0 border-none shadow-2xl bg-white overflow-hidden flex flex-col md:flex-row">
-        
-        {/* PHẦN VISUAL: Trên mobile hiện ngắn lại, trên desktop hiện bên trái */}
         <div className="w-full md:w-2/5 bg-[#F0F7FF] flex items-center justify-center p-6 md:p-10 relative shrink-0">
           <div className="absolute top-4 left-6 md:top-6 md:left-8 text-[#67AEFF]/20 font-black text-xl md:text-2xl italic tracking-tighter uppercase select-none">
             Scan
           </div>
-          
-          {/* Container Camera: Thu nhỏ một chút trên mobile để tiết kiệm không gian */}
           <div className="relative">
             <div className="w-32 h-32 md:w-64 md:h-64 rounded-full border-2 border-white/50 flex items-center justify-center">
               <div className="w-24 h-24 md:w-48 md:h-48 rounded-full border-[6px] md:border-[12px] border-[#67AEFF]/10 bg-white flex items-center justify-center shadow-sm">
                 <Camera className="w-10 h-10 md:w-24 md:h-24 text-[#67AEFF]" strokeWidth={1.5} />
               </div>
             </div>
-            {/* Hiệu ứng tia sáng nhỏ trang trí */}
             <Sparkles className="absolute -top-2 -right-2 text-[#67AEFF] w-6 h-6 opacity-50 hidden md:block" />
           </div>
         </div>
 
-        {/* PHẦN NỘI DUNG: Có scroll trên mobile nếu nội dung quá dài */}
         <div className="flex-1 p-5 md:p-8 overflow-y-auto">
           <DialogHeader className="space-y-2">
             <DialogTitle className="text-xl md:text-2xl font-bold text-slate-900 text-center md:text-left">
@@ -54,11 +114,10 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
           </DialogHeader>
 
           <div className="grid gap-4 md:gap-6 py-5 md:py-6">
-            {/* Instructions List */}
             <div className="space-y-2 md:space-y-3">
               {guidelines.map((guide, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex items-start gap-3 bg-[#F0F7FF]/50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-[#67AEFF]/5 hover:bg-[#F0F7FF] transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-[#67AEFF] mt-0.5 shrink-0" />
@@ -69,31 +128,29 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
               ))}
             </div>
 
-            {/* Action Area */}
             <div className="pt-2">
-              <Button 
+              <Button
+                disabled={isUploading}
                 className="w-full h-14 md:h-16 bg-[#67AEFF] hover:bg-[#5BA0EB] text-white rounded-xl md:rounded-2xl font-extrabold text-base md:text-lg gap-3 shadow-lg shadow-[#67AEFF]/20 transition-all active:scale-[0.97]"
                 onClick={() => document.getElementById('file-upload')?.click()}
               >
-                <Upload className="w-5 h-5 md:w-6 md:h-6" />
-                Upload Photo
+                {isUploading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Upload className="w-5 h-5 md:w-6 md:h-6" />
+                )}
+                {isUploading ? 'Analyzing...' : 'Upload Photo'}
               </Button>
-              
-              <input 
-                id="file-upload" 
-                type="file" 
-                className="hidden" 
-                accept="image/*" 
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    console.log("File selected:", e.target.files[0].name)
-                  }
-                }}
+              <input
+                id="file-upload"
+                type="file"
+                className="hidden"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleFileUpload}
               />
             </div>
           </div>
 
-          {/* Footer Info */}
           <div className="flex items-center justify-center gap-2 text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 md:mt-0">
             <Info className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#67AEFF]/50" />
             Your data is encrypted and secure

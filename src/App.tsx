@@ -3,7 +3,7 @@ import { MainLayout } from '@/shared/layouts/MainLayout'
 import Register from '@/features/auth/pages/Register'
 import Login from '@/features/auth/pages/Login'
 import { Toaster } from '@/shared/components/ui/toaster'
-import Home from '@/features/main/pages/Home'
+import Home from '@/features/home/pages/Home'
 
 function App() {
   return (
