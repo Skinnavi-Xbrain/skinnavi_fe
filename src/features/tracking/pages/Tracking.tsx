@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion'
-import { SkinCalendar } from '../components/SkinCalendar'
-import { ComparisonSlider } from '../components/ComparisonSlider'
-import { HealthProgress } from '../components/HealthProgress' 
-import { AIInsights } from '../components/AIInsights'
-import { StatusHeader } from '../components/StatusHeader'
 import { PageHeader } from '@/features/navigation/components/PageHeader'
+import { StatusHeader } from '@/features/tracking/components/StatusHeader'
+import { SkinCalendar } from '@/features/tracking/components/SkinCalendar'
+import { HealthProgress } from '@/features/tracking/components/HealthProgress'
+import { AIInsights } from '@/features/tracking/components/AIInsights'
+import { ComparisonSlider } from '@/features/tracking/components/ComparisonSlider'
 
 export default function TrackingPage() {
   return (

@@ -5,7 +5,8 @@ import Login from './features/auth/pages/Login'
 import Home from '@/features/home/pages/Home'
 import { Toaster } from './shared/components/ui/toaster'
 import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
-import Tracking from '@/features/home/pages/Tracking'
+import Tracking from '@/features/tracking/pages/Tracking'
+
 
 function App() {
   return (
