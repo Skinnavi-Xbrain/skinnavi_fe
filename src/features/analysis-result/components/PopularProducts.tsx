@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { ChevronDown, Loader2 } from 'lucide-react'
-import { env } from '@/config/env'
-import axios from 'axios'
+import { getAffiliateProducts } from '@/features/analysis-result/services/products.api'
 import type { Product } from '../types/product'
 
 const BG_COLORS = ['bg-[#E3F2ED]', 'bg-[#E7F0F8]', 'bg-[#F9E8E8]']
@@ -15,12 +14,8 @@ export const PopularProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${env.API_URL}/products/affiliate`)
-        const result = response.data
-
-        if (result.success && result.data && Array.isArray(result.data.items)) {
-          setProducts(result.data.items.slice(6, 10))
-        }
+        const items = await getAffiliateProducts()
+        setProducts(items.slice(6, 10))
       } catch (error) {
         console.error('Error fetching products:', error)
       } finally {

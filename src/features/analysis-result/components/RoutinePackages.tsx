@@ -2,19 +2,10 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Calendar, Star, CheckCircle2, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
-import { env } from '@/config/env'
-
-interface RoutinePackage {
-  id: string
-  package_name: string
-  description: string
-  highlights: string[]
-  duration_days: number
-  price: string
-}
+import { getRoutinePackages } from '@/features/analysis-result/services/routines.api'
+import type { RoutinePackage } from '../types/routine'
 
 export const RoutinePackages = () => {
   const navigate = useNavigate()
@@ -24,10 +15,8 @@ export const RoutinePackages = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const response = await axios.get(`${env.API_URL}/routines/packages`)
-        if (response.data.success) {
-          setPackages(response.data.data)
-        }
+        const data = await getRoutinePackages()
+        setPackages(data)
       } catch (error) {
         console.error('Error fetching routine packages:', error)
       } finally {
