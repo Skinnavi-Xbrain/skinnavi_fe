@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { Upload, Info, CheckCircle2, Camera, Sparkles, Loader2 } from 'lucide-react'
 import {
   Dialog,
@@ -9,11 +9,14 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog'
 import { Button } from '@/shared/components/ui/button'
-import { env } from '@/config/env' //
+import { env } from '@/config/env'
+import { useToast } from '@/shared/hooks/use-toast'
+import type { ApiErrorResponse } from '@/shared/types/api'
 
 export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const { toast } = useToast()
 
   const guidelines = [
     'Ensure face is centered and clearly visible.',
@@ -26,48 +29,70 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     const file = event.target.files?.[0]
     if (!file) return
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024
+    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        variant: 'destructive',
+        title: 'Lỗi dung lượng',
+        description: 'Vui lòng chọn ảnh dưới 5MB.'
+      })
+      return
+    }
+
+    if (!ALLOWED_MIMES.includes(file.type)) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Unsupported Format',
+        description: 'Just a heads up, we only accept JPEG, PNG, or WEBP images.'
+      })
+      return
+    }
+
     const formData = new FormData()
     formData.append('image', file)
 
     try {
       setIsUploading(true)
-      setUploadError(null)
 
       const response = await axios.post(`${env.API_URL}/upload/image`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / (progressEvent.total || 1)
-          )
-          console.log(`Upload progress: ${percentCompleted}%`)
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
       })
 
-      if (response.data.success) {
-        console.log('Upload thành công:', response.data)
-        alert('Tải ảnh lên và phân tích thành công!')
+      if (response.data) {
+        toast({
+          title: 'Upload Successful',
+          description: 'Your image has been uploaded successfully.',
+          variant: 'success'
+        })
+        setIsOpen(false)
       }
-    } catch (error) {
-      const axiosError = error instanceof axios.AxiosError ? error : new axios.AxiosError()
-      console.error('Lỗi khi upload:', axiosError)
-      setUploadError(axiosError.response?.data?.message || 'Có lỗi xảy ra khi tải ảnh lên.')
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiErrorResponse>
+
+      const serverError = axiosError.response?.data
+      const message = serverError?.message || 'Upload failed. Please try again.'
+
+      toast({
+        variant: 'destructive',
+        title: 'Upload Failed',
+        description: Array.isArray(message) ? message[0] : message
+      })
     } finally {
       setIsUploading(false)
+      event.target.value = ''
     }
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px] w-[95vw] max-h-[90vh] rounded-[1.5rem] sm:rounded-[2rem] p-0 border-none shadow-2xl bg-white overflow-hidden flex flex-col md:flex-row">
-        {/* PHẦN VISUAL */}
         <div className="w-full md:w-2/5 bg-[#F0F7FF] flex items-center justify-center p-6 md:p-10 relative shrink-0">
           <div className="absolute top-4 left-6 md:top-6 md:left-8 text-[#67AEFF]/20 font-black text-xl md:text-2xl italic tracking-tighter uppercase select-none">
             Scan
           </div>
-
           <div className="relative">
             <div className="w-32 h-32 md:w-64 md:h-64 rounded-full border-2 border-white/50 flex items-center justify-center">
               <div className="w-24 h-24 md:w-48 md:h-48 rounded-full border-[6px] md:border-[12px] border-[#67AEFF]/10 bg-white flex items-center justify-center shadow-sm">
@@ -78,7 +103,6 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        {/* PHẦN NỘI DUNG */}
         <div className="flex-1 p-5 md:p-8 overflow-y-auto">
           <DialogHeader className="space-y-2">
             <DialogTitle className="text-xl md:text-2xl font-bold text-slate-900 text-center md:text-left">
@@ -104,11 +128,6 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
               ))}
             </div>
 
-            {/* Hiển thị lỗi nếu có */}
-            {uploadError && (
-              <p className="text-red-500 text-xs font-bold text-center">{uploadError}</p>
-            )}
-
             <div className="pt-2">
               <Button
                 disabled={isUploading}
@@ -120,14 +139,13 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
                 ) : (
                   <Upload className="w-5 h-5 md:w-6 md:h-6" />
                 )}
-                {isUploading ? 'Analyzing Skin...' : 'Upload Photo'}
+                {isUploading ? 'Analyzing...' : 'Upload Photo'}
               </Button>
-
               <input
                 id="file-upload"
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileUpload}
               />
             </div>
