@@ -58,7 +58,7 @@ const Register = () => {
     setLoading(true)
     setServerError(null)
     try {
-      const response = await axios.post(`${env.API_URL}/auth/register`, {
+      const response = await register({
         email: data.email,
         password: data.password,
         full_name: data.full_name,
@@ -68,7 +68,7 @@ const Register = () => {
 
       toast({
         title: 'Registration Complete',
-        description: response.data?.message || 'Registration successful! Please log in.',
+        description: response?.message || 'Registration successful! Please log in.',
         variant: 'success'
       })
 

@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import axios, { AxiosError } from 'axios'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { Upload, Info, CheckCircle2, Camera, Sparkles, Loader2 } from 'lucide-react'
 import {
   Dialog,
@@ -9,14 +11,20 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog'
 import { Button } from '@/shared/components/ui/button'
-import { env } from '@/config/env'
 import { useToast } from '@/shared/hooks/use-toast'
 import type { ApiErrorResponse } from '@/shared/types/api'
+import { uploadImage, analyzeImage } from '@/features/home/services/analysis.api'
+import { setAnalysisResult, addToCache } from '../store/analysis.slice'
+import type { RootState } from '@/shared/store'
 
 export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { toast } = useToast()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const analysisCache = useSelector((state: RootState) => state.analysis.analysisCache)
 
   const guidelines = [
     'Ensure face is centered and clearly visible.',
@@ -29,14 +37,29 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     const file = event.target.files?.[0]
     if (!file) return
 
+    const fileKey = `${file.name}-${file.size}`
+
+    if (analysisCache && analysisCache[fileKey]) {
+      toast({
+        title: 'Using Previous Result',
+        description: 'This image was recently analyzed. Loading stored data...',
+        variant: 'success'
+      })
+
+      dispatch(setAnalysisResult(analysisCache[fileKey]))
+      setIsOpen(false)
+      navigate('/analysis-result')
+      return
+    }
+
     const MAX_FILE_SIZE = 5 * 1024 * 1024
     const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
 
     if (file.size > MAX_FILE_SIZE) {
       toast({
         variant: 'destructive',
-        title: 'Lỗi dung lượng',
-        description: 'Vui lòng chọn ảnh dưới 5MB.'
+        title: 'Error File Too Large',
+        description: 'Please select an image under 5MB.'
       })
       return
     }
@@ -56,28 +79,35 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     try {
       setIsUploading(true)
 
-      const response = await axios.post(`${env.API_URL}/upload/image`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const uploadRes = await uploadImage(formData)
+      const imageUrl = uploadRes.data.url
+      const analyzeRes = await analyzeImage(imageUrl)
+
+      dispatch(setAnalysisResult(analyzeRes.data))
+      dispatch(addToCache({ key: fileKey, result: analyzeRes.data }))
+
+      toast({
+        title: 'Analysis Successful',
+        description: 'Your skin analysis has been completed.',
+        variant: 'success'
       })
+      setIsOpen(false)
 
-      if (response.data) {
-        toast({
-          title: 'Upload Successful',
-          description: 'Your image has been uploaded successfully.',
-          variant: 'success'
-        })
-        setIsOpen(false)
+      navigate('/analysis-result')
+    } catch (err: unknown) {
+      let message = 'Processing failed. Please try again.'
+
+      if (axios.isAxiosError(err)) {
+        const serverError = err.response?.data as ApiErrorResponse
+        message = Array.isArray(serverError?.message)
+          ? serverError.message[0]
+          : serverError?.message || message
       }
-    } catch (err) {
-      const axiosError = err as AxiosError<ApiErrorResponse>
-
-      const serverError = axiosError.response?.data
-      const message = serverError?.message || 'Upload failed. Please try again.'
 
       toast({
         variant: 'destructive',
-        title: 'Upload Failed',
-        description: Array.isArray(message) ? message[0] : message
+        title: 'Analysis Failed',
+        description: message
       })
     } finally {
       setIsUploading(false)
@@ -139,7 +169,7 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
                 ) : (
                   <Upload className="w-5 h-5 md:w-6 md:h-6" />
                 )}
-                {isUploading ? 'Analyzing...' : 'Upload Photo'}
+                {isUploading ? 'Analyzing...' : 'Start Skin Scan'}
               </Button>
               <input
                 id="file-upload"

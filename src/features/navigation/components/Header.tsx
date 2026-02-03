@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Menu, X, Home, Sparkles, Activity, Info, ChevronRight, LogOut, UserCircle } from 'lucide-react';
-import Logo from '@/shared/assets/images/Logo_Skinnavi.jpg';
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Bell,
+  Menu,
+  X,
+  Home,
+  Sparkles,
+  Activity,
+  Info,
+  ChevronRight,
+  LogOut,
+  UserCircle
+} from 'lucide-react'
+import Logo from '@/shared/assets/images/Logo_Skinnavi.jpg'
 
 const Header = () => {
-  const [hoveredTab, setHoveredTab] = useState(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredTab, setHoveredTab] = useState(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
-    { label: 'Home', href: '/', icon: <Home className="w-5 h-5" /> },
+    { label: 'Home', href: '/home', icon: <Home className="w-5 h-5" /> },
     { label: 'Routine', href: '/routine', icon: <Sparkles className="w-5 h-5" /> },
     { label: 'Tracking', href: '/tracking', icon: <Activity className="w-5 h-5" /> },
-    { label: 'About', href: '/about', icon: <Info className="w-5 h-5" /> },
-  ];
+    { label: 'About', href: '/about', icon: <Info className="w-5 h-5" /> }
+  ]
 
-  const brandColor = "#67AEFF";
+  const brandColor = '#67AEFF'
 
   return (
     <>
-      <motion.header 
+      <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-xl border-b border-[#67AEFF20] px-4 md:px-6 h-16 flex items-center justify-between shadow-sm"
@@ -39,17 +50,15 @@ const Header = () => {
               onMouseEnter={() => setHoveredTab(item.label)}
               onMouseLeave={() => setHoveredTab(null)}
               className="relative px-4 py-2 text-[15px] font-medium transition-colors"
-              style={{ color: hoveredTab === item.label ? brandColor : "#64748b" }}
+              style={{ color: hoveredTab === item.label ? brandColor : '#64748b' }}
             >
-              <span className="relative z-10 flex items-center gap-2">
-                {item.label}
-              </span>
+              <span className="relative z-10 flex items-center gap-2">{item.label}</span>
               {hoveredTab === item.label && (
                 <motion.div
                   layoutId="nav-pill"
                   className="absolute inset-0 z-0 rounded-full"
                   style={{ backgroundColor: `${brandColor}15` }}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
                 />
               )}
             </a>
@@ -58,7 +67,7 @@ const Header = () => {
 
         {/* RIGHT: Actions */}
         <div className="flex items-center gap-2 md:gap-4">
-          <motion.button 
+          <motion.button
             whileTap={{ scale: 0.9 }}
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#67AEFF15] text-[#67AEFF] border border-[#67AEFF20] hover:bg-[#67AEFF25] transition-colors"
           >
@@ -66,13 +75,15 @@ const Header = () => {
             <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white shadow-sm" />
           </motion.button>
 
-          <motion.div 
-            className="hidden md:block h-10 w-10 shrink-0 cursor-pointer overflow-hidden rounded-full border-2 border-[#67AEFF30] shadow-sm hover:border-[#67AEFF] transition-all"
-          >
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="User" className="h-full w-full object-cover" />
+          <motion.div className="hidden md:block h-10 w-10 shrink-0 cursor-pointer overflow-hidden rounded-full border-2 border-[#67AEFF30] shadow-sm hover:border-[#67AEFF] transition-all">
+            <img
+              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
+              alt="User"
+              className="h-full w-full object-cover"
+            />
           </motion.div>
 
-          <button 
+          <button
             className="md:hidden p-2 text-[#67AEFF] active:scale-90 transition-transform bg-[#67AEFF10] rounded-lg"
             onClick={() => setIsMobileMenuOpen(true)}
           >
@@ -85,24 +96,26 @@ const Header = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
               className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 md:hidden"
             />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white z-[60] shadow-2xl md:hidden flex flex-col"
             >
               <div className="flex items-center justify-between px-6 h-20 border-b border-[#67AEFF10]">
-                <span className="font-bold text-lg" style={{ color: brandColor }}>Menu</span>
-                <button 
+                <span className="font-bold text-lg" style={{ color: brandColor }}>
+                  Menu
+                </span>
+                <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 rounded-full bg-[#67AEFF10] text-[#67AEFF] active:scale-90 transition-all"
                 >
@@ -117,12 +130,19 @@ const Header = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 text-lg leading-tight">Alex Johnson</h4>
-                    <p className="text-xs font-bold mt-1 tracking-wide uppercase" style={{ color: brandColor }}>Premium User</p>
+                    <p
+                      className="text-xs font-bold mt-1 tracking-wide uppercase"
+                      style={{ color: brandColor }}
+                    >
+                      Premium User
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2 mb-4">Menu điều hướng</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2 mb-4">
+                    Menu điều hướng
+                  </p>
                   {navItems.map((item, idx) => (
                     <motion.a
                       key={item.label}
@@ -146,7 +166,7 @@ const Header = () => {
               </div>
 
               <div className="p-8 border-t border-[#67AEFF10] bg-white">
-                <button 
+                <button
                   className="w-full py-4 bg-white border-2 border-red-50 text-red-500 hover:bg-red-50 rounded-2xl font-medium flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-sm active:shadow-inner"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -159,7 +179,7 @@ const Header = () => {
         )}
       </AnimatePresence>
     </>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
