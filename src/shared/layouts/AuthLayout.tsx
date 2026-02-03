@@ -13,6 +13,7 @@ export const AuthLayout = ({ children, imageSrc }: AuthLayoutProps) => {
         <div className="hidden md:block md:w-[35%] relative bg-[#f3f4f6]">
           <img src={imageSrc} alt="Auth Illustration" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-blue-50/10" />
+          <div className="absolute inset-0 bg-blue-50/10" />
         </div>
 
         {/* FORM */}
