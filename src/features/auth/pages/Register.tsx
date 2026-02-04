@@ -5,12 +5,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import axios, { AxiosError } from 'axios'
+import { register as registerUser } from '@/features/auth/services/auth.api'
 
 import { Button } from '@/shared/components/ui/button'
 import { AuthLayout } from '@/shared/layouts/AuthLayout'
 import { InputWithIcon } from '@/shared/components/ui/input-with-icon'
 import { Field, FieldError } from '@/shared/components/ui/field'
-import { env } from '@/config/env'
 import type { ApiErrorResponse } from '@/shared/types/api'
 import registerImg from '@/shared/assets/images/register.png'
 import { toast } from '@/shared/hooks/use-toast'
@@ -35,7 +35,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 const Register = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<boolean>(false)
-  const [serverError, setServerError] = useState<string | null>(null)
+  const [, setServerError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -58,7 +58,7 @@ const Register = () => {
     setLoading(true)
     setServerError(null)
     try {
-      const response = await register({
+      const response = await registerUser({
         email: data.email,
         password: data.password,
         full_name: data.full_name,
@@ -102,8 +102,6 @@ const Register = () => {
       </div>
 
       <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-        {serverError && <div className="">{/* {serverError} */}</div>}
-
         <Field className="gap-0">
           <InputWithIcon
             label="Full Name"
@@ -198,7 +196,7 @@ const Register = () => {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-400 hover:bg-blue-500 text-white font-medium py-4 rounded-xl text-base"
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Create Account'}
         </Button>
