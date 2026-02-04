@@ -58,7 +58,7 @@ const Register = () => {
     setLoading(true)
     setServerError(null)
     try {
-      const response = await axios.post(`${env.API_URL}/auth/register`, {
+      const response = await register({
         email: data.email,
         password: data.password,
         full_name: data.full_name,
@@ -68,7 +68,7 @@ const Register = () => {
 
       toast({
         title: 'Registration Complete',
-        description: response.data?.message || 'Registration successful! Please log in.',
+        description: response?.message || 'Registration successful! Please log in.',
         variant: 'success'
       })
 
@@ -107,7 +107,7 @@ const Register = () => {
         <Field className="gap-0">
           <InputWithIcon
             label="Full Name"
-            placeholder="John Doe"
+            placeholder="Enter your full name"
             icon={<User className="w-5 h-5" />}
             {...register('full_name')}
             className="py-2"
@@ -119,7 +119,7 @@ const Register = () => {
           <InputWithIcon
             label="Email"
             type="email"
-            placeholder="your@email.com"
+            placeholder="Enter your email"
             icon={<Mail className="w-5 h-5" />}
             {...register('email')}
             className="py-2"

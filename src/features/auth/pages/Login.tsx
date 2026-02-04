@@ -4,16 +4,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
+import type { ApiErrorResponse } from '@/shared/types/api'
 
 import { Button } from '@/shared/components/ui/button'
 import { AuthLayout } from '@/shared/layouts/AuthLayout'
 import { InputWithIcon } from '@/shared/components/ui/input-with-icon'
 import { Field, FieldError } from '@/shared/components/ui/field'
-import { env } from '@/config/env'
 import { toast } from '@/shared/hooks/use-toast'
-import type { ApiErrorResponse } from '@/shared/types/api'
 import loginImg from '@/shared/assets/images/login.png'
+import { login } from '../services/auth.api'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -27,7 +27,6 @@ const Login = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState(false)
-
   const {
     register,
     handleSubmit,
@@ -44,31 +43,34 @@ const Login = () => {
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true)
     try {
-      const response = await axios.post(`${env.API_URL}/auth/login`, {
-        email: data.email,
-        password: data.password
-      })
-      const { accessToken } = response.data.data
+      const response = await login({ email: data.email, password: data.password })
+      const { accessToken } = response.data
       localStorage.setItem('accessToken', accessToken)
+
       toast({
         title: 'Welcome back!',
-        description: 'Login successful.',
+        description: response.message,
         variant: 'success'
       })
 
       navigate('/home')
-    } catch (error: unknown) {
-      let errorMessage = 'Login failed. Please try again.'
+    } catch (err: unknown) {
+      let description = 'Please check your credentials and try again.'
 
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError<ApiErrorResponse>
-        const message = axiosError.response?.data?.message
-        errorMessage = Array.isArray(message) ? message[0] : message || errorMessage
+      if (axios.isAxiosError(err)) {
+        const apiError = err.response?.data as ApiErrorResponse | undefined
+        if (apiError?.message) {
+          description = Array.isArray(apiError.message)
+            ? apiError.message.join(', ')
+            : apiError.message
+        }
+      } else if (err instanceof Error) {
+        description = err.message
       }
 
       toast({
-        title: 'Login Error',
-        description: errorMessage,
+        title: 'Login failed',
+        description,
         variant: 'destructive'
       })
     } finally {
@@ -90,7 +92,7 @@ const Login = () => {
           <InputWithIcon
             label="Email"
             type="email"
-            placeholder="yifang@gmail.com"
+            placeholder="Enter your email"
             icon={<Mail className="w-5 h-5" />}
             {...register('email')}
           />
@@ -102,7 +104,7 @@ const Login = () => {
             <InputWithIcon
               label="Password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               icon={<Lock className="w-5 h-5" />}
               {...register('password')}
             />
@@ -116,7 +118,6 @@ const Login = () => {
           </div>
           <FieldError errors={[errors.password]} />
         </Field>
-
         <div className="flex items-center justify-between pt-2">
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
@@ -130,7 +131,6 @@ const Login = () => {
             Forgot password?
           </Link>
         </div>
-
         <Button
           type="submit"
           disabled={loading}
@@ -138,7 +138,6 @@ const Login = () => {
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Sign in'}
         </Button>
-
         <div className="text-center text-sm text-slate-500">
           Don't have an account?
           <Link to="/register" className="text-blue-500 font-semibold hover:underline ml-1">
