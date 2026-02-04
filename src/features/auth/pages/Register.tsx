@@ -5,12 +5,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import axios, { AxiosError } from 'axios'
+import { register as registerUser } from '@/features/auth/services/auth.api'
 
 import { Button } from '@/shared/components/ui/button'
 import { AuthLayout } from '@/shared/layouts/AuthLayout'
 import { InputWithIcon } from '@/shared/components/ui/input-with-icon'
 import { Field, FieldError } from '@/shared/components/ui/field'
-import { env } from '@/config/env'
 import type { ApiErrorResponse } from '@/shared/types/api'
 import registerImg from '@/shared/assets/images/register.png'
 import { toast } from '@/shared/hooks/use-toast'
@@ -58,7 +58,7 @@ const Register = () => {
     setLoading(true)
     setServerError(null)
     try {
-      const response = await register({
+      const response = await registerUser({
         email: data.email,
         password: data.password,
         full_name: data.full_name,
@@ -102,7 +102,7 @@ const Register = () => {
       </div>
 
       <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-        {serverError && <div className="">{/* {serverError} */}</div>}
+        {serverError && <div className="text-sm text-red-500">{serverError}</div>}
 
         <Field className="gap-0">
           <InputWithIcon
