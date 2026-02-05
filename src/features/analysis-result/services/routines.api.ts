@@ -7,7 +7,9 @@ interface PackagesResponse {
 }
 
 export const getRoutinePackages = async (): Promise<RoutinePackage[]> => {
-  const res = await apiClient.get<PackagesResponse>('/routines/packages')
-  if (res.data?.success && Array.isArray(res.data.data)) return res.data.data
+  const res = await apiClient.get<PackagesResponse>('/routine-packages/all')
+  if (res.data?.success && Array.isArray(res.data.data)) {
+    return res.data.data
+  }
   return []
 }

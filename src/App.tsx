@@ -6,6 +6,7 @@ import { Toaster } from '@/shared/components/ui/toaster'
 import Home from '@/features/home/pages/Home'
 import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
 import { ProtectedRoute } from './routes/ProtectedRoute'
+import DetailedRoutine from './features/detail-packages/pages/DetailedRoutine'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/home" element={<Home />} />
             <Route path="/analysis-result" element={<AnalysisResult />} />
+            <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
           </Route>
         </Route>
 

@@ -24,10 +24,8 @@ export const SkinImprovement = () => {
     <section className="relative bg-[#F0F7FF] py-16 md:py-24 overflow-hidden">
       {/* Decorative Background Element */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#67AEFF]/5 rounded-full blur-3xl -mr-20 -mt-20" />
-      
+
       <div className="container relative mx-auto px-6 flex flex-col md:flex-row items-center gap-12 max-w-7xl">
-        
-        {/* Image Section */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -36,18 +34,15 @@ export const SkinImprovement = () => {
           className="w-full md:w-[50%]"
         >
           <div className="relative">
-            {/* Main Image Container */}
             <div className="relative rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl aspect-[4/3] md:aspect-[16/10]">
               <img
                 src="https://i.pinimg.com/736x/ec/ef/4c/ecef4c9c17c8c50da8734ad6afcc8767.jpg"
                 alt="Skin Analysis Result"
                 className="w-full h-full object-cover"
               />
-              {/* Overlay màu chủ đạo nhẹ */}
               <div className="absolute inset-0 bg-gradient-to-tr from-[#67AEFF]/20 to-transparent" />
             </div>
 
-            {/* Thông số cải thiện - Sử dụng màu #67AEFF */}
             <motion.div
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
@@ -59,13 +54,14 @@ export const SkinImprovement = () => {
               </div>
               <div>
                 <div className="text-3xl font-black text-slate-900 leading-none">39%</div>
-                <p className="text-xs font-bold text-[#67AEFF] uppercase tracking-wider mt-1">Improvement</p>
+                <p className="text-xs font-bold text-[#67AEFF] uppercase tracking-wider mt-1">
+                  Improvement
+                </p>
               </div>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Content Section */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -74,24 +70,30 @@ export const SkinImprovement = () => {
           className="w-full md:w-[50%] space-y-8"
         >
           <div className="space-y-4 text-center md:text-left">
-            <motion.div 
-              variants={itemVariants} 
+            <motion.div
+              variants={itemVariants}
               className="inline-flex items-center gap-2 text-[#67AEFF] font-bold text-sm tracking-[0.2em] uppercase"
             >
               <ShieldCheck className="w-5 h-5" />
               Clinical Analysis
             </motion.div>
-            
-            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-slate-900 leading-[1.15]">
+
+            <motion.h2
+              variants={itemVariants}
+              className="text-4xl md:text-5xl font-bold text-slate-900 leading-[1.15]"
+            >
               Your skin health has significantly <span className="text-[#67AEFF]">improved.</span>
             </motion.h2>
-            
-            <motion.p variants={itemVariants} className="text-lg text-slate-600 max-w-lg mx-auto md:mx-0">
-              Based on your latest scan, your skin shows a 39% increase in hydration and texture consistency compared to last month.
+
+            <motion.p
+              variants={itemVariants}
+              className="text-lg text-slate-600 max-w-lg mx-auto md:mx-0"
+            >
+              Based on your latest scan, your skin shows a 39% increase in hydration and texture
+              consistency compared to last month.
             </motion.p>
           </div>
 
-          {/* Feature Grid */}
           <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-3 group">
               <h4 className="font-bold text-slate-900 flex items-center gap-3">
@@ -120,7 +122,6 @@ export const SkinImprovement = () => {
             </Button>
           </motion.div>
         </motion.div>
-
       </div>
     </section>
   )
