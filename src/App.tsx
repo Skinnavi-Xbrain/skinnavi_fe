@@ -13,7 +13,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/routine-step-detail/" element={<RoutineStepDetail />} />
+          <Route path="/step-detail/" element={<RoutineStepDetail />} />
         </Route>
 
         <Route
