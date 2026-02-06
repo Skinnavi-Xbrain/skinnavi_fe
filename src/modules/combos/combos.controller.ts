@@ -24,4 +24,21 @@ export class CombosController {
       200,
     );
   }
+
+  @Post('products')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get a flat list of products from specific skincare combos',
+  })
+  async getProductsInCombos(@Body() dto: GetRecommendationsDto) {
+    const products = await this.combosService.findProductsInCombos(
+      dto.comboIds,
+    );
+    return new SimpleResponse(
+      products,
+      'Listed products from combos successfully',
+      200,
+    );
+  }
 }
