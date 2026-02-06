@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux'
 import { Sparkles, Droplets, Sun, Moon, TrendingUp } from 'lucide-react'
-import { PopularProducts } from '../components/PopularProducts'
+import { RecommendedProducts } from '../components/RecommendedProducts'
 import { RoutinePackages } from '../components/RoutinePackages'
 import { SkinMetricsCard } from '../components/SkinMetricsCard'
 import profileImage from '@/shared/assets/images/profile.jpg'
@@ -20,6 +20,7 @@ const AnalysisResult = () => {
   }
 
   const { result } = analysisData
+  const comboIds = result.recommendedCombos || []
 
   const getStatus = (value: number) => {
     if (value >= 85) return { text: 'Excellent', color: 'text-green-600', bgColor: 'bg-green-50' }
@@ -102,7 +103,7 @@ const AnalysisResult = () => {
 
         <SkinMetricsCard metrics={skinMetrics} getStatus={getStatus} />
 
-        <PopularProducts />
+        <RecommendedProducts comboIds={comboIds} />
         <RoutinePackages />
       </div>
     </div>
