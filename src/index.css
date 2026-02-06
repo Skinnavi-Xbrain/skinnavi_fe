@@ -122,7 +122,6 @@
     scrollbar-width: none;
   }
 
-  /* Tối ưu cho thiết bị di động */
   @media (max-width: 640px) {
     .container {
       padding-left: 1.5rem;
