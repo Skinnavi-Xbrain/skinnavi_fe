@@ -1,9 +1,9 @@
 import { useSelector } from 'react-redux'
 import { Sparkles, Droplets, Sun, Moon, TrendingUp, CheckCircle2 } from 'lucide-react'
-import { RecommendedProducts } from '../components/RecommendedProducts'
 import { RoutinePackages } from '../components/RoutinePackages'
 import { SkinMetricsCard } from '../components/SkinMetricsCard'
 import type { RootState } from '@/shared/store'
+import { RecommendedProducts } from '../components/RecommendedProducts'
 
 const AnalysisResult = () => {
   const analysisData = useSelector((state: RootState) => state.analysis.currentResult)
@@ -53,6 +53,8 @@ const AnalysisResult = () => {
       barColor: 'from-red-500 to-rose-600'
     }
   }
+
+  const overallScore = Math.round(result.overallScore || 0)
 
   const skinMetrics = [
     {
@@ -108,7 +110,7 @@ const AnalysisResult = () => {
                 </div>
                 <div className="absolute -bottom-2 -right-2 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center shadow-xl ring-4 ring-white bg-gradient-to-br from-blue-600 to-indigo-600">
                   <div className="text-center text-white">
-                    <div className="text-2xl md:text-3xl font-black">{result.overallScore}%</div>
+                    <div className="text-2xl md:text-3xl font-black">{overallScore}%</div>
                     <div className="text-[9px] font-bold uppercase tracking-tighter opacity-80">
                       Score
                     </div>
@@ -149,8 +151,8 @@ const AnalysisResult = () => {
         </div>
       </div>
 
-        <RecommendedProducts comboIds={comboIds} />
-        <RoutinePackages />
+      <RecommendedProducts comboIds={comboIds} />
+      <RoutinePackages />
     </div>
   )
 }
