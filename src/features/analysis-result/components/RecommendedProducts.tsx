@@ -2,20 +2,24 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { ChevronDown, Loader2 } from 'lucide-react'
-import { getAffiliateProducts } from '@/features/analysis-result/services/products.api'
-import type { Product } from '../types/product'
+import type { AffiliateProduct } from '@/features/detail-packages/types/combo'
+import { getProductsFromCombos } from '../services/products.api'
 
-const BG_COLORS = ['bg-[#E3F2ED]', 'bg-[#E7F0F8]', 'bg-[#F9E8E8]']
+const BG_COLORS = ['bg-[#E7F0F8]']
 
-export const PopularProducts = () => {
-  const [products, setProducts] = useState<Product[]>([])
+export const RecommendedProducts = ({ comboIds }: { comboIds: string[] }) => {
+  const [products, setProducts] = useState<AffiliateProduct[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (comboIds.length === 0) {
+        setLoading(false)
+        return
+      }
       try {
-        const items = await getAffiliateProducts()
-        setProducts(items.slice(6, 10))
+        const data = await getProductsFromCombos(comboIds)
+        setProducts(data)
       } catch (error) {
         console.error('Error fetching products:', error)
       } finally {
@@ -24,7 +28,7 @@ export const PopularProducts = () => {
     }
 
     fetchProducts()
-  }, [])
+  }, [comboIds])
 
   if (loading) {
     return (
@@ -46,7 +50,6 @@ export const PopularProducts = () => {
           </p>
         </div>
 
-        {/* Dropdown filter - Desktop */}
         <div className="absolute top-0 right-0 hidden md:block">
           <Button
             variant="outline"
@@ -58,7 +61,7 @@ export const PopularProducts = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
-        {products.map((product, index) => (
+        {products.slice(1, 5).map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 20 }}
