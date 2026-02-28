@@ -1,29 +1,41 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { CheckCircle2, Sparkles, Loader2 } from 'lucide-react'
+import { useSelector } from 'react-redux'
+import axios from 'axios'
+
 import { Button } from '@/shared/components/ui/button'
-import { getRoutinePackage } from '../services/detail-packages.api'
+import { getRoutinePackage, createDailyRoutine } from '../services/detail-packages.api'
 import type { RoutinePackage } from '../types/detail-routine'
+import type { RootState } from '@/shared/store'
+import { toast } from '@/shared/hooks/use-toast'
+import type { ApiErrorResponse } from '@/shared/types/api'
 
 import detailPackage1 from '@/shared/assets/images/detail_package1.png'
 import detailPackage2 from '@/shared/assets/images/detail_package2.png'
 import { ComboList } from '../components/ComboList'
 
 const DetailedRoutine = () => {
-  const { id } = useParams<{ id: string }>()
+  const { id: routinePackageId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [packageData, setPackageData] = useState<RoutinePackage | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const [isCreating, setIsCreating] = useState(false)
+  const [selectedComboId, setSelectedComboId] = useState<string | null>(null)
+
+  const analysisResult = useSelector((state: RootState) => state.analysis.currentResult)
+  const skinAnalysisId = analysisResult?.analysisId
 
   useEffect(() => {
     const fetchAndFilterPackage = async () => {
       setIsLoading(true)
       try {
-        const matchedPackage = await getRoutinePackage(id!)
+        const matchedPackage = await getRoutinePackage(routinePackageId!)
         if (matchedPackage) {
           setPackageData(matchedPackage)
         } else {
-          console.error('Package not found for id:', id)
+          console.error('Package not found for id:', routinePackageId)
         }
       } catch (error) {
         console.error('Error fetching package data:', error)
@@ -32,10 +44,64 @@ const DetailedRoutine = () => {
       }
     }
 
-    if (id) {
+    if (routinePackageId) {
       fetchAndFilterPackage()
     }
-  }, [id])
+  }, [routinePackageId])
+
+  const handleGetStarted = async () => {
+    if (!selectedComboId) {
+      toast({
+        title: 'No combo selected',
+        description: 'Please select a combo from the list before getting started.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    if (!skinAnalysisId || !routinePackageId) {
+      toast({
+        title: 'Incomplete information',
+        description: 'Skin analysis ID or routine package ID is missing.',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      const payload = {
+        skinAnalysisId,
+        routinePackageId,
+        comboId: selectedComboId
+      }
+
+      const response = await createDailyRoutine(payload)
+
+      toast({
+        title: 'Successfully applied routine!',
+        description: response?.message || 'You can start your daily routine now.',
+        variant: 'success'
+      })
+
+      navigate('/daily-routine')
+    } catch (err: unknown) {
+      let message = 'Can not apply routine. Please try again.'
+      if (axios.isAxiosError(err)) {
+        const serverError = err.response?.data as ApiErrorResponse
+        message = Array.isArray(serverError?.message)
+          ? serverError.message[0]
+          : serverError?.message || message
+      }
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive'
+      })
+    } finally {
+      setIsCreating(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -114,13 +180,16 @@ const DetailedRoutine = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4 animate-fade-in-up">
             Recommended Combos for You
           </h2>
-          <ComboList />
-          <div className="text-center mt-12 animate-fade-in-up animation-delay-400">
+
+          <ComboList onComboSelect={(id) => setSelectedComboId(id)} />
+
+          <div className="text-center my-6 animate-fade-in-up animation-delay-400">
             <Button
-              onClick={() => navigate('/daily-routine')}
-              className="px-12 py-6 bg-blue-400 hover:bg-blue-500 text-white text-lg font-semibold rounded-xl transition-all hover:scale-105"
+              disabled={isCreating}
+              onClick={handleGetStarted}
+              className="px-12 py-6 bg-blue-400 hover:bg-blue-500 font-bold text-white text-md rounded-xl transition-all hover:scale-105 min-w-[200px]"
             >
-              GET STARTED
+              {isCreating ? <Loader2 className="animate-spin" /> : 'CREATE MY ROUTINE'}
             </Button>
           </div>
           <p className="text-center text-gray-500 mb-12 animate-fade-in-up">
