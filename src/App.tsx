@@ -8,7 +8,7 @@ import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
 import DetailedRoutine from './features/detail-packages/pages/DetailedRoutine'
 import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
-import DailyRoutine from './features/routine/pages/Dailyroutine'
+import DailyRoutine from './features/routine/pages/DailyRoutine'
 
 function App() {
   return (

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Upload, Info, CheckCircle2, Camera, Sparkles, Loader2 } from 'lucide-react'
@@ -14,8 +14,7 @@ import { Button } from '@/shared/components/ui/button'
 import { useToast } from '@/shared/hooks/use-toast'
 import type { ApiErrorResponse } from '@/shared/types/api'
 import { uploadImage, analyzeImage } from '@/features/home/services/analysis.api'
-import { setAnalysisResult, addToCache } from '../store/analysis.slice'
-import type { RootState } from '@/shared/store'
+import { setAnalysisResult } from '../store/analysis.slice'
 
 export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
   const [isUploading, setIsUploading] = useState(false)
@@ -23,8 +22,6 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-
-  const analysisCache = useSelector((state: RootState) => state.analysis.analysisCache)
 
   const guidelines = [
     'Ensure face is centered and clearly visible.',
@@ -36,21 +33,6 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-
-    const fileKey = `${file.name}-${file.size}`
-
-    if (analysisCache && analysisCache[fileKey]) {
-      toast({
-        title: 'Using Previous Result',
-        description: 'This image was recently analyzed. Loading stored data...',
-        variant: 'success'
-      })
-
-      dispatch(setAnalysisResult(analysisCache[fileKey]))
-      setIsOpen(false)
-      navigate('/analysis-result')
-      return
-    }
 
     const MAX_FILE_SIZE = 5 * 1024 * 1024
     const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
@@ -78,22 +60,37 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
 
     try {
       setIsUploading(true)
-
       const uploadRes = await uploadImage(formData)
       const imageUrl = uploadRes.data.url
       const analyzeRes = await analyzeImage(imageUrl)
 
-      dispatch(setAnalysisResult(analyzeRes.data))
-      dispatch(addToCache({ key: fileKey, result: analyzeRes.data }))
+      const { result } = analyzeRes.data
 
-      toast({
-        title: 'Analysis Successful',
-        description: 'Your skin analysis has been completed.',
-        variant: 'success'
-      })
-      setIsOpen(false)
+      if (analyzeRes.data.result.isValidImage) {
+        const finalData = {
+          ...analyzeRes.data,
+          result: {
+            ...analyzeRes.data.result,
+            imageUrl: imageUrl
+          }
+        }
 
-      navigate('/analysis-result')
+        dispatch(setAnalysisResult(finalData))
+
+        toast({
+          title: 'Analysis Successful',
+          description: 'Your skin analysis has been completed.',
+          variant: 'success'
+        })
+        setIsOpen(false)
+        navigate('/analysis-result')
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid Image',
+          description: result.message || 'Please upload a clear photo of your face.'
+        })
+      }
     } catch (err: unknown) {
       let message = 'Processing failed. Please try again.'
 
