@@ -4,10 +4,10 @@ import { CheckCircle2, Sparkles, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { getRoutinePackage } from '../services/detail-packages.api'
 import type { RoutinePackage } from '../types/detail-routine'
-import { ProductList } from '../components/ProductList'
 
 import detailPackage1 from '@/shared/assets/images/detail_package1.png'
 import detailPackage2 from '@/shared/assets/images/detail_package2.png'
+import { ComboList } from '../components/ComboList'
 
 const DetailedRoutine = () => {
   const { id } = useParams<{ id: string }>()
@@ -111,18 +111,16 @@ const DetailedRoutine = () => {
 
       <section className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12 animate-fade-in-up">
-            Our Featured Products
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4 animate-fade-in-up">
+            Recommended Combos for You
           </h2>
-          <ProductList />
-          <div className="text-center mt-12 animate-fade-in-up animation-delay-400">
-            <Button
-              onClick={() => navigate('/register')}
-              className="px-12 py-6 bg-blue-400 hover:bg-blue-500 text-white text-lg font-semibold rounded-xl transition-all hover:scale-105"
-            >
-              GET STARTED
-            </Button>
-          </div>
+          <p className="text-center text-gray-500 mb-12 animate-fade-in-up">
+            Specially selected based on your recent AI Skin Analysis.
+          </p>
+
+          <ComboList />
+
+          <div className="text-center mt-12 animate-fade-in-up"></div>
         </div>
       </section>
 
