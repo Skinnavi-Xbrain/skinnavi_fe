@@ -26,3 +26,14 @@ export const getPackages = async (): Promise<RoutinePackage[]> => {
   }
   return []
 }
+
+export interface CreateRoutinePayload {
+  skinAnalysisId: string
+  routinePackageId: string
+  comboId: string
+}
+
+export const createDailyRoutine = async (payload: CreateRoutinePayload) => {
+  const res = await apiClient.post('/routines', payload)
+  return res.data
+}

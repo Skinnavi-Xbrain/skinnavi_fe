@@ -3,13 +3,13 @@ import { Loader2 } from 'lucide-react'
 import { getUserRoutines } from '../services/daily-routine.api'
 import type { Routine, RoutineTime } from '../types'
 import Calendar from '../component/Calendar'
-import RoutineSteps from '../component/Routinesteps'
-import RoutineTabs from '../component/Routinetabs'
+import RoutineSteps from '../component/RoutineSteps'
+import RoutineTabs from '../component/RoutineTabs'
 
 const DailyRoutine = () => {
   const [activeTab, setActiveTab] = useState<RoutineTime>('morning')
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [routines, setRoutines] = useState<Routine[]>([])
+  const [routines, setRoutines] = useState<{ morning?: Routine; evening?: Routine }>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,7 +40,7 @@ const DailyRoutine = () => {
     fetchRoutines()
   }, [])
 
-  const currentRoutine = routines.find((r) => r.routine_time === activeTab.toUpperCase())
+  const currentRoutine = routines[activeTab]
 
   const handlePrevMonth = () => {
     const currentYear = currentDate.getFullYear()
@@ -79,7 +79,6 @@ const DailyRoutine = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-100 to-blue-50 py-12 md:py-16 animate-fadeIn">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-3 animate-slideInRight">
@@ -101,6 +100,7 @@ const DailyRoutine = () => {
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid lg:grid-cols-[1fr,420px] gap-8">
           <RoutineSteps activeTab={activeTab} currentRoutine={currentRoutine} />
+
           <div className="space-y-6 lg:sticky lg:top-4 lg:self-start">
             <RoutineTabs activeTab={activeTab} onTabChange={setActiveTab} />
             <Calendar
@@ -112,50 +112,13 @@ const DailyRoutine = () => {
         </div>
       </div>
 
-      {/* CSS Animations */}
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        .animate-slideInRight {
-          animation: slideInRight 0.6s ease-out;
-        }
-
-        .animate-slideUp {
-          animation: slideUp 0.6s ease-out backwards;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+        .animate-slideInRight { animation: slideInRight 0.6s ease-out; }
+        .animate-slideUp { animation: slideUp 0.6s ease-out backwards; }
       `}</style>
     </div>
   )

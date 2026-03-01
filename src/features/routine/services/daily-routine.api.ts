@@ -1,12 +1,12 @@
 import apiClient from '@/shared/lib/api-client'
-import type { Routine, RoutineResponse } from '../types'
+import type { RoutineResponse } from '../types'
 
-export const getUserRoutines = async (): Promise<Routine[]> => {
+export const getUserRoutines = async (): Promise<RoutineResponse['data']> => {
   const res = await apiClient.get<RoutineResponse>('/routines')
 
-  if (res.data?.success && Array.isArray(res.data.data)) {
+  if (res.data?.success && res.data.data) {
     return res.data.data
   }
 
-  return []
+  return {}
 }

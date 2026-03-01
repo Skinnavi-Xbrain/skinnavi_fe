@@ -5,15 +5,23 @@ import type { Combo } from '../types/combo'
 import { getRecommendedCombos } from '../services/combos.api'
 import type { RootState } from '@/shared/store'
 import { useSelector } from 'react-redux'
+import { toast } from '@/shared/hooks/use-toast'
+import { cn } from '@/shared/lib/utils'
 
 interface ComboWithProducts extends Combo {
   products?: { id: string; name: string; size?: string; image?: string }[]
 }
 
-export const ComboList = () => {
+interface ComboListProps {
+  onComboSelect: (comboId: string | null) => void
+}
+
+export const ComboList = ({ onComboSelect }: ComboListProps) => {
   const [combos, setCombos] = useState<ComboWithProducts[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCombo, setSelectedCombo] = useState<ComboWithProducts | null>(null)
+
+  const [appliedComboId, setAppliedComboId] = useState<string | null>(null)
 
   const analysisResult = useSelector((state: RootState) => state.analysis.currentResult)
   const comboIds = analysisResult?.result?.recommendedCombos || []
@@ -36,6 +44,19 @@ export const ComboList = () => {
     fetchCombos()
   }, [comboIds])
 
+  const handleApplyClick = (comboId: string) => {
+    setAppliedComboId(comboId)
+    onComboSelect(comboId)
+    setSelectedCombo(null)
+
+    toast({
+      title: 'Combo selected',
+      description:
+        'You have selected a combo. You can now proceed to get started with your routine.',
+      variant: 'success'
+    })
+  }
+
   if (isLoading)
     return (
       <div className="flex justify-center p-10">
@@ -45,16 +66,26 @@ export const ComboList = () => {
 
   return (
     <>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-16">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         {combos.map((combo, index) => (
           <div
             key={combo.id}
             onClick={() => setSelectedCombo(combo)}
             style={{ animationDelay: `${index * 150}ms` }}
-            className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-3 shadow-sm
+            className={`group relative cursor-pointer overflow-hidden rounded-[2.5rem] border bg-white p-3 shadow-sm
                  transition-all duration-500 hover:border-blue-200 hover:shadow-[0_20px_50px_rgba(103,174,255,0.15)]
-                 animate-fade-in-up"
+                 animate-fade-in-up ${
+                   appliedComboId === combo.id
+                     ? 'border-blue-400 ring-2 ring-blue-100'
+                     : 'border-slate-100'
+                 }`}
           >
+            {appliedComboId === combo.id && (
+              <div className="absolute top-4 right-4 z-10 bg-blue-500 text-white p-1.5 rounded-full shadow-lg animate-scale-up">
+                <Check className="w-4 h-4" strokeWidth={3} />
+              </div>
+            )}
+
             <div
               className="relative aspect-square overflow-hidden rounded-[2rem]
                       bg-gradient-to-br from-[#F8FBFF] to-[#F0F7FF]
@@ -248,12 +279,15 @@ export const ComboList = () => {
                 </Button>
 
                 <Button
-                  className="flex-1 h-14 rounded-2xl
-                     bg-blue-500 hover:bg-blue-600
-                     text-white font-bold"
-                  onClick={() => setSelectedCombo(null)}
+                  className={cn(
+                    'flex-1 h-14 rounded-2xl font-bold text-white',
+                    appliedComboId === selectedCombo.id
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  )}
+                  onClick={() => handleApplyClick(selectedCombo.id)}
                 >
-                  APPLY ROUTINE
+                  {appliedComboId === selectedCombo.id ? 'SELECTED' : 'APPLY'}
                 </Button>
               </div>
             </div>

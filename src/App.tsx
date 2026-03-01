@@ -8,8 +8,8 @@ import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
 import DetailedRoutine from './features/detail-packages/pages/DetailedRoutine'
 import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
-import DailyRoutine from './features/routine/pages/Dailyroutine'
-import RoutineStepDetail from './features/detail-step-routine/pages/Routinestepdetail'
+import DailyRoutine from './features/routine/pages/DailyRoutine'
+import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
 
 function App() {
   return (

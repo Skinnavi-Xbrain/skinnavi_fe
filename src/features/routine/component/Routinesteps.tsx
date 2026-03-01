@@ -36,7 +36,6 @@ const getBackgroundColor = (role: string) => {
 const RoutineSteps = ({ activeTab, currentRoutine }: RoutineStepsProps) => {
   return (
     <div className="space-y-6">
-      {/* Greeting Card */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-between transition-all duration-300 hover:shadow-md animate-slideUp">
         <div className="flex items-center gap-8">
           <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden">
@@ -61,7 +60,6 @@ const RoutineSteps = ({ activeTab, currentRoutine }: RoutineStepsProps) => {
         </div>
       </div>
 
-      {/* Routine Steps */}
       {currentRoutine && currentRoutine.steps.length > 0 ? (
         <div className="space-y-0">
           {currentRoutine.steps
@@ -89,7 +87,6 @@ const RoutineSteps = ({ activeTab, currentRoutine }: RoutineStepsProps) => {
                       {step.product.usage_role}
                     </h3>
 
-                    {/* Product Card */}
                     <a
                       href={`/step-detail`}
                       className="block bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-300 transition-all duration-300"
@@ -124,7 +121,6 @@ const RoutineSteps = ({ activeTab, currentRoutine }: RoutineStepsProps) => {
         </div>
       )}
 
-      {/* Routine Tips */}
       <div className="mt-8 animate-slideUp" style={{ animationDelay: '0.5s' }}>
         <h3 className="text-xl font-bold text-gray-900 mb-4">Routine Tips</h3>
 
