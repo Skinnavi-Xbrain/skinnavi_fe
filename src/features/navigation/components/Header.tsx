@@ -20,7 +20,7 @@ const Header = () => {
 
   const navItems = [
     { label: 'Home', href: '/home', icon: <Home className="w-5 h-5" /> },
-    { label: 'Routine', href: '/routine', icon: <Sparkles className="w-5 h-5" /> },
+    { label: 'Routine', href: '/daily-routine', icon: <Sparkles className="w-5 h-5" /> },
     { label: 'Tracking', href: '/tracking', icon: <Activity className="w-5 h-5" /> },
     { label: 'About', href: '/about', icon: <Info className="w-5 h-5" /> }
   ]

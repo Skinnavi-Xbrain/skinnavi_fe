@@ -8,6 +8,7 @@ import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
 import DetailedRoutine from './features/detail-packages/pages/DetailedRoutine'
 import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
+import DailyRoutine from './features/routine/pages/DailyRoutine'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/analysis-result" element={<AnalysisResult />} />
             <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
+            <Route path="/daily-routine" element={<DailyRoutine />} />
           </Route>
         </Route>
 

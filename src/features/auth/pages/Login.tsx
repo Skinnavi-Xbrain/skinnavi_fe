@@ -27,7 +27,6 @@ const Login = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState(false)
-
   const {
     register,
     handleSubmit,
@@ -119,7 +118,6 @@ const Login = () => {
           </div>
           <FieldError errors={[errors.password]} />
         </Field>
-
         <div className="flex items-center justify-between pt-2">
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
@@ -133,7 +131,6 @@ const Login = () => {
             Forgot password?
           </Link>
         </div>
-
         <Button
           type="submit"
           disabled={loading}
@@ -141,7 +138,6 @@ const Login = () => {
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Sign in'}
         </Button>
-
         <div className="text-center text-sm text-slate-500">
           Don't have an account?
           <Link to="/register" className="text-blue-500 font-semibold hover:underline ml-1">
