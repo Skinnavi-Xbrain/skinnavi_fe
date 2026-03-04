@@ -16,13 +16,16 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<Home />} />
+        </Route>
+
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
-            <Route path="/home" element={<Home />} />
             <Route path="/analysis-result" element={<AnalysisResult />} />
             <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
             <Route path="/daily-routine" element={<DailyRoutine />} />
