@@ -29,7 +29,9 @@ function App() {
             <Route path="/analysis-result" element={<AnalysisResult />} />
             <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
             <Route path="/daily-routine" element={<DailyRoutine />} />
-            <Route path="/step-detail" element={<RoutineStepDetail />} />
+
+            {/* step-detail now accepts an ID param to fetch specific routine step */}
+            <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
           </Route>
         </Route>
 

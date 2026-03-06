@@ -88,7 +88,7 @@ const RoutineSteps = ({ activeTab, currentRoutine }: RoutineStepsProps) => {
                     </h3>
 
                     <a
-                      href={`/step-detail`}
+                      href={`/step-detail/${step.id}`}
                       className="block bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-300 transition-all duration-300"
                     >
                       <div className="flex items-center gap-4">
