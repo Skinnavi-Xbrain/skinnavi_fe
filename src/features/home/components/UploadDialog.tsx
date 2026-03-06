@@ -30,6 +30,23 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     'Keep a neutral expression for analysis.'
   ]
 
+  const handleInitiateUpload = () => {
+    const token = localStorage.getItem('accessToken')
+
+    if (!token) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'Please log in to upload and analyze your skin.'
+      })
+
+      setTimeout(() => setIsOpen(false), 1000)
+      return
+    }
+
+    document.getElementById('file-upload')?.click()
+  }
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -159,14 +176,14 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
               <Button
                 disabled={isUploading}
                 className="w-full h-14 md:h-16 bg-[#67AEFF] hover:bg-[#5BA0EB] text-white rounded-xl md:rounded-2xl font-extrabold text-base md:text-lg gap-3 shadow-lg shadow-[#67AEFF]/20 transition-all active:scale-[0.97]"
-                onClick={() => document.getElementById('file-upload')?.click()}
+                onClick={handleInitiateUpload}
               >
                 {isUploading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <Upload className="w-5 h-5 md:w-6 md:h-6" />
                 )}
-                {isUploading ? 'Analyzing...' : 'Start Skin Scan'}
+                {isUploading ? 'Analyzing...' : 'Upload Your Photo'}
               </Button>
               <input
                 id="file-upload"

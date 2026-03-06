@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { getUserRoutines } from '../services/daily-routine.api'
 import type { Routine, RoutineTime } from '../types'
-import Calendar from '../component/Calendar'
-import RoutineSteps from '../component/RoutineSteps'
-import RoutineTabs from '../component/RoutineTabs'
+import Calendar from '../components/Calendar'
+import RoutineSteps from '../components/RoutineSteps'
+import RoutineTabs from '../components/RoutineTabs'
 
 const DailyRoutine = () => {
   const [activeTab, setActiveTab] = useState<RoutineTime>('morning')
