@@ -12,7 +12,7 @@ export interface SubStep {
   id: string
   instruction: string
   order: number
-  description?: string // detailed guidance for the sub-step, instruction remains a brief title
+  description?: string
 }
 
 export interface RoutineStep {
@@ -22,7 +22,7 @@ export interface RoutineStep {
   instruction: string
   product_id: string
   product: Product
-  sub_steps?: SubStep[] // optional detailed sub-steps
+  sub_steps?: SubStep[]
 }
 
 export interface Routine {
@@ -30,7 +30,7 @@ export interface Routine {
   user_package_subscription_id: string
   routine_time: 'MORNING' | 'EVENING'
   steps: RoutineStep[]
-  created_at?: string // optional timestamp from backend
+  created_at?: string
 }
 
 export interface RoutineResponse {
@@ -47,7 +47,7 @@ export type RoutineTime = 'morning' | 'evening'
 export interface RoutineDailyLog {
   id: string
   user_routine_id: string
-  log_date: string // ISO date string (YYYY-MM-DD)
+  log_date: string
   is_completed: boolean
   created_at?: string
 }
@@ -61,11 +61,11 @@ export interface RoutineDailyLogsResponse {
 
 export interface SkinAnalysisMetrics {
   date: string
-  moistureLevel: number // 0-100
-  oilLevel: number // 0-100
+  moistureLevel: number
+  oilLevel: number
   acneCount: number
-  rednessLevel: number // 0-100
-  texture: string // 'smooth' | 'rough'
+  rednessLevel: number
+  texture: string
 }
 
 export interface SkinAnalysisComparison {
@@ -74,7 +74,7 @@ export interface SkinAnalysisComparison {
     current: SkinAnalysisMetrics
     previous: SkinAnalysisMetrics
     improvement: {
-      moisture: number // percentage change
+      moisture: number
       oil: number
       acne: number
       redness: number

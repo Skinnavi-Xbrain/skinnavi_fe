@@ -64,7 +64,6 @@ const RoutineStepDetail = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ================= HERO ================= */}
       <section className="bg-gradient-to-r from-blue-100 to-blue-50 py-10 md:py-14 animate-fadeIn">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-4 mb-4">
@@ -81,7 +80,6 @@ const RoutineStepDetail = () => {
             </h1>
           </div>
 
-          {/* Breadcrumb */}
           <nav className="flex items-center justify-center gap-2 text-xs md:text-sm">
             <span
               className="text-gray-600 hover:text-blue-500 cursor-pointer transition-colors"
@@ -102,7 +100,6 @@ const RoutineStepDetail = () => {
         </div>
       </section>
 
-      {/* ================= STEPS ================= */}
       <section className="container mx-auto px-6 md:px-12 lg:px-20 py-8 md:py-12">
         <div className="max-w-7xl mx-auto space-y-8">
           {sub_steps.map((step, index) => (
@@ -113,7 +110,6 @@ const RoutineStepDetail = () => {
               } animate-slideUp`}
               style={{ animationDelay: `${index * 0.15}s` }}
             >
-              {/* IMAGE */}
               <div className="w-full md:w-64 lg:w-72 flex-shrink-0">
                 <div className="relative bg-gradient-to-br from-blue-100 to-blue-50 rounded-3xl overflow-hidden shadow-sm p-4 transition-all duration-300 hover:shadow-lg">
                   <div className="bg-white rounded-2xl overflow-hidden">
@@ -126,10 +122,8 @@ const RoutineStepDetail = () => {
                 </div>
               </div>
 
-              {/* CONTENT */}
               <div className="flex-1 w-full">
                 <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 md:p-10 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-300">
-                  {/* STEP HEADER */}
                   <div className="inline-flex items-center gap-3 bg-blue-100 rounded-full px-4 py-2 mb-4">
                     <div className="w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center text-white font-bold text-xs">
                       {step.order || index + 1}
@@ -138,7 +132,6 @@ const RoutineStepDetail = () => {
                     <h3 className="text-sm md:text-base font-bold text-blue-400">{step.title}</h3>
                   </div>
 
-                  {/* DESCRIPTION */}
                   <p className="text-gray-700 leading-relaxed text-xs md:text-sm">{step.how_to}</p>
                 </div>
               </div>
@@ -147,7 +140,6 @@ const RoutineStepDetail = () => {
         </div>
       </section>
 
-      {/* ================= ANIMATIONS ================= */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
