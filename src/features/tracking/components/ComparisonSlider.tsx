@@ -1,68 +1,114 @@
-import { Card } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import { Sparkles, ArrowLeftRight } from "lucide-react";
+import { TrendingUp, ArrowLeftRight } from 'lucide-react'
+import type { TrackingOverview } from '../types'
 
-export const ComparisonSlider = () => (
-  <Card className="p-6 bg-white border-none shadow-xl shadow-blue-500/5 rounded-[2.5rem] h-full flex flex-col min-h-[420px] justify-between">
-    <div className="flex justify-between items-center mb-4">
-      <div>
-        <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2 leading-none mb-1">
-          Before / After
-          <Sparkles className="w-4 h-4 text-[#67AEFF]" />
-        </h3>
-        <p className="text-xs text-slate-400 font-normal">January 11, 2026</p>
-      </div>
-      <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full text-[11px] font-semibold">
-          Score: 87
-      </Badge>
-    </div>
-    
-    {/* Tỉ lệ aspect được giữ cân đối để không bị quá to trên mobile */}
-    <div className="relative flex-grow aspect-[4/3] md:aspect-[16/10] overflow-hidden rounded-[1.8rem] mb-5 group border border-slate-50 shadow-inner">
-      <div className="flex h-full w-full">
-        {/* Before Side */}
-        <div className="w-1/2 bg-slate-100 border-r border-white relative">
-           <img 
-            src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=1000" 
-            className="object-cover h-full w-full grayscale-[30%] opacity-90" 
-            alt="Before"
-           />
-           <span className="absolute bottom-3 left-3 text-[10px] text-white font-medium uppercase tracking-wider bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-lg">
-            Before
-           </span>
+interface ComparisonSliderProps {
+  tracking?: TrackingOverview | null
+}
+
+export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
+  const latestAnalysis = tracking?.skin_analyses[0]
+  const previousAnalysis = tracking?.skin_analyses[1]
+
+  const beforeImage = previousAnalysis?.face_image_url
+  const afterImage = latestAnalysis?.face_image_url
+  const scoreImprovement = latestAnalysis?.overall_score_trend ?? 0
+  const latestScore = latestAnalysis?.overall_score ?? 87
+
+  const hasComparison = latestAnalysis && previousAnalysis
+
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h3 className="font-bold text-blue-400 text-base">Before / After Comparison</h3>
+          <p className="text-xs text-slate-400">
+            {latestAnalysis?.created_at.split('T')[0] ?? 'No data'}
+          </p>
         </div>
-
-        {/* After Side */}
-        <div className="w-1/2 bg-slate-50 relative">
-           <img 
-            src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=1000" 
-            className="object-cover h-full w-full" 
-            alt="After"
-           />
-           <span className="absolute bottom-3 right-3 text-[10px] text-white font-medium uppercase tracking-wider bg-[#67AEFF]/60 backdrop-blur-md px-2.5 py-1 rounded-lg">
-            After
-           </span>
+        <div className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5">
+          <TrendingUp className="w-3 h-3" /> Score: {latestScore}
         </div>
       </div>
 
-      {/* Slider Handle */}
-      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/80 backdrop-blur-sm flex items-center justify-center">
-         <div className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center text-[#67AEFF] border border-slate-100 transition-transform group-hover:scale-110">
-            <ArrowLeftRight className="w-4 h-4" />
-         </div>
-      </div>
-    </div>
+      <div
+        className="relative flex-1 overflow-hidden rounded-xl border border-slate-100"
+        style={{ minHeight: 260 }}
+      >
+        {hasComparison ? (
+          <div className="flex h-full">
+            <div className="w-1/2 relative overflow-hidden">
+              <img
+                src={
+                  beforeImage ||
+                  'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=600'
+                }
+                alt="Before"
+                className="object-cover w-full h-full grayscale-[25%] brightness-95"
+              />
+              <span className="absolute bottom-3 left-3 text-[10px] text-white font-semibold uppercase tracking-wider bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md">
+                Before
+              </span>
+            </div>
 
-    {/* Analysis Results - Font chữ 13px tương đồng AI Insights */}
-    <div className="grid grid-cols-2 gap-3">
-      <div className="bg-emerald-50/50 p-3.5 rounded-[1.2rem] border border-emerald-100/50">
-        <p className="text-[11px] font-semibold text-emerald-600 uppercase tracking-tight mb-1">Improvement</p>
-        <p className="text-[13px] font-normal text-emerald-800 leading-tight">Texture significantly smoother</p>
+            <div className="w-1/2 relative overflow-hidden">
+              <img
+                src={
+                  afterImage ||
+                  'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=600'
+                }
+                alt="After"
+                className="object-cover w-full h-full"
+              />
+              <span className="absolute bottom-3 right-3 text-[10px] text-white font-semibold uppercase tracking-wider bg-blue-400/60 backdrop-blur-sm px-2 py-1 rounded-md">
+                After
+              </span>
+            </div>
+
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 flex items-center">
+              <div className="w-px h-full bg-white/80" />
+              <div className="absolute w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-blue-400 border border-slate-100">
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-slate-50">
+            <img
+              src={
+                afterImage ||
+                'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=600'
+              }
+              alt="Latest"
+              className="object-cover w-full h-full"
+            />
+          </div>
+        )}
       </div>
-      <div className="bg-blue-50/50 p-3.5 rounded-[1.2rem] border border-blue-100/50">
-        <p className="text-[11px] font-semibold text-blue-600 uppercase tracking-tight mb-1">Key Change</p>
-        <p className="text-[13px] font-normal text-blue-800 leading-tight">Redness reduced by 20%</p>
+
+      <div className="grid grid-cols-2 gap-3 mt-4">
+        <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+          <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wide mb-0.5">
+            Improvement
+          </p>
+          <p className="text-emerald-700 text-xs font-bold">
+            {scoreImprovement > 0 ? '+' : ''}
+            {scoreImprovement}%
+            {scoreImprovement === 0
+              ? ' (baseline)'
+              : scoreImprovement > 0
+                ? ' improved'
+                : ' decline'}
+          </p>
+        </div>
+        <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+          <p className="text-[10px] font-semibold text-blue-500 uppercase tracking-wide mb-0.5">
+            Status
+          </p>
+          <p className="text-blue-700 text-xs font-bold">
+            {hasComparison ? 'Comparison' : 'Latest scan'}
+          </p>
+        </div>
       </div>
     </div>
-  </Card>
-);
+  )
+}

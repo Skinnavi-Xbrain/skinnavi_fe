@@ -1,59 +1,55 @@
-import { motion } from 'framer-motion'
-import { PageHeader } from '@/features/navigation/components/PageHeader'
-import { StatusHeader } from '@/features/tracking/components/StatusHeader'
-import { SkinCalendar } from '@/features/tracking/components/SkinCalendar'
-import { HealthProgress } from '@/features/tracking/components/HealthProgress'
-import { AIInsights } from '@/features/tracking/components/AIInsights'
-import { ComparisonSlider } from '@/features/tracking/components/ComparisonSlider'
+import { useEffect, useState } from 'react'
+import { PageHeader } from '../components/Pageheader'
+import { SkinCalendar } from '../components/SkinCalendar'
+import HealthProgress from '../components/HealthProgress'
+import { ComparisonSlider } from '../components/ComparisonSlider'
+import { AIInsights } from '../components/AIInsights'
+import { StatusHeader } from '../components/StatusHeader'
+import { getTrackingOverview } from '../services/tracking.api'
+import type { TrackingOverview } from '../services/tracking.api'
 
-export default function TrackingPage() {
+export default function Tracking() {
+  const [tracking, setTracking] = useState<TrackingOverview | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getTrackingOverview()
+        setTracking(data)
+      } catch {}
+    }
+    fetchData()
+  }, [])
+
   return (
-    <div className="min-h-screen bg-[#F8FAFF] pb-10 md:pb-20 font-sans">
+    <div className="min-h-screen bg-blue-50 font-sans">
       <PageHeader title="Tracking" />
+      <StatusHeader />
 
-      <main className="max-w-6xl mx-auto px-4 md:px-6 mt-4 md:mt-8">
-        
-    
-        <StatusHeader />
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
-          
-          <motion.div 
-            className="lg:col-span-5 order-1"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <SkinCalendar />
-          </motion.div>
-
-          <motion.div 
-            className="lg:col-span-7 order-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <SkinCalendar tracking={tracking} />
+          {tracking?.skin_analyses && tracking.skin_analyses.length > 0 ? (
+            <HealthProgress
+              data={[...tracking.skin_analyses]
+                .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                .slice(-5)
+                .map((a) => ({
+                  label: a.created_at.split('T')[0],
+                  score: a.overall_score ?? 0,
+                  pores: a.metrics.find((m) => m.metric_type === 'PORES')?.score ?? 0,
+                  acnes: a.metrics.find((m) => m.metric_type === 'ACNE')?.score ?? 0,
+                  darkCircles: a.metrics.find((m) => m.metric_type === 'DARK_CIRCLES')?.score ?? 0,
+                  darkPots: a.metrics.find((m) => m.metric_type === 'DARK_SPOTS')?.score ?? 0
+                }))}
+            />
+          ) : (
             <HealthProgress />
-          </motion.div>
-
-          <motion.div 
-            className="lg:col-span-5 order-3 lg:order-4"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <AIInsights />
-          </motion.div>
-
-          <motion.div 
-            className="lg:col-span-7 order-4 lg:order-3"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <ComparisonSlider />
-          </motion.div>
-
+          )}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ComparisonSlider tracking={tracking} />
+          <AIInsights tracking={tracking} />
         </div>
       </main>
     </div>
