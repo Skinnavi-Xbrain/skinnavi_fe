@@ -1,145 +1,158 @@
-import { Sparkles, Droplets, Sun, Moon, TrendingUp } from 'lucide-react'
-import { type LucideIcon } from 'lucide-react'
-import { cn } from '@/shared/lib/utils'
-import { PopularProducts } from '../components/PopularProducts'
+import { useSelector } from 'react-redux'
+import { Sparkles, Droplets, Sun, Moon, TrendingUp, CheckCircle2 } from 'lucide-react'
 import { RoutinePackages } from '../components/RoutinePackages'
-import profileImage from '@/shared/assets/images/profile.jpg'
 import { SkinMetricsCard } from '../components/SkinMetricsCard'
-
-interface SkinMetric {
-  label: string
-  value: number
-  icon: LucideIcon
-  color: string
-  bgColor: string
-  description: string
-}
+import type { RootState } from '@/shared/store'
+import { RecommendedProducts } from '../components/RecommendedProducts'
 
 const AnalysisResult = () => {
-  const getResultStatus = (value: number) => {
-    if (value >= 85) return { text: 'Excellent', color: 'text-green-600', bgColor: 'bg-green-50' }
-    if (value >= 70) return { text: 'Good', color: 'text-blue-600', bgColor: 'bg-blue-50' }
-    if (value >= 50) return { text: 'Fair', color: 'text-yellow-600', bgColor: 'bg-yellow-50' }
-    return { text: 'Needs Care', color: 'text-orange-600', bgColor: 'bg-orange-50' }
+  const analysisData = useSelector((state: RootState) => state.analysis.currentResult)
+
+  if (!analysisData || !analysisData.result.isValidImage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-500 font-medium">
+          No valid analysis data found. Please scan again from the Home page.
+        </p>
+      </div>
+    )
   }
 
-  const getOverallAssessment = (score: number) => {
-    if (score >= 85)
+  const { result } = analysisData
+  const { metrics } = result
+
+  const analyzedImageUrl = analysisData.result.imageUrl || ''
+  const comboIds = result.recommendedCombos || []
+
+  const getStatus = (value: number) => {
+    if (value >= 85)
       return {
-        text: 'Outstanding',
-        description: 'Your skin is in excellent condition!',
-        color: 'from-green-500 to-emerald-600'
+        text: 'Excellent',
+        color: 'text-emerald-600',
+        bgColor: 'bg-emerald-50',
+        barColor: 'from-emerald-400 to-teal-500'
       }
-    if (score >= 70)
+    if (value >= 70)
       return {
-        text: 'Healthy',
-        description: 'Your skin shows good health.',
-        color: 'from-blue-500 to-cyan-600'
+        text: 'Good',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+        barColor: 'from-blue-400 to-indigo-500'
+      }
+    if (value >= 50)
+      return {
+        text: 'Fair',
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-50',
+        barColor: 'from-amber-400 to-orange-500'
       }
     return {
-      text: 'Moderate',
-      description: 'Some areas need attention.',
-      color: 'from-yellow-500 to-amber-600'
+      text: 'Critical',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      barColor: 'from-red-500 to-rose-600'
     }
   }
 
-  const skinMetrics: SkinMetric[] = [
+  const overallScore = Math.round(result.overallScore || 0)
+
+  const skinMetrics = [
     {
       label: 'Pores',
-      value: 88,
+      value: Math.round(metrics?.PORES || 0),
       icon: Droplets,
-      color: 'from-blue-400 to-cyan-500',
-      bgColor: 'bg-blue-50',
-      description: 'Pore condition'
+      description: 'Pore clarity & size'
     },
     {
-      label: 'Acnes',
-      value: 79,
+      label: 'Acne',
+      value: Math.round(metrics?.ACNE || 0),
       icon: Sun,
-      color: 'from-amber-400 to-orange-500',
-      bgColor: 'bg-amber-50',
-      description: 'Acne control'
+      description: 'Acne & breakout condition'
     },
     {
-      label: 'Dark circles',
-      value: 65,
+      label: 'Dark Circles',
+      value: Math.round(metrics?.DARK_CIRCLES || 0),
       icon: Moon,
-      color: 'from-indigo-400 to-purple-500',
-      bgColor: 'bg-indigo-50',
-      description: 'Under-eye area'
+      description: 'Under-eye fatigue'
     },
     {
-      label: 'Dark spots',
-      value: 79,
+      label: 'Dark Spots',
+      value: Math.round(metrics?.DARK_SPOTS || 0),
       icon: Sparkles,
-      color: 'from-pink-400 to-rose-500',
-      bgColor: 'bg-pink-50',
-      description: 'Pigmentation'
+      description: 'Pigmentation & spots'
     }
   ]
 
-  const overallScore = Math.round(
-    skinMetrics.reduce((acc, m) => acc + m.value, 0) / skinMetrics.length
-  )
-  const assessment = getOverallAssessment(overallScore)
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-12">
-      <div className="max-w-6xl mx-auto">
-        {/* Hero Assessment Card */}
-        <div className="mb-12 transition-all duration-1000 delay-100 opacity-100 translate-y-0">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/50 flex flex-col md:flex-row items-center gap-10">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-pink-400 rounded-full blur-2xl opacity-40" />
-              <div className="relative w-56 h-56 rounded-full overflow-hidden ring-8 ring-white shadow-xl">
-                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-              </div>
-              <div
-                className={cn(
-                  'absolute -bottom-2 -right-2 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl ring-4 ring-white bg-gradient-to-br',
-                  assessment.color
-                )}
-              >
-                <div className="text-center text-white">
-                  <div className="text-3xl font-bold leading-none">{overallScore}%</div>
-                </div>
-              </div>
-            </div>
+      <div className="mb-12 text-center">
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Skin Analysis Results
+        </h1>
+      </div>
 
-            <div className="flex-1 space-y-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <TrendingUp className="text-blue-500" />
-                  <h2 className="text-2xl font-bold text-gray-800">Professional Assessment</h2>
+      <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-2xl border border-white overflow-hidden mb-20">
+        <div className="flex flex-col">
+          <div className="p-8 md:p-12 bg-gradient-to-b from-blue-50/50 to-transparent border-b border-gray-100">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-pink-400 rounded-full blur-3xl opacity-20 animate-pulse" />
+                <div className="relative w-44 h-44 md:w-52 md:h-52 rounded-full overflow-hidden ring-[12px] ring-white shadow-2xl">
+                  <img
+                    src={analyzedImageUrl}
+                    alt="Analyzed Face"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      ;(e.target as HTMLImageElement).src =
+                        'https://via.placeholder.com/150?text=No+Image'
+                    }}
+                  />
                 </div>
-                <p className="text-gray-600 leading-relaxed">{assessment.description}</p>
+                <div className="absolute -bottom-2 -right-2 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center shadow-xl ring-4 ring-white bg-gradient-to-br from-blue-600 to-indigo-600">
+                  <div className="text-center text-white">
+                    <div className="text-2xl md:text-3xl font-black">{overallScore}%</div>
+                    <div className="text-[9px] font-bold uppercase tracking-tighter opacity-80">
+                      Score
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="bg-blue-50/50 p-4 rounded-2xl flex items-center gap-3 text-blue-700 text-sm">
-                <Sparkles className="w-5 h-5" />
-                <span>Updated today based on your latest scan</span>
+
+              <div className="flex-1 space-y-6 text-center md:text-left">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-lg text-blue-700 text-xs font-bold uppercase tracking-wider">
+                    <TrendingUp className="w-4 h-4" />
+                    Expert Assessment
+                  </div>
+                  <h2 className="text-base md:text-lg font-normal italic text-gray-800 leading-tight">
+                    "{result.overallComment}"
+                  </h2>
+                </div>
+
+                <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    <span className="text-sm font-bold text-emerald-700">
+                      Skin Type: {result.skinType}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-2xl border border-purple-100">
+                    <Sparkles className="w-5 h-5 text-purple-500" />
+                    <span className="text-sm font-bold text-purple-700">AI Verified Analysis</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          <div className="p-8 md:p-12">
+            <SkinMetricsCard metrics={skinMetrics} getStatus={getStatus} isNested={true} />
+          </div>
         </div>
-
-        <SkinMetricsCard metrics={skinMetrics} getStatus={getResultStatus} />
-
-        {/* Metrics Grid */}
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {skinMetrics.map((metric, index) => (
-            <MetricCard
-              key={metric.label}
-              {...metric}
-              index={index}
-              mounted={true}
-              status={getResultStatus(metric.value)}
-            />
-          ))}
-        </div> */}
-
-        <PopularProducts />
-        <RoutinePackages />
       </div>
+
+      <RecommendedProducts comboIds={comboIds} />
+      <RoutinePackages />
     </div>
   )
 }

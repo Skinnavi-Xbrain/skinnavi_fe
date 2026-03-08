@@ -1,5 +1,8 @@
-import { Upload, Info, CheckCircle2, Camera, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { Upload, Info, CheckCircle2, Camera, Sparkles, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -8,8 +11,16 @@ import {
   DialogTrigger
 } from '@/shared/components/ui/dialog'
 import { Button } from '@/shared/components/ui/button'
+import { useToast } from '@/shared/hooks/use-toast'
+import type { ApiErrorResponse } from '@/shared/types/api'
+import { uploadImage, analyzeImage } from '@/features/home/services/analysis.api'
+import { setAnalysisResult } from '../store/analysis.slice'
 
 export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
+  const [isUploading, setIsUploading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const { toast } = useToast()
+  const dispatch = useDispatch()
   const navigate = useNavigate()
 
   const guidelines = [
@@ -19,28 +30,113 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     'Keep a neutral expression for analysis.'
   ]
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleInitiateUpload = () => {
+    const token = localStorage.getItem('accessToken')
+
+    if (!token) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'Please log in to upload and analyze your skin.'
+      })
+
+      setTimeout(() => setIsOpen(false), 1000)
+      return
+    }
+
+    document.getElementById('file-upload')?.click()
+  }
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
     if (!file) return
 
-    console.log('File selected:', file.name)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024
+    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
 
-    // 👉 Nếu cần upload BE thì làm tại đây
-    // await uploadImage(file)
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        variant: 'destructive',
+        title: 'Error File Too Large',
+        description: 'Please select an image under 5MB.'
+      })
+      return
+    }
 
-    navigate('/analysis-result', { replace: true })
+    if (!ALLOWED_MIMES.includes(file.type)) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Unsupported Format',
+        description: 'Just a heads up, we only accept JPEG, PNG, or WEBP images.'
+      })
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('image', file)
+
+    try {
+      setIsUploading(true)
+      const uploadRes = await uploadImage(formData)
+      const imageUrl = uploadRes.data.url
+      const analyzeRes = await analyzeImage(imageUrl)
+
+      const { result } = analyzeRes.data
+
+      if (analyzeRes.data.result.isValidImage) {
+        const finalData = {
+          ...analyzeRes.data,
+          result: {
+            ...analyzeRes.data.result,
+            imageUrl: imageUrl
+          }
+        }
+
+        dispatch(setAnalysisResult(finalData))
+
+        toast({
+          title: 'Analysis Successful',
+          description: 'Your skin analysis has been completed.',
+          variant: 'success'
+        })
+        setIsOpen(false)
+        navigate('/analysis-result')
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid Image',
+          description: result.message || 'Please upload a clear photo of your face.'
+        })
+      }
+    } catch (err: unknown) {
+      let message = 'Processing failed. Please try again.'
+
+      if (axios.isAxiosError(err)) {
+        const serverError = err.response?.data as ApiErrorResponse
+        message = Array.isArray(serverError?.message)
+          ? serverError.message[0]
+          : serverError?.message || message
+      }
+
+      toast({
+        variant: 'destructive',
+        title: 'Analysis Failed',
+        description: message
+      })
+    } finally {
+      setIsUploading(false)
+      event.target.value = ''
+    }
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-
       <DialogContent className="sm:max-w-[800px] w-[95vw] max-h-[90vh] rounded-[1.5rem] sm:rounded-[2rem] p-0 border-none shadow-2xl bg-white overflow-hidden flex flex-col md:flex-row">
         <div className="w-full md:w-2/5 bg-[#F0F7FF] flex items-center justify-center p-6 md:p-10 relative shrink-0">
           <div className="absolute top-4 left-6 md:top-6 md:left-8 text-[#67AEFF]/20 font-black text-xl md:text-2xl italic tracking-tighter uppercase select-none">
             Scan
           </div>
-
           <div className="relative">
             <div className="w-32 h-32 md:w-64 md:h-64 rounded-full border-2 border-white/50 flex items-center justify-center">
               <div className="w-24 h-24 md:w-48 md:h-48 rounded-full border-[6px] md:border-[12px] border-[#67AEFF]/10 bg-white flex items-center justify-center shadow-sm">
@@ -78,19 +174,23 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
 
             <div className="pt-2">
               <Button
+                disabled={isUploading}
                 className="w-full h-14 md:h-16 bg-[#67AEFF] hover:bg-[#5BA0EB] text-white rounded-xl md:rounded-2xl font-extrabold text-base md:text-lg gap-3 shadow-lg shadow-[#67AEFF]/20 transition-all active:scale-[0.97]"
-                onClick={() => document.getElementById('file-upload')?.click()}
+                onClick={handleInitiateUpload}
               >
-                <Upload className="w-5 h-5 md:w-6 md:h-6" />
-                Upload Photo
+                {isUploading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Upload className="w-5 h-5 md:w-6 md:h-6" />
+                )}
+                {isUploading ? 'Analyzing...' : 'Upload Your Photo'}
               </Button>
-
               <input
                 id="file-upload"
                 type="file"
                 className="hidden"
-                accept="image/*"
-                onChange={handleFileChange}
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleFileUpload}
               />
             </div>
           </div>

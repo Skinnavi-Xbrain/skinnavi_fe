@@ -2,25 +2,24 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { ChevronDown, Loader2 } from 'lucide-react'
-import { env } from '@/config/env'
-import axios from 'axios'
-import type { Product } from '../types/product'
+import type { AffiliateProduct } from '@/features/detail-packages/types/combo'
+import { getProductsFromCombos } from '../services/products.api'
 
-const BG_COLORS = ['bg-[#E3F2ED]', 'bg-[#E7F0F8]', 'bg-[#F9E8E8]']
+const BG_COLORS = ['bg-[#E7F0F8]']
 
-export const PopularProducts = () => {
-  const [products, setProducts] = useState<Product[]>([])
+export const RecommendedProducts = ({ comboIds }: { comboIds: string[] }) => {
+  const [products, setProducts] = useState<AffiliateProduct[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (comboIds.length === 0) {
+        setLoading(false)
+        return
+      }
       try {
-        const response = await axios.get(`${env.API_URL}/products/affiliate`)
-        const result = response.data
-
-        if (result.success && result.data && Array.isArray(result.data.items)) {
-          setProducts(result.data.items.slice(6, 10))
-        }
+        const data = await getProductsFromCombos(comboIds)
+        setProducts(data)
       } catch (error) {
         console.error('Error fetching products:', error)
       } finally {
@@ -29,7 +28,7 @@ export const PopularProducts = () => {
     }
 
     fetchProducts()
-  }, [])
+  }, [comboIds])
 
   if (loading) {
     return (
@@ -51,7 +50,6 @@ export const PopularProducts = () => {
           </p>
         </div>
 
-        {/* Dropdown filter - Desktop */}
         <div className="absolute top-0 right-0 hidden md:block">
           <Button
             variant="outline"
@@ -63,7 +61,7 @@ export const PopularProducts = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
-        {products.map((product, index) => (
+        {products.slice(1, 5).map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 20 }}
