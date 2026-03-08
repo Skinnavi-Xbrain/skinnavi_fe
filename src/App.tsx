@@ -10,6 +10,7 @@ import Tracking from '@/features/tracking/pages/Tracking'
 import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
+import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
             <Route path="/daily-routine" element={<DailyRoutine />} />
             <Route path="/tracking" element={<Tracking />} />
+            <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
           </Route>
         </Route>
 
