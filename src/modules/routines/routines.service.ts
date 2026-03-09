@@ -664,4 +664,232 @@ export class RoutinesService implements OnModuleInit {
       routines,
     };
   }
+
+  // Get daily logs for user with optional date range filter
+  async getDailyLogs(userId: string, startDate?: string, endDate?: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    let start: Date | null = null;
+    let end: Date | null = null;
+
+    if (startDate) {
+      start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+    }
+
+    if (endDate) {
+      end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+    }
+
+    const subscriptions = await this.prisma.user_package_subscriptions.findMany(
+      {
+        where: { user_id: userId },
+        include: {
+          routines: {
+            include: {
+              daily_logs: {
+                where:
+                  start && end ? { log_date: { gte: start, lte: end } } : {},
+                orderBy: { log_date: 'asc' },
+              },
+            },
+            orderBy: { routine_time: 'asc' },
+          },
+        },
+      },
+    );
+
+    const routines: any[] = [];
+    for (const subscription of subscriptions) {
+      for (const routine of subscription.routines) {
+        const completedCount = routine.daily_logs.filter(
+          (log) => log.is_completed,
+        ).length;
+
+        routines.push({
+          routine_id: routine.id,
+          routine_time: routine.routine_time,
+          routine_created_at: routine.created_at.toISOString(),
+          subscription_id: subscription.id,
+          subscription_start_date: subscription.start_date
+            .toISOString()
+            .split('T')[0],
+          subscription_end_date: subscription.end_date
+            .toISOString()
+            .split('T')[0],
+          daily_logs: routine.daily_logs.map((log) => ({
+            id: log.id,
+            user_routine_id: log.user_routine_id,
+            log_date: log.log_date.toISOString().split('T')[0],
+            is_completed: log.is_completed,
+          })),
+          completed_count: completedCount,
+          total_count: routine.daily_logs.length,
+        });
+      }
+    }
+
+    return {
+      user_id: user.id,
+      routines,
+    };
+  }
+
+  // Get all skin analyses for user
+  async getUserSkinAnalyses(userId: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const skinAnalyses = await this.prisma.skin_analyses.findMany({
+      where: { user_id: userId },
+      include: {
+        skin_type: true,
+        metrics: true,
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    const analyzesWithTrend: any[] = [];
+    for (let i = 0; i < skinAnalyses.length; i++) {
+      const current = skinAnalyses[i];
+      const previous = skinAnalyses[i + 1];
+
+      let scoreTrend: number | null = null;
+      if (current.overall_score && previous?.overall_score) {
+        scoreTrend =
+          Number(current.overall_score) - Number(previous.overall_score);
+      }
+
+      analyzesWithTrend.push({
+        id: current.id,
+        skin_type_code: current.skin_type.code,
+        overall_score: current.overall_score
+          ? Number(current.overall_score)
+          : null,
+        overall_comment: current.overall_comment,
+        created_at: current.created_at.toISOString(),
+        face_image_url: current.face_image_url,
+        overall_score_trend: scoreTrend,
+        metrics: current.metrics.map((m) => ({
+          metric_type: m.metric_type,
+          score: m.score ? Number(m.score) : null,
+        })),
+      });
+    }
+
+    return {
+      user_id: user.id,
+      full_name: user.full_name,
+      email: user.email,
+      avatar_url: user.avatar_url,
+      skin_analyses: analyzesWithTrend,
+    };
+  }
+
+  // Compare two skin analyses
+  async compareAnalyses(
+    userId: string,
+    analysisId1: string,
+    analysisId2: string,
+  ) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const [analysis1, analysis2] = await Promise.all([
+      this.prisma.skin_analyses.findFirst({
+        where: { id: analysisId1, user_id: userId },
+        include: { skin_type: true, metrics: true },
+      }),
+      this.prisma.skin_analyses.findFirst({
+        where: { id: analysisId2, user_id: userId },
+        include: { skin_type: true, metrics: true },
+      }),
+    ]);
+
+    if (!analysis1) throw new NotFoundException('Analysis 1 not found');
+    if (!analysis2) throw new NotFoundException('Analysis 2 not found');
+
+    // If skin types are different, throw error
+    if (analysis1.skin_type_id !== analysis2.skin_type_id) {
+      throw new BadRequestException(
+        'Cannot compare analyses with different skin types',
+      );
+    }
+
+    // Build metrics comparison
+    const metricsMap = new Map<
+      string,
+      { score1: number | null; score2: number | null }
+    >();
+
+    analysis1.metrics.forEach((m) => {
+      metricsMap.set(m.metric_type, {
+        score1: m.score ? Number(m.score) : null,
+        score2: null,
+      });
+    });
+
+    analysis2.metrics.forEach((m) => {
+      const existing = metricsMap.get(m.metric_type);
+      if (existing) {
+        existing.score2 = m.score ? Number(m.score) : null;
+      } else {
+        metricsMap.set(m.metric_type, {
+          score1: null,
+          score2: m.score ? Number(m.score) : null,
+        });
+      }
+    });
+
+    const metricsComparison = Array.from(metricsMap.entries()).map(
+      ([type, scores]) => ({
+        metric_type: type,
+        score1: scores.score1,
+        score2: scores.score2,
+        difference:
+          scores.score1 !== null && scores.score2 !== null
+            ? scores.score2 - scores.score1
+            : null,
+      }),
+    );
+
+    let overallScoreDiff: number | null = null;
+    if (analysis1.overall_score && analysis2.overall_score) {
+      overallScoreDiff =
+        Number(analysis2.overall_score) - Number(analysis1.overall_score);
+    }
+
+    return {
+      analysis1_id: analysis1.id,
+      analysis1_date: analysis1.created_at.toISOString(),
+      analysis1_score: analysis1.overall_score
+        ? Number(analysis1.overall_score)
+        : null,
+      analysis2_id: analysis2.id,
+      analysis2_date: analysis2.created_at.toISOString(),
+      analysis2_score: analysis2.overall_score
+        ? Number(analysis2.overall_score)
+        : null,
+      overall_score_difference: overallScoreDiff,
+      skin_type: analysis1.skin_type.code,
+      metrics_comparison: metricsComparison,
+    };
+  }
 }
