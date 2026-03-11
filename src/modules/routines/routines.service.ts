@@ -440,8 +440,6 @@ export class RoutinesService implements OnModuleInit {
     return step;
   }
 
-  // Create daily logs for all missing days (runs every day at midnight)
-  // This creates logs for ALL days from routine creation to today
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async createDailyLogs() {
     const now = new Date();
@@ -450,7 +448,6 @@ export class RoutinesService implements OnModuleInit {
     const todayEnd = new Date(now);
     todayEnd.setHours(23, 59, 59, 999);
 
-    // Find all active routines where subscription is still valid
     const activeRoutines = await this.prisma.user_routines.findMany({
       where: {
         subscription: {
@@ -463,28 +460,23 @@ export class RoutinesService implements OnModuleInit {
       },
     });
 
-    // Create daily logs for each active routine if not already created
     const results: any[] = [];
     for (const routine of activeRoutines) {
       try {
-        // Calculate the date range for this routine
         const routineStartDate = new Date(routine.created_at);
         routineStartDate.setHours(0, 0, 0, 0);
 
         const subscriptionEndDate = new Date(routine.subscription.end_date);
         subscriptionEndDate.setHours(23, 59, 59, 999);
 
-        // Use the later date between routine creation and subscription start
         const startDate =
           routineStartDate > new Date(routine.subscription.start_date)
             ? routineStartDate
             : new Date(routine.subscription.start_date);
 
-        // Use the earlier date between today and subscription end
         const endDate =
           today < subscriptionEndDate ? today : subscriptionEndDate;
 
-        // Create logs for each day from start to end
         const currentDate = new Date(startDate);
         while (currentDate <= endDate) {
           const logDate = new Date(currentDate);
@@ -507,7 +499,6 @@ export class RoutinesService implements OnModuleInit {
             results.push(newLog);
           }
 
-          // Move to next day
           currentDate.setDate(currentDate.getDate() + 1);
         }
       } catch (error) {
@@ -521,7 +512,6 @@ export class RoutinesService implements OnModuleInit {
     return { created: results.length, logs: results };
   }
 
-  // Update daily log completion status
   async updateDailyLog(logId: string, is_completed: boolean) {
     const log = await this.prisma.routine_daily_logs.findUnique({
       where: { id: logId },
@@ -537,7 +527,6 @@ export class RoutinesService implements OnModuleInit {
     });
   }
 
-  // Get tracking overview with date range filter
   async getTrackingOverview(
     userId: string,
     startDate?: string,
@@ -665,7 +654,6 @@ export class RoutinesService implements OnModuleInit {
     };
   }
 
-  // Get daily logs for user with optional date range filter
   async getDailyLogs(userId: string, startDate?: string, endDate?: string) {
     const user = await this.prisma.users.findUnique({
       where: { id: userId },
@@ -742,8 +730,7 @@ export class RoutinesService implements OnModuleInit {
     };
   }
 
-  // Get all skin analyses for user
-  async getUserSkinAnalyses(userId: string) {
+  async getUserSkinAnalyses(userId: string, days: number = 7) {
     const user = await this.prisma.users.findUnique({
       where: { id: userId },
     });
@@ -752,14 +739,38 @@ export class RoutinesService implements OnModuleInit {
       throw new NotFoundException('User not found');
     }
 
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    const start = new Date(end);
+    start.setDate(start.getDate() - (days - 1));
+    start.setHours(0, 0, 0, 0);
+
     const skinAnalyses = await this.prisma.skin_analyses.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+        created_at: { gte: start },
+      },
       include: {
         skin_type: true,
         metrics: true,
       },
       orderBy: { created_at: 'desc' },
     });
+
+    if (skinAnalyses.length < 2) {
+      return {
+        user_id: user.id,
+        full_name: user.full_name,
+        email: user.email,
+        avatar_url: user.avatar_url,
+        skin_analyses: [],
+        start_date: start.toISOString().split('T')[0],
+        end_date: end.toISOString().split('T')[0],
+        message: `At least 2 analyses are required between ${
+          start.toISOString().split('T')[0]
+        } and ${end.toISOString().split('T')[0]}`,
+      };
+    }
 
     const analyzesWithTrend: any[] = [];
     for (let i = 0; i < skinAnalyses.length; i++) {
@@ -794,11 +805,12 @@ export class RoutinesService implements OnModuleInit {
       full_name: user.full_name,
       email: user.email,
       avatar_url: user.avatar_url,
+      start_date: start.toISOString().split('T')[0],
+      end_date: end.toISOString().split('T')[0],
       skin_analyses: analyzesWithTrend,
     };
   }
 
-  // Compare two skin analyses
   async compareAnalyses(
     userId: string,
     analysisId1: string,
@@ -826,14 +838,12 @@ export class RoutinesService implements OnModuleInit {
     if (!analysis1) throw new NotFoundException('Analysis 1 not found');
     if (!analysis2) throw new NotFoundException('Analysis 2 not found');
 
-    // If skin types are different, throw error
     if (analysis1.skin_type_id !== analysis2.skin_type_id) {
       throw new BadRequestException(
         'Cannot compare analyses with different skin types',
       );
     }
 
-    // Build metrics comparison
     const metricsMap = new Map<
       string,
       { score1: number | null; score2: number | null }

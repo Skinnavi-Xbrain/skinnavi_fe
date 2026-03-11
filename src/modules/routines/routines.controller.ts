@@ -118,8 +118,10 @@ export class RoutinesController {
   @Get('tracking/skin-analyses')
   async getUserSkinAnalyses(
     @GetUser('id') userId: string,
+    @Query() query: TrackingQueryDto,
   ): Promise<SimpleResponse<any>> {
-    const data = await this.routinesService.getUserSkinAnalyses(userId);
+    const days = query.days ?? 7;
+    const data = await this.routinesService.getUserSkinAnalyses(userId, days);
     return new SimpleResponse(data, 'Get user skin analyses', 200);
   }
 
