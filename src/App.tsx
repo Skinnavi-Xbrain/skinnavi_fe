@@ -10,6 +10,7 @@ import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
+import PaymentResult from './features/payment/pages/PaymentResult'
 
 function App() {
   return (
@@ -23,15 +24,15 @@ function App() {
 
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/payment-result" element={<PaymentResult />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/analysis-result" element={<AnalysisResult />} />
             <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
             <Route path="/daily-routine" element={<DailyRoutine />} />
-
-            {/* step-detail now accepts an ID param to fetch specific routine step */}
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
+            {/* <Route path="/payment-result" element={<PaymentResult />} /> */}
           </Route>
         </Route>
 

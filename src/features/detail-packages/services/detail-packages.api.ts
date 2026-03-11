@@ -37,3 +37,23 @@ export const createDailyRoutine = async (payload: CreateRoutinePayload) => {
   const res = await apiClient.post('/routines', payload)
   return res.data
 }
+export class PaymentResponseDto {
+  url?: string
+  hasActivePackage?: boolean
+  currentPackage?: {
+    name: string
+    endDate: Date
+  }
+  message?: string
+}
+
+export interface ActivePackageResponse {
+  hasActivePackage?: boolean
+  isFreeTrial?: boolean
+  currentPackage?: {
+    name: string
+    endDate: string
+  }
+  message: string
+  url?: string
+}
