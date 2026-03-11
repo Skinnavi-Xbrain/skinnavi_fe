@@ -57,3 +57,10 @@ export interface ActivePackageResponse {
   message: string
   url?: string
 }
+
+export interface CreateRoutinePayload {
+  skinAnalysisId: string
+  routinePackageId: string
+  comboId: string
+  isTrial?: boolean
+}
