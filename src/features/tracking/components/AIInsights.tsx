@@ -53,7 +53,6 @@ export const AIInsights = ({ tracking }: AIInsightsProps) => {
         <h3 className="font-bold text-slate-700 text-base">SkinNavi Highlights</h3>
       </div>
 
-      {/* Highlight cards */}
       <div className="space-y-3 flex-1">
         {highlights.map((item, i) => {
           const { Icon } = item
@@ -97,7 +96,6 @@ export const AIInsights = ({ tracking }: AIInsightsProps) => {
         })}
       </div>
 
-      {/* Action buttons */}
       <div className="mt-5 space-y-2">
         <button className="w-full bg-blue-400 hover:bg-blue-500 text-white text-xs font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
           <Sparkles className="w-3.5 h-3.5" /> Recommended Products

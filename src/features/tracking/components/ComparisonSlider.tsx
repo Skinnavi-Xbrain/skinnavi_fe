@@ -7,7 +7,6 @@ interface ComparisonSliderProps {
   tracking?: TrackingOverview | null
 }
 
-// ── Custom Dropdown ──────────────────────────────────────────────────────────
 interface DropdownOption {
   value: string
   label: string
@@ -34,7 +33,6 @@ const CustomSelect = ({
 
   const selected = options.find((o) => o.value === value)
 
-  // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
@@ -43,13 +41,12 @@ const CustomSelect = ({
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const ITEM_H = 34 // px per item
-  const MAX_VISIBLE = 5 // items before scroll
+  const ITEM_H = 34
+  const MAX_VISIBLE = 5
   const listMaxH = ITEM_H * MAX_VISIBLE
 
   return (
     <div ref={ref} style={{ position: 'relative', minWidth: 130 }} id={id}>
-      {/* Trigger button */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -84,7 +81,6 @@ const CustomSelect = ({
         />
       </button>
 
-      {/* Dropdown list */}
       {open && (
         <div
           style={{
@@ -100,7 +96,6 @@ const CustomSelect = ({
             minWidth: '100%'
           }}
         >
-          {/* Scrollable area */}
           <div
             style={{
               maxHeight: listMaxH,
@@ -167,7 +162,6 @@ const CustomSelect = ({
     </div>
   )
 }
-// ────────────────────────────────────────────────────────────────────────────
 
 export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
   const skinAnalyses = tracking?.skin_analyses || []
@@ -238,7 +232,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
       setSelectedAfter(defaultAfterId)
   }, [skinAnalyses, defaultBeforeId, defaultAfterId])
 
-  // Build options for Before dropdown
   const beforeOptions: DropdownOption[] = [
     ...skinAnalyses.map((analysis) => {
       let disabled = false
@@ -254,7 +247,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
     })
   ]
 
-  // Build options for After dropdown
   const afterOptions: DropdownOption[] = [
     ...skinAnalyses.map((analysis) => {
       const disabled = beforeAnalysis ? !isAfterDate(analysis, beforeAnalysis) : false
@@ -284,7 +276,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
         height: '100%'
       }}
     >
-      {/* ── Header ── */}
       <div style={{ marginBottom: 16 }}>
         <div
           style={{
@@ -322,7 +313,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
           </div>
         </div>
 
-        {/* Selects row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <CalendarDays size={20} color="#94a3b8" style={{ flexShrink: 0 }} />
 
@@ -353,7 +343,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
         </div>
       </div>
 
-      {/* ── Image comparison ── */}
       <div
         style={{
           position: 'relative',
@@ -366,7 +355,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
       >
         {hasComparison ? (
           <div style={{ display: 'flex', height: '100%' }}>
-            {/* Before */}
             <div style={{ width: '50%', position: 'relative', overflow: 'hidden' }}>
               <img
                 src={
@@ -401,7 +389,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
               </span>
             </div>
 
-            {/* After */}
             <div style={{ width: '50%', position: 'relative', overflow: 'hidden' }}>
               <img
                 src={
@@ -431,7 +418,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
               </span>
             </div>
 
-            {/* Divider */}
             <div
               style={{
                 position: 'absolute',
@@ -489,7 +475,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
         )}
       </div>
 
-      {/* ── Stats row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
         <div
           style={{

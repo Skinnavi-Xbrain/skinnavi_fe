@@ -117,7 +117,6 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
       className="bg-white rounded-2xl shadow-sm border border-slate-100"
       style={{ padding: '20px 20px 16px' }}
     >
-      {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
           <p style={{ fontWeight: 700, color: '#1e293b', fontSize: 16, marginBottom: 2 }}>
@@ -127,7 +126,6 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Date filter dropdown */}
           <div style={{ position: 'relative', userSelect: 'none' }}>
             <button
               type="button"
@@ -216,7 +214,6 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
             )}
           </div>
 
-          {/* Score badge */}
           <div
             style={{
               background: '#f0fdf4',
@@ -238,9 +235,7 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
         </div>
       </div>
 
-      {/* Chart */}
       <div style={{ position: 'relative', height: 210 }}>
-        {/* Y-axis labels */}
         <div
           style={{
             position: 'absolute',
@@ -317,7 +312,6 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
 
             {displayData.map((d, i) => (
               <g key={i}>
-                {/* Outer glow ring on hover */}
                 {hoveredIdx === i && (
                   <circle
                     cx={xScale(i)}
@@ -327,14 +321,12 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
                     fillOpacity="0.15"
                   />
                 )}
-                {/* Solid dot — no white fill */}
                 <circle
                   cx={xScale(i)}
                   cy={yScale(d.score)}
                   r={hoveredIdx === i ? 2.0 : 1.4}
                   fill="#8b5cf6"
                 />
-                {/* Hit area */}
                 <circle
                   cx={xScale(i)}
                   cy={yScale(d.score)}
@@ -348,7 +340,6 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
             ))}
           </svg>
 
-          {/* Tooltip */}
           {hoveredIdx !== null &&
             (() => {
               const d = displayData[hoveredIdx]
@@ -420,7 +411,6 @@ export default function HealthProgress({ data = defaultData }: { data?: HealthDa
             })()}
         </div>
 
-        {/* X-axis labels */}
         <div
           style={{
             position: 'absolute',
