@@ -11,6 +11,7 @@ import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
+import AboutPage from '@/features/about-us/pages/AboutUs'
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/daily-routine" element={<DailyRoutine />} />
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
             <Route path="/tracking" element={<Tracking />} />
+            <Route path="/about" element={<AboutPage />} />
           </Route>
         </Route>
 
