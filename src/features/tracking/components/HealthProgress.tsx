@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { TrendingUp, ChevronDown, Check } from 'lucide-react'
 
 export type HealthDataItem = {
@@ -27,8 +27,6 @@ const DAYS_MAP: Record<string, number | undefined> = {
   all: 1000
 }
 
-const MIN_POINT_WIDTH = 48
-
 export default function HealthProgress({
   data = defaultData,
   onDateFilterChange
@@ -39,9 +37,20 @@ export default function HealthProgress({
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const svgContainerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(300)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
   const [dateFilter, setDateFilter] = useState('7d')
   const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setContainerWidth(el.clientWidth))
+    ro.observe(el)
+    setContainerWidth(el.clientWidth)
+    return () => ro.disconnect()
+  }, [])
 
   const handleDateFilterChange = (value: string) => {
     setDateFilter(value)
@@ -64,14 +73,15 @@ export default function HealthProgress({
   const SCROLLBAR_SPACE = 8
   const Y_AXIS_WIDTH = 32
 
-  const minContentWidth = Math.max(n * MIN_POINT_WIDTH, 300)
+  const minPerPoint = 48
+  const contentWidth = Math.max(containerWidth, n * minPerPoint)
 
   const padL = 12
   const padR = 20
   const padT = 14
   const padB = 6
 
-  const svgW = minContentWidth
+  const svgW = contentWidth
   const svgH = CHART_HEIGHT
 
   const xScale = (i: number) =>
@@ -255,7 +265,10 @@ export default function HealthProgress({
           ))}
         </div>
 
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <div
+          ref={containerRef}
+          style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}
+        >
           <div
             ref={scrollContainerRef}
             style={{
@@ -263,14 +276,14 @@ export default function HealthProgress({
               overflowY: 'hidden',
               paddingBottom: SCROLLBAR_SPACE,
               scrollbarWidth: 'thin',
-              scrollbarColor: '#c4b5fd #f1f5f9'
+              scrollbarColor: '#93c5fd #f1f5f9'
             }}
             onMouseLeave={() => setHoveredIdx(null)}
           >
-            <div style={{ width: minContentWidth, position: 'relative' }}>
+            <div style={{ width: contentWidth, position: 'relative' }}>
               <div
                 ref={svgContainerRef}
-                style={{ width: minContentWidth, height: CHART_HEIGHT, position: 'relative' }}
+                style={{ width: contentWidth, height: CHART_HEIGHT, position: 'relative' }}
               >
                 <svg
                   width={svgW}
@@ -279,9 +292,9 @@ export default function HealthProgress({
                   style={{ display: 'block', overflow: 'visible' }}
                 >
                   <defs>
-                    <linearGradient id="violetGrad2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.18" />
-                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.01" />
+                    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.22" />
+                      <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.01" />
                     </linearGradient>
                   </defs>
 
@@ -310,11 +323,11 @@ export default function HealthProgress({
                     fill="#e2e8f0"
                   />
 
-                  <path d={areaPath} fill="url(#violetGrad2)" />
+                  <path d={areaPath} fill="url(#blueGrad)" />
                   <path
                     d={linePath}
                     fill="none"
-                    stroke="#8b5cf6"
+                    stroke="#60a5fa"
                     strokeWidth="1.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -329,7 +342,7 @@ export default function HealthProgress({
                             y1={padT}
                             x2={xScale(i)}
                             y2={svgH - padB}
-                            stroke="#8b5cf6"
+                            stroke="#60a5fa"
                             strokeWidth="0.6"
                             strokeDasharray="3,3"
                             opacity={0.35}
@@ -338,7 +351,7 @@ export default function HealthProgress({
                             cx={xScale(i)}
                             cy={yScale(d.score)}
                             r="5"
-                            fill="#8b5cf6"
+                            fill="#60a5fa"
                             fillOpacity="0.12"
                           />
                         </>
@@ -347,7 +360,7 @@ export default function HealthProgress({
                         cx={xScale(i)}
                         cy={yScale(d.score)}
                         r={hoveredIdx === i ? 2.5 : 1.8}
-                        fill="#8b5cf6"
+                        fill="#60a5fa"
                       />
                       <circle
                         cx={xScale(i)}
@@ -439,7 +452,7 @@ export default function HealthProgress({
 
               <div
                 style={{
-                  width: minContentWidth,
+                  width: contentWidth,
                   height: LABEL_HEIGHT,
                   position: 'relative'
                 }}
@@ -462,7 +475,7 @@ export default function HealthProgress({
                         style={{
                           fontSize: 10,
                           lineHeight: '14px',
-                          color: hoveredIdx === i ? '#8b5cf6' : '#94a3b8',
+                          color: hoveredIdx === i ? '#60a5fa' : '#94a3b8',
                           fontWeight: hoveredIdx === i ? 600 : 400,
                           transition: 'color 0.15s'
                         }}
