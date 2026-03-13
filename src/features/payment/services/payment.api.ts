@@ -1,29 +1,5 @@
 import apiClient from '@/shared/lib/api-client'
-
-export interface ActivePackageInfo {
-  name: string
-  endDate: string
-}
-
-export interface EligibilityResponse {
-  requiresPayment: boolean
-  isFreeTrial: boolean
-  hasActivePackage: boolean
-  currentPackage: ActivePackageInfo | null
-}
-
-export interface CreatePaymentResponse {
-  url?: string
-  message?: string
-  isFreeTrial?: boolean
-  hasActivePackage?: boolean
-  currentPackage?: ActivePackageInfo
-}
-
-export interface VnpayVerifyResponse {
-  RspCode: string
-  Message: string
-}
+import type { EligibilityResponse, CreatePaymentResponse, VnpayVerifyResponse } from '../types'
 
 export const checkEligibility = async (packageId: string): Promise<EligibilityResponse> => {
   const res = await apiClient.get<EligibilityResponse>(`/payments/eligibility`, {

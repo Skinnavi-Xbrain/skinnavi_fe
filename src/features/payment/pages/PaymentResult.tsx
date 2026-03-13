@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Loader2 } from 'lucide-react'
-import { verifyPayment, type VnpayVerifyResponse } from '../services/payment.api'
+import { verifyPayment } from '../services/payment.api'
 import { createDailyRoutine } from '@/features/detail-packages/services/detail-packages.api'
+import type { VnpayVerifyResponse } from '../types'
 import type { RootState } from '@/shared/store'
 import { SuccessView, FailureView } from '../components/StatusViews'
 
@@ -72,7 +73,7 @@ const PaymentResult = () => {
 
       {status === 'SUCCESS' && <SuccessView />}
 
-      {status === 'FAILED' && <FailureView onRetry={() => navigate('/home')} />}
+      {status === 'FAILED' && <FailureView onRetry={() => navigate('/analysis-result')} />}
     </div>
   )
 }

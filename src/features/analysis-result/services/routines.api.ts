@@ -1,10 +1,6 @@
 import apiClient from '@/shared/lib/api-client'
 import type { RoutinePackage } from '../types/routine'
-
-interface PackagesResponse {
-  success: boolean
-  data: RoutinePackage[]
-}
+import type { PackagesResponse } from '../types/routine'
 
 export const getRoutinePackages = async (): Promise<RoutinePackage[]> => {
   const res = await apiClient.get<PackagesResponse>('/routine-packages/all')

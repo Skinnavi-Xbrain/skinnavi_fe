@@ -1,15 +1,10 @@
 import apiClient from '@/shared/lib/api-client'
 import type { RoutinePackage } from '../types/detail-routine'
-
-interface PackagesResponse {
-  success: boolean
-  data: RoutinePackage[]
-}
-
-interface SinglePackageResponse {
-  success: boolean
-  data: RoutinePackage
-}
+import type {
+  PackagesResponse,
+  SinglePackageResponse,
+  CreateRoutinePayload
+} from '../types/detail-routine'
 
 export const getRoutinePackage = async (id: string): Promise<RoutinePackage | null> => {
   const res = await apiClient.get<SinglePackageResponse>(`/routine-packages/package/${id}`)
@@ -27,39 +22,7 @@ export const getPackages = async (): Promise<RoutinePackage[]> => {
   return []
 }
 
-export interface CreateRoutinePayload {
-  skinAnalysisId: string
-  routinePackageId: string
-  comboId: string
-}
-
 export const createDailyRoutine = async (payload: CreateRoutinePayload) => {
   const res = await apiClient.post('/routines', payload)
   return res.data
-}
-export class PaymentResponseDto {
-  url?: string
-  hasActivePackage?: boolean
-  currentPackage?: {
-    name: string
-    endDate: Date
-  }
-  message?: string
-}
-
-export interface ActivePackageResponse {
-  hasActivePackage?: boolean
-  isFreeTrial?: boolean
-  currentPackage?: {
-    name: string
-    endDate: string
-  }
-  message: string
-  url?: string
-}
-
-export interface CreateRoutinePayload {
-  skinAnalysisId: string
-  routinePackageId: string
-  comboId: string
 }

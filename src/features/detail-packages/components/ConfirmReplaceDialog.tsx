@@ -1,4 +1,5 @@
-import { AlertTriangle } from 'lucide-react'
+import { useState } from 'react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import {
   AlertDialog,
@@ -14,11 +15,22 @@ import {
 type Props = {
   open: boolean
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: () => Promise<void>
   activePackageName: string
 }
 
 const ConfirmReplaceDialog = ({ open, onClose, onConfirm, activePackageName }: Props) => {
+  const [loading, setLoading] = useState(false)
+
+  const handleConfirm = async () => {
+    try {
+      setLoading(true)
+      await onConfirm()
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent
@@ -57,6 +69,7 @@ const ConfirmReplaceDialog = ({ open, onClose, onConfirm, activePackageName }: P
           <AlertDialogCancel asChild>
             <Button
               variant="outline"
+              disabled={loading}
               className="
               w-full 
               sm:flex-1
@@ -69,14 +82,17 @@ const ConfirmReplaceDialog = ({ open, onClose, onConfirm, activePackageName }: P
 
           <AlertDialogAction asChild>
             <Button
-              onClick={onConfirm}
+              onClick={handleConfirm}
+              disabled={loading}
               className="
               w-full 
               sm:flex-1
               bg-[#67aeff] hover:bg-[#4f9df5] text-white
+              flex items-center justify-center gap-2
             "
             >
-              Continue
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading ? 'Processing...' : 'Continue'}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
