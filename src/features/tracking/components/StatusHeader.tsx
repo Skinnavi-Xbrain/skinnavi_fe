@@ -4,7 +4,7 @@ import { UploadDialog } from '@/features/home/components/UploadDialog'
 
 export const StatusHeader = () => {
   return (
-    <div className="mt-10 flex justify-end md:px-40">
+    <div className="mt-10 flex justify-end max-w-6xl mx-auto px-4 md:px-6">
       <UploadDialog>
         <motion.button
           whileHover={{ y: -2, scale: 1.02 }}
