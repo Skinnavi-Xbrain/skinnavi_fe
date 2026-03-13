@@ -10,6 +10,8 @@ import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
+import AdminDashboard from './features/admin/pages/AdminDashboard'
+import PlaceholderPage from './features/admin/components/PlaceholderPage'
 
 function App() {
   return (
@@ -22,6 +24,16 @@ function App() {
         </Route>
 
         <Route path="/register" element={<Register />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<PlaceholderPage title="Users" />} />
+        <Route path="/admin/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
+        <Route path="/admin/revenue" element={<PlaceholderPage title="Revenue" />} />
+        <Route path="/admin/product" element={<PlaceholderPage title="Product" />} />
+        <Route path="/admin/settings" element={<PlaceholderPage title="Settings" />} />
+
+        {/* <Route path="/login" element={<LoginPage />} /> */}
+
+        {/* Route 404 - Not Found */}
         <Route path="/login" element={<Login />} />
 
         <Route element={<ProtectedRoute />}>
