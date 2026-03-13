@@ -21,7 +21,6 @@ const PaymentResult = () => {
       if (isProcessing.current) return
       isProcessing.current = true
 
-      // Lấy mã phản hồi từ VNPay (00 là thành công ở bước thanh toán)
       const vnpResponseCode = searchParams.get('vnp_ResponseCode')
 
       if (vnpResponseCode !== '00') {
@@ -30,28 +29,23 @@ const PaymentResult = () => {
       }
 
       try {
-        // Gửi toàn bộ query string về Backend để kiểm tra chữ ký và cập nhật DB
         const verifyRes: VnpayVerifyResponse = await verifyPayment(searchParams.toString())
 
         if (verifyRes.RspCode === '00') {
           setStatus('SUCCESS')
 
-          // Lấy thông tin gói đã lưu trước khi đi thanh toán
           const pendingData = localStorage.getItem('pending_payment_info')
           const pending = pendingData ? JSON.parse(pendingData) : null
 
-          // Nếu có đủ thông tin, gọi AI tạo Routine dựa trên combo đã mua
           if (skinAnalysisId && pending?.packageId) {
             await createDailyRoutine({
               skinAnalysisId,
               routinePackageId: pending.packageId,
-              comboId: pending.comboId,
-              isTrial: false // Gói trả phí thực tế
+              comboId: pending.comboId
             })
             localStorage.removeItem('pending_payment_info')
           }
 
-          // Chuyển hướng sau khi hiện thông báo thành công
           setTimeout(() => navigate('/daily-routine'), 4500)
         } else {
           setStatus('FAILED')
@@ -71,7 +65,7 @@ const PaymentResult = () => {
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-[#67AEFF] mx-auto" />
           <p className="text-slate-600 font-bold tracking-widest uppercase text-sm">
-            Đang xác thực giao dịch...
+            Verifying your payment...
           </p>
         </div>
       )}

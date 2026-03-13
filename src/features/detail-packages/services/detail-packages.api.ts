@@ -62,5 +62,4 @@ export interface CreateRoutinePayload {
   skinAnalysisId: string
   routinePackageId: string
   comboId: string
-  isTrial?: boolean
 }
