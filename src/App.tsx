@@ -14,6 +14,7 @@ import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepD
 import AdminDashboard from './features/admin/pages/AdminDashboard'
 import PlaceholderPage from './features/admin/components/PlaceholderPage'
 import AboutPage from '@/features/about-us/pages/AboutUs'
+import PaymentResult from './features/payment/pages/PaymentResult'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
 
         {/* Route 404 - Not Found */}
         <Route path="/login" element={<Login />} />
+        <Route path="/payment-result" element={<PaymentResult />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>

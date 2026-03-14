@@ -6,3 +6,8 @@ export interface RoutinePackage {
   duration_days: number
   price: string
 }
+
+export interface PackagesResponse {
+  success: boolean
+  data: RoutinePackage[]
+}

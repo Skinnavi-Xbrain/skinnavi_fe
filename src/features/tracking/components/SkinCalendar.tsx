@@ -7,8 +7,8 @@ interface SkinCalendarProps {
 }
 
 export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
-  const completedDates = new Set<string>() 
-  const incompleteDates = new Set<string>() 
+  const completedDates = new Set<string>()
+  const incompleteDates = new Set<string>()
   let maxDay = new Date().getDate()
   let dataMonth = new Date().getMonth() + 1
   let dataYear = new Date().getFullYear()
