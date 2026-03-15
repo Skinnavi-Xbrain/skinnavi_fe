@@ -22,3 +22,8 @@ export interface VnpayVerifyResponse {
   RspCode: string
   Message: string
 }
+
+export interface PaymentState {
+  eligibility: Record<string, EligibilityResponse>
+  loading: boolean
+}

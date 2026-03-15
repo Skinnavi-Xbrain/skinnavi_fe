@@ -53,7 +53,7 @@ const ConfirmReplaceDialog = ({ open, onClose, onConfirm, activePackageName }: P
 
           <AlertDialogDescription className="text-sm sm:text-base leading-relaxed text-gray-600 max-w-md">
             You are currently using
-            <span className="font-semibold text-[#67aeff]"> {activePackageName}</span>.
+            <span className="font-semibold text-[#67aeff]"> {activePackageName}</span>.{' '}
             <br className="hidden sm:block" />
             Purchasing this package will replace your current routine plan.
           </AlertDialogDescription>
