@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { MainLayout } from '@/shared/layouts/MainLayout'
 import Register from '@/features/auth/pages/Register'
 import Login from '@/features/auth/pages/Login'
@@ -22,21 +22,11 @@ function App() {
       <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
         </Route>
 
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/users" element={<PlaceholderPage title="Users" />} />
-        <Route path="/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
-        <Route path="/revenue" element={<PlaceholderPage title="Revenue" />} />
-        <Route path="/product" element={<PlaceholderPage title="Product" />} />
-        <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
-
-        {/* <Route path="/login" element={<LoginPage />} /> */}
-
-        {/* Route 404 - Not Found */}
         <Route path="/login" element={<Login />} />
         <Route path="/payment-result" element={<PaymentResult />} />
 
@@ -49,6 +39,13 @@ function App() {
             <Route path="/tracking" element={<Tracking />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
+
+          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/users" element={<PlaceholderPage title="Users" />} />
+          <Route path="/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
+          <Route path="/revenue" element={<PlaceholderPage title="Revenue" />} />
+          <Route path="/product" element={<PlaceholderPage title="Product" />} />
+          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         </Route>
 
         <Route

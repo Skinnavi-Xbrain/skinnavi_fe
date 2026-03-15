@@ -39,7 +39,7 @@ const RevenueTrendChart = ({ monthly }: RevenueTrendChartProps) => {
       <div className="h-[280px]">
         {!hasData ? (
           <div className="flex h-full items-center justify-center text-xs text-gray-400">
-            Không có dữ liệu doanh thu theo tháng.
+            No revenue data available
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
