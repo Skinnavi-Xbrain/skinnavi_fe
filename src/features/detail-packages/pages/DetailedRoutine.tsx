@@ -119,7 +119,7 @@ const DetailedRoutine = () => {
     try {
       const eligibility = await checkEligibility(routinePackageId)
 
-      if (eligibility.isFreeTrial) {
+      if (eligibility.isFreeTrial || eligibility.requiresPayment === false) {
         await createFreeTrial({
           packageId: routinePackageId,
           comboId: selectedComboId
@@ -132,7 +132,7 @@ const DetailedRoutine = () => {
         })
 
         toast({
-          title: 'Free trial activated!',
+          title: 'Routine created',
           description: 'Your routine has been created.',
           variant: 'success'
         })

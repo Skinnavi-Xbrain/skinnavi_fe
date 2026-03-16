@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { Loader2, Check } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { toast } from '@/shared/hooks/use-toast'
-import type { RootState } from '@/shared/store'
 import { getRecommendedCombos } from '../services/combos.api'
+import { getLatestSkinAnalysis } from '@/features/home/services/analysis.api' //
 import type { Combo } from '../types/combo'
 import { ComboDetailModal } from './ComboDetailModal'
 
@@ -24,26 +23,34 @@ const ComboSection = ({ isCreating, onCreate, setSelectedComboId }: Props) => {
   const [selectedCombo, setSelectedCombo] = useState<ComboWithProducts | null>(null)
   const [appliedComboId, setAppliedComboId] = useState<string | null>(null)
 
-  const analysisResult = useSelector((state: RootState) => state.analysis.currentResult)
-  const comboIds = analysisResult?.result?.recommendedCombos || []
-
   useEffect(() => {
-    const fetchCombos = async () => {
-      if (comboIds.length === 0) {
-        setIsLoadingCombos(false)
-        return
-      }
+    const fetchAnalysisAndCombos = async () => {
+      setIsLoadingCombos(true)
       try {
-        const data = await getRecommendedCombos(comboIds)
-        setCombos(data)
+        const analysisRes = await getLatestSkinAnalysis()
+
+        if (analysisRes.success && analysisRes.data?.result?.recommendedCombos) {
+          const comboIds = analysisRes.data.result.recommendedCombos
+
+          if (comboIds.length > 0) {
+            const combosData = await getRecommendedCombos(comboIds)
+            setCombos(combosData)
+          }
+        }
       } catch (error) {
-        console.error('Error fetching recommended combos:', error)
+        console.error('Error fetching analysis or combos:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load recommended combos. Please try again.',
+          variant: 'destructive'
+        })
       } finally {
         setIsLoadingCombos(false)
       }
     }
-    fetchCombos()
-  }, [comboIds])
+
+    fetchAnalysisAndCombos()
+  }, [])
 
   const handleApplyClick = (comboId: string) => {
     setAppliedComboId(comboId)
@@ -108,12 +115,6 @@ const ComboSection = ({ isCreating, onCreate, setSelectedComboId }: Props) => {
                     )}
                   </p>
                 </div>
-
-                {/* <div className="md:absolute md:bottom-4 md:left-1/2 md:w-full md:-translate-x-1/2 md:px-8 md:translate-y-4 md:opacity-0 transition-all duration-300 md:group-hover:translate-y-0 md:group-hover:opacity-100 mt-2">
-                  <div className="rounded-xl bg-[#67AEFF] py-3 text-center text-[12px] font-bold text-white shadow-lg shadow-blue-200 uppercase tracking-wider max-w-[calc(100%-2rem)] mx-auto">
-                    VIEW DETAILS
-                  </div>
-                </div> */}
               </div>
             ))}
           </div>
@@ -125,7 +126,8 @@ const ComboSection = ({ isCreating, onCreate, setSelectedComboId }: Props) => {
             onClick={onCreate}
             className="w-[calc(100%-2rem)] md:w-auto px-12 py-7 bg-blue-400 hover:bg-blue-500 font-bold text-white text-md rounded-2xl transition-all hover:scale-105 shadow-xl shadow-blue-100"
           >
-            {isCreating ? <Loader2 className="animate-spin" /> : 'CREATE MY ROUTINE'}
+            {isCreating ? 'CREATING...' : 'CREATE MY ROUTINE'}
+            {isCreating && <Loader2 className="w-4 h-4 animate-spin" />}
           </Button>
         </div>
       </div>
