@@ -15,23 +15,31 @@ export const RoutinePackages = () => {
   const [eligibilityMap, setEligibilityMap] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
+    let isMounted = true
+
     const fetchPackagesAndEligibility = async () => {
       try {
+        setLoading(true)
         const data = await getRoutinePackages()
+        if (!isMounted) return
         setPackages(data)
 
         const token = localStorage.getItem('accessToken')
-        if (token) {
-          const eligibilityPromises = data.map(async (pkg) => {
-            try {
-              const res = await checkEligibility(pkg.id)
-              return { id: pkg.id, isFreeTrial: res.isFreeTrial }
-            } catch {
-              return { id: pkg.id, isFreeTrial: false }
-            }
-          })
+        if (token && data.length > 0) {
+          const results = await Promise.all(
+            data.map(async (pkg) => {
+              try {
+                const res = await checkEligibility(pkg.id)
+                return { id: pkg.id, isFreeTrial: res.isFreeTrial }
+              } catch (err) {
+                console.error(`Error checking eligibility for ${pkg.id}:`, err)
+                return { id: pkg.id, isFreeTrial: false }
+              }
+            })
+          )
 
-          const results = await Promise.all(eligibilityPromises)
+          if (!isMounted) return
+
           const newMap = results.reduce(
             (acc, curr) => ({ ...acc, [curr.id]: curr.isFreeTrial }),
             {}
@@ -41,10 +49,15 @@ export const RoutinePackages = () => {
       } catch (error) {
         console.error('Error fetching routine packages:', error)
       } finally {
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
+
     fetchPackagesAndEligibility()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   const formatPrice = (price: string) => {
@@ -62,7 +75,7 @@ export const RoutinePackages = () => {
         text: 'text-blue-500',
         bg: 'bg-blue-50/50',
         btnClass: 'bg-slate-100 text-slate-900 hover:bg-blue-500 hover:text-white',
-        label: 'Starter Plan',
+        label: 'Perfect for beginners',
         icon: <Calendar className="w-6 h-6" />
       }
 
@@ -74,7 +87,7 @@ export const RoutinePackages = () => {
         bg: 'bg-blue-50/50',
         btnClass:
           'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 shadow-blue-200 hover:shadow-blue-300',
-        label: 'Professional',
+        label: 'Most popular choice',
         popular: true,
         icon: <Zap className="w-6 h-6" />
       }
@@ -85,7 +98,7 @@ export const RoutinePackages = () => {
       text: 'text-rose-600',
       bg: 'bg-rose-50/50',
       btnClass: 'bg-slate-100 text-slate-900 hover:bg-rose-500 hover:text-white',
-      label: 'Ultimate Glow',
+      label: 'Best for long-term results',
       icon: <Sparkles className="w-6 h-6" />
     }
   }
