@@ -13,6 +13,7 @@ import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
 import AdminDashboard from './features/admin/pages/AdminDashboard'
 import PlaceholderPage from './features/admin/components/PlaceholderPage'
+import AdminRevenue from './features/admin/pages/AdminRevenue'
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<PlaceholderPage title="Users" />} />
           <Route path="/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
-          <Route path="/revenue" element={<PlaceholderPage title="Revenue" />} />
+          <Route path="/revenue" element={<AdminRevenue />} />
           <Route path="/product" element={<PlaceholderPage title="Product" />} />
           <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         </Route>
