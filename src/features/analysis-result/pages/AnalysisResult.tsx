@@ -1,14 +1,43 @@
-import { useSelector } from 'react-redux'
-import { Sparkles, Droplets, Sun, Moon, TrendingUp, CheckCircle2 } from 'lucide-react'
+import { Sparkles, Droplets, Sun, Moon, TrendingUp, CheckCircle2, Loader2 } from 'lucide-react'
 import { RoutinePackages } from '../components/RoutinePackages'
 import { SkinMetricsCard } from '../components/SkinMetricsCard'
-import type { RootState } from '@/shared/store'
 import { RecommendedProducts } from '../components/RecommendedProducts'
+import { getLatestSkinAnalysis } from '@/features/home/services/analysis.api'
+import { useEffect, useState } from 'react'
+import type { AnalyzeResult } from '@/features/home/types/analysis'
 
 const AnalysisResult = () => {
-  const analysisData = useSelector((state: RootState) => state.analysis.currentResult)
+  const [analysisData, setAnalysisData] = useState<AnalyzeResult | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  if (!analysisData || !analysisData.result.isValidImage) {
+  useEffect(() => {
+    const fetchLatestResult = async () => {
+      try {
+        setIsLoading(true)
+        const response = await getLatestSkinAnalysis()
+
+        if (response.success && response.data) {
+          setAnalysisData(response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching latest skin analysis:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchLatestResult()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+      </div>
+    )
+  }
+
+  if (!analysisData || !analysisData.result?.isValidImage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-slate-500 font-medium">

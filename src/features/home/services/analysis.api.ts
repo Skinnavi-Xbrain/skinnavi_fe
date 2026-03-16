@@ -12,3 +12,8 @@ export const analyzeImage = async (imageUrl: string): Promise<AnalyzeResponse> =
   const res = await apiClient.post<AnalyzeResponse>('/skin-analysis/analyze', { imageUrl })
   return res.data
 }
+
+export const getLatestSkinAnalysis = async (): Promise<AnalyzeResponse> => {
+  const res = await apiClient.get<AnalyzeResponse>('/skin-analysis/result')
+  return res.data
+}
