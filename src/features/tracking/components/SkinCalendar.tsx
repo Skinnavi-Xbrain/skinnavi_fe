@@ -1,43 +1,62 @@
-import { useState } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
-import type { TrackingOverview } from '../types'
-
-interface SkinCalendarProps {
-  tracking?: TrackingOverview | null
-}
+import { useState, useMemo } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import type { SkinCalendarProps } from '../types'
 
 export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
-  const completedDates = new Set<string>()
-  const incompleteDates = new Set<string>()
   let maxDay = new Date().getDate()
   let dataMonth = new Date().getMonth() + 1
   let dataYear = new Date().getFullYear()
 
-  if (tracking?.routines) {
-    tracking.routines.forEach((routine) => {
-      routine.daily_logs.forEach((log) => {
-        const logDate = new Date(log.log_date)
-        const day = logDate.getDate()
-        const month = logDate.getMonth() + 1
-        const year = logDate.getFullYear()
+  const { completedDates, partialDates, incompleteDates } = useMemo(() => {
+    const dateMap = new Map<string, { total: number; completed: number }>()
 
-        const latestDate = new Date(dataYear, dataMonth - 1, maxDay)
-        if (logDate > latestDate) {
-          maxDay = day
-          dataMonth = month
-          dataYear = year
-        }
+    if (tracking?.routines) {
+      tracking.routines.forEach((routine) => {
+        routine.daily_logs.forEach((log) => {
+          const logDate = new Date(log.log_date)
+          const day = logDate.getDate()
+          const month = logDate.getMonth() + 1
+          const year = logDate.getFullYear()
 
-        const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          const latestDate = new Date(dataYear, dataMonth - 1, maxDay)
+          if (logDate > latestDate) {
+            maxDay = day
+            dataMonth = month
+            dataYear = year
+          }
 
-        if (log.is_completed) {
-          completedDates.add(dateKey)
-        } else {
-          incompleteDates.add(dateKey)
-        }
+          const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+
+          if (!dateMap.has(key)) {
+            dateMap.set(key, { total: 0, completed: 0 })
+          }
+
+          const current = dateMap.get(key)!
+          current.total += 1
+
+          if (log.is_completed) {
+            current.completed += 1
+          }
+        })
       })
+    }
+
+    const completedDates = new Set<string>()
+    const partialDates = new Set<string>()
+    const incompleteDates = new Set<string>()
+
+    dateMap.forEach((value, key) => {
+      if (value.completed === value.total) {
+        completedDates.add(key)
+      } else if (value.completed > 0) {
+        partialDates.add(key)
+      } else {
+        incompleteDates.add(key)
+      }
     })
-  }
+
+    return { completedDates, partialDates, incompleteDates }
+  }, [tracking])
 
   const today = maxDay
 
@@ -78,14 +97,25 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
   const getDayStyle = (day: number) => {
     const key = dateKey(day)
 
-    if (completedDates.has(key)) return 'bg-blue-400 text-white font-bold'
+    if (completedDates.has(key)) {
+      return 'bg-blue-400 text-white font-bold'
+    }
 
-    if (isCurrentView && day === today)
+    if (partialDates.has(key)) {
+      return 'bg-amber-400 text-white font-bold'
+    }
+
+    if (isCurrentView && day === today) {
       return 'border-2 border-blue-400 text-blue-500 font-bold bg-white'
+    }
 
-    if (incompleteDates.has(key)) return 'bg-red-400 text-white font-bold'
+    if (incompleteDates.has(key)) {
+      return 'bg-red-400 text-white font-bold'
+    }
 
-    if (isCurrentView && day > today) return 'text-slate-300 bg-white border border-slate-100'
+    if (isCurrentView && day > today) {
+      return 'text-slate-300 bg-white border border-slate-100'
+    }
 
     return 'text-slate-400 bg-white border border-slate-100'
   }
@@ -102,11 +132,11 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
         </div>
         <div className="flex gap-2">
           <ChevronLeft
-            className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-600 transition-colors"
+            className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-600"
             onClick={goToPrev}
           />
           <ChevronRight
-            className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-600 transition-colors"
+            className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-600"
             onClick={goToNext}
           />
         </div>
@@ -129,15 +159,15 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
           .map((_, i) => (
             <div key={`empty-${i}`} />
           ))}
+
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
           <div key={day} className="flex justify-center">
             <div
-              className={`w-9 h-9 rounded-xl flex flex-col items-center justify-center text-[11px] transition-all ${getDayStyle(day)}`}
+              className={`w-9 h-9 rounded-xl flex flex-col items-center justify-center text-[11px] ${getDayStyle(
+                day
+              )}`}
             >
               <span>{day}</span>
-              {completedDates.has(dateKey(day)) && (
-                <CheckCircle2 className="w-2.5 h-2.5 mt-0.5 opacity-80" />
-              )}
             </div>
           </div>
         ))}
@@ -148,10 +178,17 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
           <div className="w-3 h-3 rounded-sm bg-blue-400" />
           <span className="text-[10px] text-slate-400">Completed</span>
         </div>
+
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-amber-400" />
+          <span className="text-[10px] text-slate-400">Partial</span>
+        </div>
+
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm bg-red-400" />
           <span className="text-[10px] text-slate-400">Missed</span>
         </div>
+
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-sm border-2 border-blue-400 bg-white" />
           <span className="text-[10px] text-slate-400">Today</span>

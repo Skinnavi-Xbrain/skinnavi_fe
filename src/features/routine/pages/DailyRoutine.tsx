@@ -45,14 +45,10 @@ const DailyRoutine = () => {
     setIsChecking(true)
 
     try {
-      const logsData = await getDailyLogs()
-      const routines = logsData.routines || []
-      setTrackingRoutines(routines)
-
       const todayStr = toDateOnlyString(new Date())
       const targetTime = activeTab.toUpperCase()
 
-      const targetRoutine = routines.find((r) => r.routine_time === targetTime)
+      const targetRoutine = trackingRoutines.find((r) => r.routine_time === targetTime)
 
       const todayLog = targetRoutine?.daily_logs.find((log) => {
         const logDateStr = toDateOnlyString(new Date(log.log_date))
@@ -108,8 +104,7 @@ const DailyRoutine = () => {
         description: errorMessage,
         variant: 'destructive'
       })
-    }
-    {
+    } finally {
       setIsChecking(false)
     }
   }
@@ -126,11 +121,21 @@ const DailyRoutine = () => {
     setError(null)
 
     try {
-      const routinesData = await getUserRoutines()
+      const [routinesData, logsData] = await Promise.all([getUserRoutines(), getDailyLogs()])
+
       setRoutines(routinesData)
-    } catch (err) {
+      setTrackingRoutines(logsData.routines || [])
+    } catch (err: unknown) {
       console.error('Error fetching data:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load routine data')
+
+      const apiMessage = (err as { response?: { data?: ApiErrorResponse } })?.response?.data
+        ?.message
+
+      const errorMessage = Array.isArray(apiMessage)
+        ? apiMessage.join(', ')
+        : apiMessage || 'Failed to load data'
+
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
