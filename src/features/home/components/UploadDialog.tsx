@@ -57,7 +57,7 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     if (file.size > MAX_FILE_SIZE) {
       toast({
         variant: 'destructive',
-        title: 'Error File Too Large',
+        title: 'File Too Large',
         description: 'Please select an image under 5MB.'
       })
       return
@@ -66,8 +66,8 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
     if (!ALLOWED_MIMES.includes(file.type)) {
       toast({
         variant: 'destructive',
-        title: 'Error Unsupported Format',
-        description: 'Just a heads up, we only accept JPEG, PNG, or WEBP images.'
+        title: 'Unsupported Format',
+        description: 'We only accept JPEG, PNG, or WEBP images.'
       })
       return
     }
@@ -77,18 +77,19 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
 
     try {
       setIsUploading(true)
+
       const uploadRes = await uploadImage(formData)
       const imageUrl = uploadRes.data.url
-      const analyzeRes = await analyzeImage(imageUrl)
 
+      const analyzeRes = await analyzeImage(imageUrl)
       const { result } = analyzeRes.data
 
-      if (analyzeRes.data.result.isValidImage) {
+      if (result.isValidImage) {
         const finalData = {
           ...analyzeRes.data,
           result: {
-            ...analyzeRes.data.result,
-            imageUrl: imageUrl
+            ...result,
+            imageUrl
           }
         }
 
@@ -99,6 +100,7 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
           description: 'Your skin analysis has been completed.',
           variant: 'success'
         })
+
         setIsOpen(false)
         navigate('/analysis-result')
       } else {
@@ -113,9 +115,16 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
 
       if (axios.isAxiosError(err)) {
         const serverError = err.response?.data as ApiErrorResponse
-        message = Array.isArray(serverError?.message)
+
+        const serverMessage = Array.isArray(serverError?.message)
           ? serverError.message[0]
-          : serverError?.message || message
+          : serverError?.message
+
+        if (serverMessage?.includes('already uploaded')) {
+          message = 'You have already uploaded this image. Please try another photo.'
+        } else {
+          message = serverMessage || message
+        }
       }
 
       toast({

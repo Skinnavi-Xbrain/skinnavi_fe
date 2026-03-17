@@ -40,7 +40,7 @@ export const PopularProducts = () => {
   }
 
   return (
-    <section className="container mx-auto px-6 py-16 md:py-24 bg-white relative">
+    <section className="container mx-auto px-6 py-16 md:py-24 bg-white relative overflow-hidden">
       <div className="absolute top-16 md:top-24 right-6 hidden md:block">
         <Button
           variant="outline"
@@ -50,7 +50,7 @@ export const PopularProducts = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col items-center text-center mb-16 space-y-3">
+      <div className="flex flex-col items-center text-center mb-12 md:mb-16 space-y-3">
         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
           Popular Products
         </h2>
@@ -68,15 +68,14 @@ export const PopularProducts = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+      <div className="flex overflow-x-auto snap-x snap-mandatory pb-8 -mx-6 px-6 md:mx-0 md:px-0 md:grid md:grid-cols-3 gap-6 lg:gap-10 scrollbar-hide">
         {products.map((product, index) => (
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ y: -10 }}
-            className="group cursor-pointer"
+            className="group cursor-pointer min-w-[85%] sm:min-w-[45%] md:min-w-0 snap-center"
             onClick={() => window.open(product.affiliate_url, '_blank')}
           >
             <div
