@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { User } from '../types';
 import { Eye, Ban, Trash2, CheckCircle, Loader2, ShieldCheck, User as UserIcon, Edit3 } from 'lucide-react';
 
@@ -13,12 +13,21 @@ interface ExtendedUser extends User {
   subscription: Subscription;
 }
 
+/* ─── Props Interface ─── */
+interface UserTableProps {
+  startIndex: number;
+  itemsPerPage: number;
+}
+
 const INITIAL_USERS: ExtendedUser[] = [
   { id: 'USR001', name: 'Emma Johnson', email: 'emma.j@email.com', role: 'Admin', status: 'Active', subscription: { plan: 'Advanced Routine – 3 Months', startDate: '2024-01-15', endDate: '2025-01-15' } },
   { id: 'USR002', name: 'Carlos Ruiz', email: 'c.ruiz@email.com', role: 'User', status: 'Active', subscription: { plan: 'Essential Routine – 1 Month', startDate: '2024-06-01', endDate: '2025-06-01' } },
   { id: 'USR003', name: 'Sarah Kim', email: 'sarahkim@email.com', role: 'User', status: 'Active', subscription: { plan: 'Starter Routine – 1 Week', startDate: null, endDate: null } },
   { id: 'USR004', name: 'David Miller', email: 'dmiller@email.com', role: 'User', status: 'Suspended', subscription: { plan: 'Starter Routine – 1 Week', startDate: '2024-03-10', endDate: '2024-09-10' } },
   { id: 'USR005', name: 'Lena Novak', email: 'lena.n@email.com', role: 'Admin', status: 'Active', subscription: { plan: 'Advanced Routine – 3 Months', startDate: '2024-11-20', endDate: '2025-11-20' } },
+  // Giả định thêm dữ liệu để test phân trang
+  { id: 'USR006', name: 'John Doe', email: 'john@email.com', role: 'User', status: 'Active', subscription: { plan: 'Starter Routine – 1 Week', startDate: null, endDate: null } },
+  { id: 'USR007', name: 'Jane Smith', email: 'jane@email.com', role: 'User', status: 'Active', subscription: { plan: 'Essential Routine – 1 Month', startDate: null, endDate: null } },
 ];
 
 const THEME = {
@@ -52,11 +61,16 @@ const formatDate = (dateStr: string | null) =>
 
 const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('');
 
-const UserTable: React.FC = () => {
+const UserTable: React.FC<UserTableProps> = ({ startIndex, itemsPerPage }) => {
   const [users, setUsers] = useState<ExtendedUser[]>(INITIAL_USERS);
   const [modal, setModal] = useState<{ type: 'view' | 'ban' | 'delete' | 'editRole' | null, user: ExtendedUser | null }>({ type: null, user: null });
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  /* ─── Logic Phân Trang ─── */
+  const paginatedUsers = useMemo(() => {
+    return users.slice(startIndex, startIndex + itemsPerPage);
+  }, [users, startIndex, itemsPerPage]);
 
   const triggerToast = (msg: string) => {
     setToast(msg);
@@ -101,10 +115,10 @@ const UserTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user, index) => (
+          {paginatedUsers.map((user, index) => (
             <UserRow 
               key={user.id} 
-              index={index + 1} 
+              index={startIndex + index + 1} 
               user={user} 
               onAction={(type) => setModal({ type, user })} 
             />
@@ -142,7 +156,7 @@ const UserRow = ({ user, index, onAction }: { user: ExtendedUser, index: number,
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = THEME.bgLight)}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSuspended ? '#FFFBFB' : 'transparent')}
     >
-      <td style={tdStyle}><span style={{ fontSize: '12px', color: THEME.textMuted, fontWeight: 500 }}>{index}</span></td>
+      <td style={tdStyle}><span style={{ fontSize: '12px', color: THEME.textMuted, fontWeight: 500 }}>{String(index).padStart(2, '0')}</span></td>
       <td style={tdStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600, background: isSuspended ? '#F3F4F6' : av.bg, color: isSuspended ? '#9CA3AF' : av.text }}>
@@ -250,7 +264,7 @@ const Modal = ({ type, user, loading, onClose, onConfirm }: any) => {
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
             {!isView && <button disabled={loading} onClick={onClose} style={{ ...btnBase, background: '#F3F4F6', color: '#4B5563', flex: 1 }}>Cancel</button>}
-            <button disabled={loading} onClick={onConfirm} style={{ ...btnBase, background: config.color, color: 'white', flex: 1 }}>
+            <button disabled={loading} onClick={isView ? onClose : onConfirm} style={{ ...btnBase, background: config.color, color: 'white', flex: 1 }}>
               {config.btn}
             </button>
           </div>
@@ -270,7 +284,7 @@ const DetailRow = ({ label, value, color, bold }: any) => (
 // --- Styles ---
 const thStyle: React.CSSProperties = { padding: '12px', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: THEME.textMuted, borderBottom: `1px solid ${THEME.border}` };
 const tdStyle: React.CSSProperties = { padding: '14px 12px', borderBottom: `1px solid ${THEME.border}`, verticalAlign: 'middle' };
-const overlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)' };
+const overlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, zIndex: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)' };
 const modalContentStyle: React.CSSProperties = { background: 'white', borderRadius: '16px', width: '90%', maxWidth: '400px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' };
 const detailRowStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: `1px solid #F3F4F6` };
 const btnBase: React.CSSProperties = { padding: '12px', borderRadius: '10px', border: 'none', fontWeight: 600, fontSize: '14px', cursor: 'pointer', transition: '0.2s' };
