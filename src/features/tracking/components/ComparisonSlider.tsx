@@ -190,7 +190,7 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
   const keyChangeMetric = comparisonData?.metrics_comparison
     ?.filter((m: any) => m.difference !== null)
     ?.sort((a: any, b: any) => Math.abs(b.difference) - Math.abs(a.difference))[0]
-  const latestScore = afterAnalysis?.overall_score ?? 87
+  const latestScore = afterAnalysis?.overall_score ?? 0
 
   const hasComparison = beforeAnalysis && afterAnalysis
 
