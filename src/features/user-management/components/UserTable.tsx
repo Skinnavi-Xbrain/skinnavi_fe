@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Eye, Trash2, Loader2, ShieldCheck, User as UserIcon, Edit3 } from 'lucide-react';
 import type { UserAPI, UserTableProps } from '../types/user';
 import { getAdminUsers, updateAdminUserRole, deleteAdminUser } from '../services/user.api';
-// Giả sử bạn có hàm này trong service, nếu chưa có hãy bổ sung nhé
-// import { getSubscriptionPlans } from '../services/subscription.api'; 
 import { toast } from '@/shared/hooks/use-toast';
 
 const THEME = {
@@ -16,17 +14,16 @@ const THEME = {
 };
 
 const PASTEL_COLORS = [
-  { bg: '#E0F2FE', text: '#0369A1' }, // Blue - Sky
-  { bg: '#F0FDF4', text: '#166534' }, // Green - Mint
-  { bg: '#FEF9C3', text: '#854D0E' }, // Yellow - Amber
-  { bg: '#FAF5FF', text: '#6B21A8' }, // Purple - Lavender
-  { bg: '#FFF1F2', text: '#9F1239' }, // Rose - Pink
-  { bg: '#ECFEFF', text: '#0891B2' }, // Cyan - Ocean
-  { bg: '#F5F3FF', text: '#5B21B6' }, // Indigo - Violet
-  { bg: '#FFF7ED', text: '#9A3412' }, // Orange - Sunset
+  { bg: '#E0F2FE', text: '#0369A1' }, 
+  { bg: '#F0FDF4', text: '#166534' }, 
+  { bg: '#FEF9C3', text: '#854D0E' }, 
+  { bg: '#FAF5FF', text: '#6B21A8' }, 
+  { bg: '#FFF1F2', text: '#9F1239' }, 
+  { bg: '#ECFEFF', text: '#0891B2' }, 
+  { bg: '#F5F3FF', text: '#5B21B6' }, 
+  { bg: '#FFF7ED', text: '#9A3412' }, 
 ];
 
-// Hàm helper để map màu dựa trên String (cho Plan Name)
 const getPlanColor = (planName: string) => {
   if (!planName || planName === 'No Plan') return { bg: '#F3F4F6', text: '#6B7280' };
   const hash = planName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -134,8 +131,6 @@ const UserTable: React.FC<UserTableProps> = ({ currentPage, itemsPerPage, onData
     </div>
   );
 };
-
-// --- Sub-Components ---
 
 const UserRow = ({ user, index, onAction }: { user: UserAPI, index: number, onAction: (type: any) => void }) => {
   const isAdmin = user.role === 'ADMIN';

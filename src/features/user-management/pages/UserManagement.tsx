@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Sidebar from '../components/Sidebar';
-import TopBar from '../components/TopBar';
+import Sidebar from '../../admin/components/Sidebar';
+import TopBar from '../../admin/components/TopBar';
 import UserTable from '../components/UserTable';
 import {
   X,
@@ -22,7 +22,6 @@ const UserManagement: React.FC = () => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  // --- PAGINATION ---
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const itemsPerPage = 10;
@@ -34,7 +33,6 @@ const UserManagement: React.FC = () => {
   setTotalUsers(total);
 }, []);
 
-  // ✅ MAP DATA
   const mapToBackendPayload = (formData: FormData) => ({
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -42,7 +40,6 @@ const UserManagement: React.FC = () => {
     role: (formData.get('role') as string).toUpperCase() as 'ADMIN' | 'USER',
   });
 
-  /* ─── CREATE USER ─── */
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formRef.current) return;
@@ -160,7 +157,6 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* --- MODAL (Đã bỏ hoàn toàn hiệu ứng animation) --- */}
         {isAddModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
             <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm overflow-hidden">

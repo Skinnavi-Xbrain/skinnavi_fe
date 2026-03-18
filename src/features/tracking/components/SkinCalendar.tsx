@@ -3,11 +3,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { SkinCalendarProps } from '../types'
 
 export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
-<<<<<<< HEAD
-  const completedDates = new Set<string>()
-  const incompleteDates = new Set<string>()
-=======
->>>>>>> 0699926f30ba9a7adc338528d4d8f1005c27715f
   let maxDay = new Date().getDate()
   let dataMonth = new Date().getMonth() + 1
   let dataYear = new Date().getFullYear()

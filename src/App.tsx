@@ -15,7 +15,7 @@ import AdminDashboard from './features/admin/pages/AdminDashboard'
 import PlaceholderPage from './features/admin/components/PlaceholderPage'
 import AboutPage from '@/features/about-us/pages/AboutUs'
 import PaymentResult from './features/payment/pages/PaymentResult'
-import UserManagement from '@/features/admin/pages/UserManagement'
+import UserManagement from '@/features/user-management/pages/UserManagement'
 
 function App() {
   return (
