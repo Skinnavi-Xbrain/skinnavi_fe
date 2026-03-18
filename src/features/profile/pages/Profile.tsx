@@ -129,14 +129,7 @@ const Profile = () => {
               <h3 className="text-3xl font-bold text-[#67AEFF] mb-2 font-['Poppins']">My Profile</h3>
               <p className="text-gray-500">Manage your account and skincare journey</p>
             </div>
-
             {[
-              { 
-                icon: <History className="text-[#67AEFF]" />, 
-                title: 'History Scan', 
-                desc: 'View your skin analysis history',
-                link: '/history-scan'
-              },
               { 
                 icon: <CreditCard className="text-[#67AEFF]" />, 
                 title: 'Subscription', 
