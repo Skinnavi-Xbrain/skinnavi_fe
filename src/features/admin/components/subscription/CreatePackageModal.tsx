@@ -8,9 +8,9 @@ const DURATION_CONFIG: Record<
   DurationType,
   { days: number; weeklyScanLimit: number; label: string }
 > = {
-  '1 Week': { days: 7, weeklyScanLimit: 1, label: '1 scan / week' },
-  '1 Months': { days: 30, weeklyScanLimit: 3, label: '3 scans / week' },
-  '3 Months': { days: 90, weeklyScanLimit: 5, label: '5 scans / week' }
+  '1 Week': { days: 7, weeklyScanLimit: 1, label: '1 scan / package' },
+  '1 Months': { days: 30, weeklyScanLimit: 4, label: '4 scans / package' },
+  '3 Months': { days: 90, weeklyScanLimit: 15, label: '15 scans / package' }
 }
 
 export interface CreatePackagePayload {
@@ -162,16 +162,16 @@ const CreatePackageModal = ({ isOpen, onClose, onSubmit }: Props) => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Price (USD)
+                      Price (VNĐ)
                     </label>
                     <input
                       required
                       type="number"
                       min={0}
-                      step={0.01}
+                      step={1000}
                       value={form.price}
                       onChange={(e) => setForm({ ...form, price: e.target.value })}
-                      placeholder="9.99"
+                      placeholder="99.000"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
                     />
                   </div>
