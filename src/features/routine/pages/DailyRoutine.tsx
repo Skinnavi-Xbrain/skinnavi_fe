@@ -1,43 +1,143 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Loader2 } from 'lucide-react'
 import { getUserRoutines } from '../services/daily-routine.api'
+import { getDailyLogs, updateDailyLog } from '@/features/tracking/services/tracking.api'
 import type { Routine, RoutineTime } from '../types'
 import Calendar from '../components/Calendar'
 import RoutineSteps from '../components/RoutineSteps'
 import RoutineTabs from '../components/RoutineTabs'
+import { DailyLogCheckIn } from '../components/DailyLogCheckIn'
+import { toast } from '@/shared/hooks/use-toast'
+import type { Routine as TrackingRoutine } from '@/features/tracking/types'
+import type { ApiErrorResponse } from '@/shared/types/api'
 
 const DailyRoutine = () => {
   const [activeTab, setActiveTab] = useState<RoutineTime>('morning')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [routines, setRoutines] = useState<{ morning?: Routine; evening?: Routine }>({})
+  const [trackingRoutines, setTrackingRoutines] = useState<TrackingRoutine[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isChecking, setIsChecking] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchRoutines = async () => {
-      const token = localStorage.getItem('accessToken')
+  function toDateOnlyString(date: Date) {
+    return date.toISOString().split('T')[0]
+  }
 
-      if (!token) {
-        setError('User not logged in')
-        setIsLoading(false)
+  const currentLogStatus = useMemo(() => {
+    const todayStr = toDateOnlyString(new Date())
+    const targetTime = activeTab.toUpperCase()
+
+    const targetRoutine = trackingRoutines.find((r) => r.routine_time === targetTime)
+
+    const todayLog = targetRoutine?.daily_logs.find((log) => {
+      const logDateStr = toDateOnlyString(new Date(log.log_date))
+      return logDateStr === todayStr
+    })
+
+    return {
+      id: todayLog?.id || null,
+      isCompleted: todayLog?.is_completed || false
+    }
+  }, [activeTab, trackingRoutines])
+
+  const handleCheckIn = async () => {
+    setIsChecking(true)
+
+    try {
+      const logsData = await getDailyLogs()
+      const routines = logsData.routines || []
+      setTrackingRoutines(routines)
+
+      const todayStr = toDateOnlyString(new Date())
+      const targetTime = activeTab.toUpperCase()
+
+      const targetRoutine = routines.find((r) => r.routine_time === targetTime)
+
+      const todayLog = targetRoutine?.daily_logs.find((log) => {
+        const logDateStr = toDateOnlyString(new Date(log.log_date))
+        return logDateStr === todayStr
+      })
+
+      if (!todayLog?.id) {
+        toast({
+          title: 'Notice',
+          description: `No ${activeTab} routine schedule found for today.`,
+          variant: 'destructive'
+        })
         return
       }
 
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const data = await getUserRoutines()
-        setRoutines(data)
-      } catch (err) {
-        console.error('Error fetching routines:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load routines')
-      } finally {
-        setIsLoading(false)
+      if (todayLog.is_completed) {
+        toast({
+          title: 'Already Completed',
+          description: 'This routine has already been checked in.',
+          variant: 'success'
+        })
+        return
       }
+
+      await updateDailyLog(todayLog.id, true)
+
+      setTrackingRoutines((prev) =>
+        prev.map((r) => ({
+          ...r,
+          daily_logs: r.daily_logs.map((log) =>
+            log.id === todayLog.id ? { ...log, is_completed: true } : log
+          )
+        }))
+      )
+
+      toast({
+        title: 'Routine Completed!',
+        description: 'Great job! Your progress has been recorded.',
+        variant: 'success'
+      })
+    } catch (err: unknown) {
+      console.error('Check-in failed:', err)
+
+      const apiMessage = (err as { response?: { data?: ApiErrorResponse } })?.response?.data
+        ?.message
+
+      const errorMessage = Array.isArray(apiMessage)
+        ? apiMessage.join(', ')
+        : apiMessage || 'Could not check-in. Please try again.'
+
+      toast({
+        title: 'Check-in Failed',
+        description: errorMessage,
+        variant: 'destructive'
+      })
+    }
+    {
+      setIsChecking(false)
+    }
+  }
+
+  const fetchData = async () => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      setError('User not logged in')
+      setIsLoading(false)
+      return
     }
 
-    fetchRoutines()
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const routinesData = await getUserRoutines()
+      setRoutines(routinesData)
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load routine data')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
   }, [])
 
   const currentRoutine = routines[activeTab]
@@ -103,6 +203,14 @@ const DailyRoutine = () => {
 
           <div className="space-y-6 lg:sticky lg:top-4 lg:self-start">
             <RoutineTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+            <DailyLogCheckIn
+              label={`Check - in ${activeTab}`}
+              isCompleted={currentLogStatus.isCompleted}
+              onToggle={handleCheckIn}
+              disabled={isChecking}
+            />
+
             <Calendar
               currentDate={currentDate}
               onPrevMonth={handlePrevMonth}

@@ -1,105 +1,156 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import UserTable from '../components/UserTable';
-import { 
-  X, UserPlus, Loader2, ChevronLeft, ChevronRight, Users, ShieldCheck, CheckCircle2, AlertCircle 
+import {
+  X,
+  UserPlus,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff
 } from 'lucide-react';
+import { toast } from '@/shared/hooks/use-toast';
+import { createAdminUser } from '../services/user.api';
 
 const UserManagement: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
-  // --- PAGINATION STATE ---
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // --- PAGINATION ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalUsers = 20; 
+  const [totalUsers, setTotalUsers] = useState(0);
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(totalUsers / itemsPerPage);
 
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' });
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const showMsg = (msg: string, type: 'success' | 'error') => {
-    setNotification({ show: true, message: msg, type });
-  };
+  const handleDataLoaded = useCallback((total: number) => {
+  setTotalUsers(total);
+}, []);
 
-  useEffect(() => {
-    if (notification.show) {
-      const timer = setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification.show]);
+  // ✅ MAP DATA
+  const mapToBackendPayload = (formData: FormData) => ({
+    email: formData.get('email') as string,
+    passwordHash: formData.get('password') as string,
+    fullName: formData.get('fullName') as string,
+    role: (formData.get('role') as string).toUpperCase() as 'ADMIN' | 'USER',
+  });
 
+  /* ─── CREATE USER ─── */
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formRef.current) return;
+
+    const formData = new FormData(formRef.current);
+    const payload = mapToBackendPayload(formData);
+
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setIsAddModalOpen(false);
-    showMsg("User created successfully!", "success");
+    try {
+      await createAdminUser(payload);
+
+      toast({
+        title: 'Success',
+        description: 'User created successfully!',
+        variant: 'success',
+      });
+
+      setIsAddModalOpen(false);
+      setCurrentPage(1);
+      setRefreshKey((prev) => prev + 1);
+      formRef.current.reset();
+      setShowPassword(false);
+    } catch (error: any) {
+      console.error('Create User Error:', error);
+      toast({
+        title: 'Error',
+        description:
+          error.response?.data?.message ||
+          'Failed to create user. Please check your data.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const inputClass = "w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:ring-4 focus:ring-[#67AEFF]/10 focus:border-[#67AEFF] transition-all font-['Poppins']";
-  const labelClass = "block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 font-['Poppins']";
+  const inputClass =
+    "w-full px-4 py-2 rounded-lg border border-gray-200 text-sm outline-none focus:ring-4 focus:ring-[#67AEFF]/10 focus:border-[#67AEFF] transition-all font-['Poppins'] bg-gray-50/50";
+  const labelClass =
+    "block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 font-['Poppins']";
 
   return (
-    <div className="flex bg-slate-50 min-h-screen" style={{ fontFamily: "'Poppins', sans-serif" }}>
+    <div
+      className="flex bg-slate-50 min-h-screen"
+      style={{ fontFamily: "'Poppins', sans-serif" }}
+    >
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 md:ml-[220px] flex flex-col min-h-screen relative">
         <TopBar onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* --- TOAST NOTIFICATION --- */}
-        {notification.show && (
-          <div className="fixed top-6 right-6 z-[200] animate-in slide-in-from-right-10 duration-300">
-            <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border bg-white ${notification.type === 'success' ? 'border-green-100' : 'border-red-100'}`}>
-              {notification.type === 'success' ? <CheckCircle2 className="text-green-500" size={20} /> : <AlertCircle className="text-red-500" size={20} />}
-              <span className="text-sm font-bold text-gray-700">{notification.message}</span>
-              <button onClick={() => setNotification(prev => ({ ...prev, show: false }))} className="ml-2 text-gray-400"><X size={16} /></button>
-            </div>
-          </div>
-        )}
-
         <div className="p-6 max-w-[1600px] mx-auto w-full flex-1 flex flex-col">
-          {/* Page Header */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
             <div className="text-left">
-              <h1 className="text-xl md:text-[22px] font-bold text-gray-900">User Management</h1>
-              <p className="text-sm text-gray-500 mt-1">Manage and monitor all SkinNavi registered users</p>
+              <h1 className="text-xl md:text-[22px] font-bold text-gray-900">
+                User Management
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Manage and monitor all SkinNavi registered users
+              </p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg"
+              className="bg-[#67AEFF] hover:bg-[#5698e6] text-white px-6 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-100"
             >
               <UserPlus size={16} />
               Add New User
             </button>
           </div>
 
-          {/* --- TABLE CONTAINER (GIỐNG PRODUCT) --- */}
-          <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden flex flex-col flex-1">
+          <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden flex flex-col flex-1 text-left">
             <div className="flex-1 overflow-x-auto">
-              <UserTable startIndex={startIndex} itemsPerPage={itemsPerPage} />
+              <UserTable
+                key={refreshKey}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onDataLoaded={handleDataLoaded}
+              />
             </div>
 
-            {/* --- PAGINATION CONTROLS (INSIDE CONTAINER) --- */}
             <div className="px-8 py-5 border-t border-gray-50 flex items-center justify-between bg-white">
               <span className="text-[13px] font-medium text-gray-400">
-                Page <span className="text-gray-900 font-bold">{currentPage}</span> of {totalPages || 1}
+                Page{' '}
+                <span className="text-gray-900 font-bold">
+                  {currentPage}
+                </span>{' '}
+                of {totalPages || 1}
               </span>
+
               <div className="flex gap-3">
-                <button 
+                <button
                   disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                   className="p-2.5 rounded-xl border border-gray-100 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90"
                 >
                   <ChevronLeft size={18} className="text-gray-600" />
                 </button>
-                <button 
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+
+                <button
+                  disabled={currentPage >= (totalPages || 1)}
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(prev + 1, totalPages)
+                    )
+                  }
                   className="p-2.5 rounded-xl border border-gray-100 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90"
                 >
                   <ChevronRight size={18} className="text-gray-600" />
@@ -109,39 +160,74 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* --- ADD USER MODAL --- */}
+        {/* --- MODAL (Đã bỏ hoàn toàn hiệu ứng animation) --- */}
         {isAddModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
-              <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 text-left">
-                <h3 className="text-xl font-bold text-gray-800">Add New User</h3>
-                <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
+              <div className="px-6 pt-6 pb-2 flex justify-between items-center">
+                <h3 className="text-xl font-bold text-gray-900 tracking-tight">
+                  Add New User
+                </h3>
+                <button 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <form onSubmit={handleAddUser} className="p-8 space-y-6 text-left">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Full Name</label>
-                    <input required type="text" className={inputClass} placeholder="e.g. Emma Johnson" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Email Address</label>
-                    <input required type="email" className={inputClass} placeholder="emma@example.com" />
-                  </div>
+
+              <form
+                ref={formRef}
+                onSubmit={handleAddUser}
+                className="p-6 space-y-4"
+              >
+                <div>
+                  <label className={labelClass}>Full Name</label>
+                  <input name="fullName" required placeholder="John Doe" className={inputClass} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Role</label>
-                    <select className={inputClass}><option>User</option><option>Admin</option></select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Plan</label>
-                    <select className={inputClass}><option>Starter</option><option>Essential</option><option>Advanced</option></select>
-                  </div>
+
+                <div>
+                  <label className={labelClass}>Email Address</label>
+                  <input name="email" required type="email" placeholder="john@example.com" className={inputClass} />
                 </div>
-                <div className="mt-8 flex gap-3">
-                  <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-3.5 rounded-2xl border border-gray-200 font-bold text-gray-600 hover:bg-gray-50 transition-all font-['Poppins']">Cancel</button>
-                  <button type="submit" className="flex-1 py-3.5 rounded-2xl bg-[#67AEFF] text-white font-bold shadow-lg shadow-blue-100 hover:bg-[#5698e6] transition-all font-['Poppins'] flex items-center justify-center gap-2">
-                    {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : 'Create Account'}
+
+                <div className="relative">
+                  <label className={labelClass}>Password</label>
+                  <input 
+                    name="password" 
+                    required 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className={inputClass} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[32px] text-gray-400 hover:text-[#67AEFF] transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Assign Role</label>
+                  <select name="role" className={inputClass}>
+                    <option value="User">User Account</option>
+                    <option value="Admin">Administrator</option>
+                  </select>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3 bg-[#67AEFF] hover:bg-[#5698e6] text-white rounded-xl font-bold transition-all active:scale-[0.98] flex justify-center items-center gap-2 shadow-lg shadow-blue-100"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      'Create Account'
+                    )}
                   </button>
                 </div>
               </form>

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 const navItems = [
   {
     name: 'Dashboard',
-    to: '/admin/dashboard',
+    to: '/dashboard',
     icon: (
       <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
@@ -15,7 +15,7 @@ const navItems = [
   },
   {
     name: 'Users',
-    to: '/admin/users',
+    to: '/users',
     icon: (
       <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <path
@@ -30,7 +30,7 @@ const navItems = [
   },
   {
     name: 'Subscriptions',
-    to: '/admin/subscriptions',
+    to: '/subscriptions',
     icon: (
       <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
@@ -40,7 +40,7 @@ const navItems = [
   },
   {
     name: 'Revenue',
-    to: '/admin/revenue',
+    to: '/revenue',
     icon: (
       <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
@@ -55,7 +55,7 @@ const navItems = [
   },
   {
     name: 'Product',
-    to: '/admin/product',
+    to: '/product',
     icon: (
       <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <path
@@ -68,7 +68,7 @@ const navItems = [
   },
   {
     name: 'Settings',
-    to: '/admin/settings',
+    to: '/settings',
     icon: (
       <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
@@ -93,7 +93,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => (
     <aside
       className={`fixed top-0 left-0 h-screen w-[220px] bg-[#0F172A] z-[100] flex flex-col px-3 pb-6 transition-transform duration-250 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
     >
-      {/* Logo */}
       <div className="flex items-center gap-2.5 px-2 py-7 border-b border-white/[0.07] mb-2">
         <div className="w-[34px] h-[34px] bg-blue-500 rounded-[9px] flex items-center justify-center shrink-0">
           <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
@@ -109,7 +108,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => (
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1">
         {navItems.map((item) => (
           <NavLink

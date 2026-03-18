@@ -95,3 +95,7 @@ export interface CompareAnalysesRequest {
   analysisId1: string
   analysisId2: string
 }
+
+export interface UpdateDailyLogDto {
+  is_completed: boolean
+}

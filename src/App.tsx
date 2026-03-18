@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { MainLayout } from '@/shared/layouts/MainLayout'
 import Register from '@/features/auth/pages/Register'
 import Login from '@/features/auth/pages/Login'
@@ -11,9 +11,10 @@ import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
-import PaymentResult from './features/payment/pages/PaymentResult'
 import AdminDashboard from './features/admin/pages/AdminDashboard'
 import PlaceholderPage from './features/admin/components/PlaceholderPage'
+import AboutPage from '@/features/about-us/pages/AboutUs'
+import PaymentResult from './features/payment/pages/PaymentResult'
 import UserManagement from '@/features/admin/pages/UserManagement'
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
       <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
         </Route>
 
@@ -37,16 +38,16 @@ function App() {
             <Route path="/daily-routine" element={<DailyRoutine />} />
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
             <Route path="/tracking" element={<Tracking />} />
-            <Route path="/payment-result" element={<PaymentResult />} />
+            <Route path="/about" element={<AboutPage />} />
           </Route>
-        </Route>
 
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<UserManagement />} />
-        <Route path="/admin/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
-        <Route path="/admin/revenue" element={<PlaceholderPage title="Revenue" />} />
-        <Route path="/admin/product" element={<PlaceholderPage title="Product" />} />
-        <Route path="/admin/settings" element={<PlaceholderPage title="Settings" />} />
+          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/users" element={<UserManagement/>} />
+          <Route path="/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
+          <Route path="/revenue" element={<PlaceholderPage title="Revenue" />} />
+          <Route path="/product" element={<PlaceholderPage title="Product" />} />
+          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+        </Route>
 
         {/* <Route path="/login" element={<LoginPage />} /> */}
 
