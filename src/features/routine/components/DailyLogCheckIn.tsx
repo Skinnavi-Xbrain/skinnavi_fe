@@ -22,7 +22,7 @@ export const DailyLogCheckIn = ({
         className={cn(
           'relative w-full h-14 rounded-full flex items-center p-2 transition-all duration-500 shadow-md border-2',
           isCompleted
-            ? 'bg-blue-400 border-blue-400 shadow-emerald-100'
+            ? 'bg-blue-400 border-blue-400 shadow-blue-200'
             : 'bg-white border-blue-400 shadow-blue-50'
         )}
       >

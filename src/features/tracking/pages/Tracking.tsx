@@ -6,11 +6,16 @@ import { ComparisonSlider } from '../components/ComparisonSlider'
 import { AIInsights } from '../components/AIInsights'
 import { StatusHeader } from '../components/StatusHeader'
 import { getUserSkinAnalyses, getDailyLogs } from '../services/tracking.api'
+import { validateSubscription } from '@/features/payment/services/payment.api'
+import { toast } from '@/shared/hooks/use-toast'
 import type { TrackingOverview, SkinAnalysis, Routine } from '../types'
+import type { ValidateSubscriptionResponse } from '@/features/payment/types'
 
 export default function Tracking() {
   const [skinAnalyses, setSkinAnalyses] = useState<SkinAnalysis[]>([])
   const [dailyLogs, setDailyLogs] = useState<Routine[]>([])
+
+  const [subscription, setSubscription] = useState<ValidateSubscriptionResponse>()
 
   const tracking: TrackingOverview | null =
     skinAnalyses.length > 0 || dailyLogs.length > 0
@@ -27,17 +32,33 @@ export default function Tracking() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const subRes = await validateSubscription()
+        setSubscription(subRes)
+
+        if (!subRes.isValid) {
+          toast({
+            title: 'Subscription Required',
+            description: subRes.message,
+            variant: 'destructive'
+          })
+          return
+        }
+
         const [skinData, logsData] = await Promise.all([getUserSkinAnalyses(), getDailyLogs()])
+
         setSkinAnalyses(skinData.skin_analyses)
         setDailyLogs(logsData.routines)
       } catch (error) {
         console.error('Error fetching tracking data:', error)
       }
     }
+
     fetchData()
   }, [])
 
   const handleSkinFilterChange = async (days: number | undefined) => {
+    if (subscription && !subscription.isValid) return
+
     try {
       const skinData = await getUserSkinAnalyses(days)
       setSkinAnalyses(skinData.skin_analyses)
@@ -54,6 +75,7 @@ export default function Tracking() {
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <SkinCalendar tracking={tracking} />
+
           {skinAnalyses.length > 0 ? (
             <HealthProgress
               data={[...skinAnalyses]
@@ -76,6 +98,7 @@ export default function Tracking() {
             <HealthProgress onDateFilterChange={handleSkinFilterChange} />
           )}
         </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ComparisonSlider tracking={tracking} />
           <AIInsights tracking={tracking} />

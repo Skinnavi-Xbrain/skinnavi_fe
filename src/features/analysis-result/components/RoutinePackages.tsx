@@ -159,7 +159,7 @@ export const RoutinePackages = () => {
                     config.color
                   )}
                 >
-                  {config.icon && <div className="w-5 h-5">{config.icon}</div>}
+                  {config.icon}
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-0.5">{pkg.package_name}</h3>
                 <p className={cn('font-bold text-[10px] uppercase tracking-widest', config.text)}>
