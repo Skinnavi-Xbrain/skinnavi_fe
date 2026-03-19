@@ -5,7 +5,7 @@ import { Bunting, Confetti } from './CelebrationEffects'
 
 export const SuccessView = () => {
   return (
-    <div className="relative w-full flex flex-col items-center justify-center overflow-hidden min-h-[600px]">
+    <div className="relative w-full flex flex-col items-center justify-center overflow-hidden min-h-[670px]">
       <Bunting />
       <Confetti />
 

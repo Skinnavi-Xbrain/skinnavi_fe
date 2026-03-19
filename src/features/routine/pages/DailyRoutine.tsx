@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Loader2 } from 'lucide-react'
 import { getUserRoutines } from '../services/daily-routine.api'
 import { getDailyLogs, updateDailyLog } from '@/features/tracking/services/tracking.api'
+import { validateSubscription } from '@/features/payment/services/payment.api'
 import type { Routine, RoutineTime } from '../types'
 import Calendar from '../components/Calendar'
 import RoutineSteps from '../components/RoutineSteps'
@@ -10,6 +11,7 @@ import { DailyLogCheckIn } from '../components/DailyLogCheckIn'
 import { toast } from '@/shared/hooks/use-toast'
 import type { Routine as TrackingRoutine } from '@/features/tracking/types'
 import type { ApiErrorResponse } from '@/shared/types/api'
+import type { ValidateSubscriptionResponse } from '@/features/payment/types'
 
 const DailyRoutine = () => {
   const [activeTab, setActiveTab] = useState<RoutineTime>('morning')
@@ -19,6 +21,8 @@ const DailyRoutine = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isChecking, setIsChecking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [subscription, setSubscription] = useState<ValidateSubscriptionResponse>()
 
   function toDateOnlyString(date: Date) {
     return date.toISOString().split('T')[0]
@@ -42,6 +46,8 @@ const DailyRoutine = () => {
   }, [activeTab, trackingRoutines])
 
   const handleCheckIn = async () => {
+    if (subscription && !subscription.isValid) return
+
     setIsChecking(true)
 
     try {
@@ -146,6 +152,18 @@ const DailyRoutine = () => {
     setError(null)
 
     try {
+      const subRes = await validateSubscription()
+      setSubscription(subRes)
+
+      if (!subRes.isValid) {
+        toast({
+          title: 'Subscription Required',
+          description: subRes.message,
+          variant: 'destructive'
+        })
+        return
+      }
+
       const [routinesData, logsData] = await Promise.all([getUserRoutines(), getDailyLogs()])
 
       setRoutines(routinesData)
