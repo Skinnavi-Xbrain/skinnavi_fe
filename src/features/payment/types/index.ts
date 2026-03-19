@@ -27,3 +27,13 @@ export interface PaymentState {
   eligibility: Record<string, EligibilityResponse>
   loading: boolean
 }
+
+export interface ValidateSubscriptionResponse {
+  isValid: boolean
+  message: string
+  data?: {
+    subscriptionId: string
+    packageName: string
+    endDate: string
+  } | null
+}
