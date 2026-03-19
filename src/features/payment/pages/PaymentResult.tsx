@@ -47,7 +47,7 @@ const PaymentResult = () => {
             localStorage.removeItem('pending_payment_info')
           }
 
-          // setTimeout(() => navigate('/daily-routine'), 4500)
+          navigate('/daily-routine')
         } else {
           setStatus('FAILED')
         }
