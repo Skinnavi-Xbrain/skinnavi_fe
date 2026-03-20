@@ -27,5 +27,6 @@ export const logout = async (): Promise<void> => {
     await apiClient.post('/auth/logout')
   } finally {
     localStorage.removeItem('accessToken')
+    localStorage.clear()
   }
 }
