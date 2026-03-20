@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 import type { ApiErrorResponse } from '@/shared/types/api'
 
 import { Button } from '@/shared/components/ui/button'
@@ -23,10 +24,19 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
+type JwtPayload = {
+  sub: string
+  email: string
+  role: string
+  exp: number
+  iat: number
+}
+
 const Login = () => {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -42,10 +52,18 @@ const Login = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true)
+
     try {
-      const response = await login({ email: data.email, password: data.password })
-      const { accessToken } = response.data
+      const response = await login({
+        email: data.email,
+        password: data.password
+      })
+
+      const accessToken = response.data.accessToken
+
       localStorage.setItem('accessToken', accessToken)
+
+      const decoded: JwtPayload = jwtDecode(accessToken)
 
       toast({
         title: 'Welcome back!',
@@ -53,12 +71,17 @@ const Login = () => {
         variant: 'success'
       })
 
-      navigate('/home')
+      if (decoded.role === 'ADMIN') {
+        navigate('/dashboard')
+      } else {
+        navigate('/home')
+      }
     } catch (err: unknown) {
       let description = 'Please check your credentials and try again.'
 
       if (axios.isAxiosError(err)) {
         const apiError = err.response?.data as ApiErrorResponse | undefined
+
         if (apiError?.message) {
           description = Array.isArray(apiError.message)
             ? apiError.message.join(', ')
@@ -108,6 +131,7 @@ const Login = () => {
               icon={<Lock className="w-5 h-5" />}
               {...register('password')}
             />
+
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -116,28 +140,33 @@ const Login = () => {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+
           <FieldError errors={[errors.password]} />
         </Field>
+
         <div className="flex items-center justify-between pt-2">
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
               type="checkbox"
-              className="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500 transition-all"
+              className="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
               {...register('rememberMe')}
             />
             <span className="text-sm text-slate-500">Remember me</span>
           </label>
+
           <Link to="#" className="text-sm text-blue-500 hover:underline">
             Forgot password?
           </Link>
         </div>
+
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Sign in'}
         </Button>
+
         <div className="text-center text-sm text-slate-500">
           Don't have an account?
           <Link to="/register" className="text-blue-500 font-semibold hover:underline ml-1">
@@ -148,4 +177,5 @@ const Login = () => {
     </AuthLayout>
   )
 }
+
 export default Login
