@@ -36,7 +36,7 @@ const getBackgroundColor = (role: string) => {
 const RoutineSteps = ({ activeTab, currentRoutine }: RoutineStepsProps) => {
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-between transition-all duration-300 hover:shadow-md animate-slideUp">
+      <div className="h-36 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-between transition-all duration-300 hover:shadow-md animate-slideUp">
         <div className="flex items-center gap-8">
           <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden">
             <img src={profile} alt="Profile" className="w-full h-full object-cover" />

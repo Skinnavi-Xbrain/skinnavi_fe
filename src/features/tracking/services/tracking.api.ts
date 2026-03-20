@@ -1,23 +1,45 @@
 import apiClient from '@/shared/lib/api-client'
-import type { TrackingOverview } from '../types'
+import type {
+  TrackingOverview,
+  SkinAnalysis,
+  Routine,
+  DailyLog,
+  Metric,
+  TrackingQueryParams,
+  SkinAnalysesResponse,
+  DailyLogsResponse,
+  CompareAnalysesResponse,
+  CompareAnalysesRequest,
+  UpdateDailyLogDto
+} from '../types'
 
-export interface TrackingQueryParams {
-  startDate?: string
-  endDate?: string
-}
-
-export interface TrackingApiResponse {
-  statusCode: number
-  data: TrackingOverview
-  message: string
-  success: boolean
-}
-
-export const getTrackingOverview = async (
-  params?: TrackingQueryParams
-): Promise<TrackingOverview> => {
-  const res = await apiClient.get<TrackingApiResponse>('/routines/tracking/overview', { params })
+export const getUserSkinAnalyses = async (days?: number): Promise<SkinAnalysesResponse['data']> => {
+  const res = await apiClient.get<SkinAnalysesResponse>('/tracking/skin-analyses', {
+    params: days !== undefined ? { days } : undefined
+  })
   return res.data.data
 }
 
-export type { TrackingOverview, SkinAnalysis, Routine, DailyLog, Metric } from '../types'
+export const getDailyLogs = async (
+  params?: TrackingQueryParams
+): Promise<DailyLogsResponse['data']> => {
+  const res = await apiClient.get<DailyLogsResponse>('/tracking/daily-logs', { params })
+  return res.data.data
+}
+
+export const compareAnalyses = async (
+  request: CompareAnalysesRequest
+): Promise<CompareAnalysesResponse['data']> => {
+  const res = await apiClient.post<CompareAnalysesResponse>('/tracking/compare', request)
+  return res.data.data
+}
+
+export const updateDailyLog = async (
+  id: string,
+  is_completed: boolean
+): Promise<UpdateDailyLogDto> => {
+  const res = await apiClient.patch(`/tracking/daily-logs/${id}`, { is_completed })
+  return res.data.data
+}
+
+export type { TrackingOverview, SkinAnalysis, Routine, DailyLog, Metric }

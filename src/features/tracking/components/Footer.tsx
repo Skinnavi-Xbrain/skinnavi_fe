@@ -2,7 +2,6 @@ import { Droplets } from 'lucide-react'
 
 export const Footer = () => (
   <>
-    {/* Newsletter */}
     <div className="bg-blue-50 py-12 mt-16">
       <div className="max-w-2xl mx-auto bg-white rounded-2xl px-8 py-8 shadow-sm flex flex-col md:flex-row items-center gap-6">
         <h3 className="text-blue-400 font-bold text-xl text-center md:text-left flex-1">
@@ -21,7 +20,6 @@ export const Footer = () => (
       </div>
     </div>
 
-    {/* Footer links */}
     <footer className="bg-white border-t border-slate-100 py-6 px-8">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex gap-6 text-xs text-slate-400">
