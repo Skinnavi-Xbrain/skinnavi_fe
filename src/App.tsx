@@ -12,6 +12,7 @@ import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
 import PaymentResult from './features/payment/pages/PaymentResult'
+import AboutPage from '@/features/about-us/pages/AboutUs'
 
 function App() {
   return (
@@ -25,7 +26,6 @@ function App() {
 
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/payment-result" element={<PaymentResult />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
@@ -35,6 +35,7 @@ function App() {
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
             <Route path="/tracking" element={<Tracking />} />
             <Route path="/payment-result" element={<PaymentResult />} />
+            <Route path="/about" element={<AboutPage />} />
           </Route>
         </Route>
 
