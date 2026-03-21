@@ -16,7 +16,7 @@ export const AuthLayout = ({ children, imageSrc }: AuthLayoutProps) => {
         </div>
 
         <div className="px-4 m-auto bg-white w-full md:w-[65%] flex items-center justify-center bg-[#f8faff]">
-          <div className="w-full md:w-[65%] bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+          <div className="w-full md:w-[65%] bg-white p-4 rounded-3xl border border-slate-100 shadow-[0_0_25px_rgba(59,130,246,0.35),0_10px_30px_rgba(59,130,246,0.2)]">
             {children}
           </div>
         </div>

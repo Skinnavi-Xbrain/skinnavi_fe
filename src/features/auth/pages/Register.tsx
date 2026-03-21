@@ -196,7 +196,7 @@ const Register = () => {
         <Button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all active:scale-[0.98] text-sm"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Create Account'}
         </Button>
