@@ -83,3 +83,14 @@ export interface SkinAnalysisComparison {
   message: string
   success: boolean
 }
+
+export interface CreateRoutineResponse {
+  requiresConfirmation?: boolean
+  isExisting?: boolean
+  message: string
+  subscriptionId?: string
+  morningRoutineId?: string
+  eveningRoutineId?: string
+  morning?: Routine
+  evening?: Routine
+}
