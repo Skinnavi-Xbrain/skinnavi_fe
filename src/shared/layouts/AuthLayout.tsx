@@ -15,7 +15,7 @@ export const AuthLayout = ({ children, imageSrc }: AuthLayoutProps) => {
           <div className="absolute inset-0 bg-blue-50/10" />
         </div>
 
-        <div className="w-full md:w-[65%] flex items-center justify-center bg-[#f8faff]">
+        <div className="px-4 m-auto bg-white w-full md:w-[65%] flex items-center justify-center bg-[#f8faff]">
           <div className="w-full md:w-[65%] bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
             {children}
           </div>

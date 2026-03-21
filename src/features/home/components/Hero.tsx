@@ -24,7 +24,6 @@ const itemVariants = {
 export const Hero = () => {
   return (
     <section className="relative container mx-auto px-6 py-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16 overflow-hidden font-sans">
-      
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
         <motion.div
@@ -63,7 +62,10 @@ export const Hero = () => {
           </h1>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 items-center justify-center md:justify-start">
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row gap-4 items-center justify-center md:justify-start"
+        >
           <UploadDialog>
             <Button className="group relative bg-[#67AEFF] hover:bg-[#5BA0EB] text-white px-10 md:px-12 py-7 md:py-8 rounded-2xl text-base md:text-lg font-bold shadow-xl shadow-blue-200/50 transition-all w-full sm:w-auto border-0 overflow-hidden">
               <motion.div
@@ -72,7 +74,7 @@ export const Hero = () => {
                 className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
               />
               <Upload className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-            Start Skin Scan 
+              START SKIN SCAN
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </UploadDialog>
@@ -97,7 +99,7 @@ export const Hero = () => {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           animate={{ y: [-8, 8, -8] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute top-1/4 -left-6 md:-left-10 z-20"
@@ -110,7 +112,7 @@ export const Hero = () => {
         {/* Image Frame with Flat Bottom Oval */}
         <div className="relative">
           <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-[320px] md:h-[360px] lg:w-[360px] lg:h-[400px]">
-            <div 
+            <div
               className="absolute inset-0 bg-[#F0F7FF] shadow-inner"
               style={{ borderRadius: '50% 50% 0 0' }}
             ></div>
