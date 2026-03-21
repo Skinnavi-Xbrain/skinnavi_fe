@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Settings2, AlertTriangle } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import { Button } from '@/shared/components/ui/button'
@@ -8,7 +8,8 @@ import { getRoutinePackage, createDailyRoutine } from '../services/detail-packag
 import {
   createPaymentUrl,
   checkEligibility,
-  createFreeTrial
+  createFreeTrial,
+  updateSubscriptionCombo
 } from '../../payment/services/payment.api'
 
 import type { RoutinePackage } from '../types/detail-routine'
@@ -31,6 +32,7 @@ const DetailedRoutine = () => {
   const [selectedComboId, setSelectedComboId] = useState<string | null>(null)
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showSwitchComboDialog, setShowSwitchComboDialog] = useState(false)
   const [activePackageName, setActivePackageName] = useState('')
 
   const analysisResult = useSelector((state: RootState) => state.analysis.currentResult)
@@ -54,14 +56,12 @@ const DetailedRoutine = () => {
 
   const handleError = (err: unknown) => {
     let message = 'An error occurred.'
-
     if (axios.isAxiosError(err)) {
       const serverError = err.response?.data as ApiErrorResponse
       message = Array.isArray(serverError?.message)
         ? serverError.message[0]
         : serverError?.message || message
     }
-
     toast({
       title: 'Error',
       description: message,
@@ -95,20 +95,39 @@ const DetailedRoutine = () => {
     }
   }
 
+  const executeSwitchCombo = async () => {
+    if (!selectedComboId || !skinAnalysisId || !routinePackageId) return
+
+    try {
+      setIsCreating(true)
+      await updateSubscriptionCombo(selectedComboId)
+
+      await createDailyRoutine({
+        skinAnalysisId,
+        routinePackageId,
+        comboId: selectedComboId
+      })
+
+      toast({
+        title: 'Combo Updated',
+        description: 'Your combo has been updated and a new routine has been created.',
+        variant: 'success'
+      })
+
+      navigate('/daily-routine')
+    } catch (err) {
+      handleError(err)
+    } finally {
+      setShowSwitchComboDialog(false)
+      setIsCreating(false)
+    }
+  }
+
   const handleGetStarted = useCallback(async () => {
     if (!selectedComboId) {
       toast({
-        title: 'No combo selected',
-        description: 'Please select a combo from the list before getting started.',
-        variant: 'destructive'
-      })
-      return
-    }
-
-    if (!skinAnalysisId || !routinePackageId) {
-      toast({
-        title: 'Incomplete information',
-        description: 'Skin analysis ID or routine package ID is missing.',
+        title: 'No Combo Selected',
+        description: 'Please select a combo to continue.',
         variant: 'destructive'
       })
       return
@@ -117,45 +136,83 @@ const DetailedRoutine = () => {
     setIsCreating(true)
 
     try {
-      const eligibility = await checkEligibility(routinePackageId)
-
-      if (eligibility.isFreeTrial || eligibility.requiresPayment === false) {
-        await createFreeTrial({
-          packageId: routinePackageId,
-          comboId: selectedComboId
-        })
-
-        await createDailyRoutine({
-          skinAnalysisId,
-          routinePackageId,
-          comboId: selectedComboId
-        })
-
+      if (!routinePackageId || !selectedComboId || !skinAnalysisId) {
         toast({
-          title: 'Routine created',
-          description: 'Your routine has been created.',
-          variant: 'success'
+          title: 'Missing Data',
+          description: 'Please complete skin analysis before continuing.',
+          variant: 'destructive'
         })
-
-        navigate('/daily-routine')
         return
       }
 
-      if (eligibility.requiresPayment) {
-        if (eligibility.hasActivePackage) {
-          setActivePackageName(eligibility.currentPackage?.name || '')
-          setShowConfirmDialog(true)
-          setIsCreating(false)
-          return
-        }
+      const eligibility = await checkEligibility(routinePackageId, selectedComboId, skinAnalysisId)
+      switch (eligibility.action) {
+        case 'LIMIT_REACHED':
+          toast({
+            title: 'Routine Limit Reached',
+            description: `Your ${eligibility.currentPackage?.name} package has reached the routine creation limit.`,
+            variant: 'destructive'
+          })
+          break
 
-        await executePayment()
+        case 'REUSE':
+          toast({
+            title: 'Welcome Back',
+            description: 'You are already using this combo.',
+            variant: 'success'
+          })
+          navigate('/daily-routine')
+          break
+
+        case 'CREATE_NEW':
+          if (eligibility.isFreeTrial || !eligibility.requiresPayment) {
+            await createFreeTrial({ packageId: routinePackageId!, comboId: selectedComboId })
+          } else {
+            await executePayment()
+            return
+          }
+
+          await createDailyRoutine({
+            skinAnalysisId: skinAnalysisId!,
+            routinePackageId: routinePackageId!,
+            comboId: selectedComboId
+          })
+
+          toast({
+            title: 'Routine Created',
+            description: 'Your daily routine has been created successfully.',
+            variant: 'success'
+          })
+          navigate('/daily-routine')
+          break
+
+        case 'CONFIRM_CHANGE_COMBO':
+          setActivePackageName(eligibility.currentPackage?.name || '')
+          setShowSwitchComboDialog(true)
+          break
+
+        case 'REQUIRE_PAYMENT':
+          if (eligibility.hasActivePackage) {
+            setActivePackageName(eligibility.currentPackage?.name || '')
+            setShowConfirmDialog(true)
+          } else {
+            await executePayment()
+          }
+          break
+
+        default:
+          toast({
+            title: 'Error',
+            description: 'This action is not supported.',
+            variant: 'destructive'
+          })
       }
     } catch (err) {
       handleError(err)
+    } finally {
       setIsCreating(false)
     }
-  }, [selectedComboId, routinePackageId, skinAnalysisId])
+  }, [selectedComboId, routinePackageId, skinAnalysisId, navigate])
 
   if (isLoading) {
     return (
@@ -182,7 +239,32 @@ const DetailedRoutine = () => {
         open={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={executePayment}
-        activePackageName={activePackageName}
+        title="Replace Current Plan?"
+        confirmText="UPGRADE NOW"
+        icon={AlertTriangle}
+        description={
+          <>
+            You are currently using{' '}
+            <span className="font-bold text-[#67aeff]">{activePackageName}</span>. Purchasing this
+            new plan will replace your active routine.
+          </>
+        }
+      />
+
+      <ConfirmReplaceDialog
+        open={showSwitchComboDialog}
+        onClose={() => setShowSwitchComboDialog(false)}
+        onConfirm={executeSwitchCombo}
+        title="Switch Your Combo?"
+        confirmText="SWITCH NOW"
+        icon={Settings2}
+        description={
+          <>
+            Do you want to switch to this new combo for your active
+            <span className="font-bold text-[#67aeff]"> {activePackageName}</span>? Your routine
+            steps will be updated immediately.
+          </>
+        }
       />
 
       <PackageHero packageData={packageData} />

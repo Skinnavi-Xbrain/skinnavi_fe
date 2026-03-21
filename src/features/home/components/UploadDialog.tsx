@@ -192,7 +192,7 @@ export const UploadDialog = ({ children }: { children: React.ReactNode }) => {
                 ) : (
                   <Upload className="w-5 h-5 md:w-6 md:h-6" />
                 )}
-                {isUploading ? 'Analyzing...' : 'Upload Your Photo'}
+                {isUploading ? 'ANALYZING...' : 'UPLOAD YOUR PHOTO'}
               </Button>
               <input
                 id="file-upload"

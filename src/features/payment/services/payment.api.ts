@@ -6,9 +6,13 @@ import type {
   ValidateSubscriptionResponse
 } from '../types'
 
-export const checkEligibility = async (packageId: string): Promise<EligibilityResponse> => {
+export const checkEligibility = async (
+  packageId: string,
+  comboId: string,
+  skinAnalysisId: string
+): Promise<EligibilityResponse> => {
   const res = await apiClient.get<EligibilityResponse>(`/payments/eligibility`, {
-    params: { packageId }
+    params: { packageId, comboId, skinAnalysisId }
   })
   return res.data
 }
@@ -36,5 +40,10 @@ export const verifyPayment = async (searchString: string): Promise<VnpayVerifyRe
 
 export const validateSubscription = async (): Promise<ValidateSubscriptionResponse> => {
   const res = await apiClient.get<ValidateSubscriptionResponse>('/package-subscriptions/validate')
+  return res.data
+}
+
+export const updateSubscriptionCombo = async (comboId: string) => {
+  const res = await apiClient.patch('/package-subscriptions/update-combo', { comboId })
   return res.data
 }
