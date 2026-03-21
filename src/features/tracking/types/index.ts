@@ -64,7 +64,8 @@ export interface DailyLogsResponse {
   statusCode: number
   data: {
     user_id: string
-    routines: Routine[]
+    type: TrackingType
+    routines: TrackingRoutineItem[]
   }
   message: string
   success: boolean
@@ -101,4 +102,27 @@ export interface UpdateDailyLogDto {
 
 export interface SkinCalendarProps {
   tracking?: TrackingOverview | null
+}
+
+export type TrackingType = 'NO_SUBSCRIPTION' | 'WEEKLY_NO_LOG' | 'NO_LOG_TODAY' | 'HAS_LOG'
+
+export interface DailyLog {
+  id: string
+  user_routine_id: string
+  log_date: string
+  is_completed: boolean
+}
+
+export interface TrackingRoutineItem {
+  routine_id: string
+  routine_time: string
+  routine_created_at: string
+  daily_log: DailyLog | null
+  is_completed: boolean
+}
+
+export interface TrackingDataResponse {
+  user_id: string
+  type: TrackingType
+  routines: TrackingRoutineItem[]
 }
