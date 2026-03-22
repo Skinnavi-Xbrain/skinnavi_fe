@@ -23,7 +23,7 @@ import PackageHero from '../components/PackageHero'
 import PackageDetails from '../components/PackageDetails'
 import ComboSection from '../components/ComboSection'
 
-const DetailedRoutine = () => {
+const RoutinePackageDetail = () => {
   const { id: routinePackageId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -304,4 +304,4 @@ const DetailedRoutine = () => {
   )
 }
 
-export default DetailedRoutine
+export default RoutinePackageDetail
