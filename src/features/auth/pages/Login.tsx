@@ -134,7 +134,7 @@ const Login = () => {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all active:scale-[0.98] text-sm"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Sign in'}
         </Button>

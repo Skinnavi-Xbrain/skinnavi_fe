@@ -7,6 +7,7 @@ export interface EligibilityResponse {
   requiresPayment: boolean
   isFreeTrial: boolean
   hasActivePackage: boolean
+  action: 'LIMIT_REACHED' | 'REUSE' | 'CREATE_NEW' | 'CONFIRM_CHANGE_COMBO' | 'REQUIRE_PAYMENT'
   currentPackage: ActivePackageInfo | null
 }
 

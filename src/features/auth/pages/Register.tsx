@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { User, Mail, Lock, ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -196,22 +196,16 @@ const Register = () => {
         <Button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] text-sm"
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-5 rounded-xl transition-all active:scale-[0.98] text-sm"
         >
           {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Create Account'}
         </Button>
 
-        <div className="text-center pt-1">
-          <p className="text-gray-600 text-xs">
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="text-blue-400 hover:underline font-medium"
-            >
-              Sign in
-            </button>
-          </p>
+        <div className="text-center text-sm text-slate-500">
+          Already have an account?
+          <Link to="/login" className="text-blue-500 font-semibold hover:underline ml-1">
+            Sign in
+          </Link>
         </div>
       </form>
     </AuthLayout>
