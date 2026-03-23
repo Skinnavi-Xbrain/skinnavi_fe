@@ -1,7 +1,8 @@
 import React from 'react';
-import { Star, Clock, Calendar, ChevronRight, ShieldCheck, Receipt } from 'lucide-react';
+import { Star, Clock, Calendar, ChevronRight, ShieldCheck, Receipt, XCircle } from 'lucide-react';
 import { RoutinePackages } from '@/features/analysis-result/components/RoutinePackages';
 import type { BillingHistory } from '../types';
+
 const Subscription = () => {
   const history: BillingHistory[] = [
     { id: 'INV-2026-003', planName: 'Premium Monthly', amount: '$19.99', paymentDate: 'Mar 01, 2026' },
@@ -9,10 +10,16 @@ const Subscription = () => {
     { id: 'INV-2026-001', planName: 'Premium Monthly', amount: '$19.99', paymentDate: 'Jan 01, 2026' },
   ];
 
+  const handleCancelPlan = () => {
+    if (confirm("Are you sure you want to cancel your premium plan? You will lose access to premium features at the end of your billing cycle.")) {
+      console.log("Plan cancelled");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white pb-24 font-['Poppins'] text-slate-900 overflow-x-hidden">
       
-      {/* 1. Header Section - GIỮ NGUYÊN */}
+      {/* 1. Header Section */}
       <section className="bg-gradient-to-r from-blue-100 to-blue-50 py-12 md:py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-3 uppercase tracking-tight">
@@ -36,18 +43,18 @@ const Subscription = () => {
             <ShieldCheck className="w-3 h-3" /> Current Plan
           </div>
 
-          <div className="flex items-start gap-8 relative z-10">
+          <div className="flex items-start gap-8 relative z-10 flex-grow">
             <div className="w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-[24px] flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-100">
               <Star fill="white" size={32} />
             </div>
-            <div>
+            <div className="flex-grow">
               <div className="flex items-center gap-4 mb-4">
                 <h2 className="text-3xl font-black text-slate-800 tracking-tight">Premium Monthly</h2>
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 text-[10px] font-black uppercase">
                   Active
                 </div>
               </div>
-              <div className="flex flex-wrap gap-x-10 gap-y-4">
+              <div className="flex flex-wrap gap-x-10 gap-y-4 mb-6 lg:mb-0">
                 <div className="flex items-center gap-3">
                   <Calendar size={15} className="text-blue-500" />
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Started: <span className="text-slate-800 ml-1">Mar 01, 2026</span></span>
@@ -59,8 +66,18 @@ const Subscription = () => {
               </div>
             </div>
           </div>
-          <div className="lg:w-[300px] p-6 bg-slate-50 rounded-3xl border border-slate-100 text-xs text-slate-500 italic">
-            "Your skincare journey is well-tracked. Keep up the consistent routine for the best results!"
+          
+          <div className="flex flex-col gap-4 lg:w-[300px]">
+            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 text-xs text-slate-500 italic">
+              "Your skincare journey is well-tracked. Keep up the consistent routine for the best results!"
+            </div>
+            <button 
+              onClick={handleCancelPlan}
+              className="group flex items-center justify-center gap-2 py-3 px-6 rounded-2xl border-2 border-slate-100 text-slate-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 transition-all duration-300 text-[11px] font-black uppercase tracking-widest"
+            >
+              <XCircle size={14} className="group-hover:rotate-90 transition-transform duration-300" />
+              Cancel Subscription
+            </button>
           </div>
         </div>
 
@@ -69,10 +86,10 @@ const Subscription = () => {
           <RoutinePackages />
         </div>
 
-        {/* 4. Payment & History Grid - Adjusted for Equal Height */}
+        {/* 4. Payment & History Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
           
-{/* LEFT: Payment Method - Removed Blue Shadow */}
+          {/* LEFT: Payment Method */}
           <div className="lg:col-span-5 flex flex-col">
             <div className="flex items-center gap-3 px-2 mb-6">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
@@ -108,7 +125,7 @@ const Subscription = () => {
             </div>
           </div>
 
-          {/* RIGHT: Billing History - Border darkened for more definition */}
+          {/* RIGHT: Billing History */}
           <div className="lg:col-span-7 flex flex-col">
             <div className="flex items-center gap-3 px-2 mb-6">
               <Receipt className="text-blue-500 w-5 h-5" strokeWidth={1.5} />
@@ -130,8 +147,8 @@ const Subscription = () => {
                       <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-8 py-6">
                           <div className="flex flex-col">
+                            {/* Đã xóa dòng hiển thị ID tại đây */}
                             <span className="text-sm font-medium text-slate-700">{item.planName}</span>
-                            <span className="text-[10px] text-slate-400 font-normal tracking-tight uppercase">ID: {item.id}</span>
                           </div>
                         </td>
                         <td className="px-8 py-6">
