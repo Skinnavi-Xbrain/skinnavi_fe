@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Loader2 } from 'lucide-react'
 import { getUserRoutines } from '../services/daily-routine.api'
-import { getDailyLogs, updateDailyLog } from '@/features/tracking/services/tracking.api'
+import { getLatestDailyLogs, updateDailyLog } from '@/features/tracking/services/tracking.api'
 import { validateSubscription } from '@/features/payment/services/payment.api'
 import type { Routine, RoutineTime } from '../types'
 import Calendar from '../components/Calendar'
@@ -9,41 +9,35 @@ import RoutineSteps from '../components/RoutineSteps'
 import RoutineTabs from '../components/RoutineTabs'
 import { DailyLogCheckIn } from '../components/DailyLogCheckIn'
 import { toast } from '@/shared/hooks/use-toast'
-import type { Routine as TrackingRoutine } from '@/features/tracking/types'
 import type { ApiErrorResponse } from '@/shared/types/api'
 import type { ValidateSubscriptionResponse } from '@/features/payment/types'
+import type { TrackingDataResponse } from '@/features/tracking/types'
 
 const DailyRoutine = () => {
   const [activeTab, setActiveTab] = useState<RoutineTime>('morning')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [routines, setRoutines] = useState<{ morning?: Routine; evening?: Routine }>({})
-  const [trackingRoutines, setTrackingRoutines] = useState<TrackingRoutine[]>([])
+  const [trackingData, setTrackingData] = useState<TrackingDataResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isChecking, setIsChecking] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [subscription, setSubscription] = useState<ValidateSubscriptionResponse>()
 
-  function toDateOnlyString(date: Date) {
-    return date.toISOString().split('T')[0]
-  }
-
   const currentLogStatus = useMemo(() => {
-    const todayStr = toDateOnlyString(new Date())
+    if (!trackingData || trackingData.type !== 'HAS_LOG') {
+      return { id: null, isCompleted: false }
+    }
+
     const targetTime = activeTab.toUpperCase()
 
-    const targetRoutine = trackingRoutines.find((r) => r.routine_time === targetTime)
-
-    const todayLog = targetRoutine?.daily_logs.find((log) => {
-      const logDateStr = toDateOnlyString(new Date(log.log_date))
-      return logDateStr === todayStr
-    })
+    const targetRoutine = trackingData.routines.find((r) => r.routine_time === targetTime)
 
     return {
-      id: todayLog?.id || null,
-      isCompleted: todayLog?.is_completed || false
+      id: targetRoutine?.daily_log?.id || null,
+      isCompleted: targetRoutine?.is_completed || false
     }
-  }, [activeTab, trackingRoutines])
+  }, [activeTab, trackingData])
 
   const handleCheckIn = async () => {
     if (subscription && !subscription.isValid) return
@@ -51,7 +45,37 @@ const DailyRoutine = () => {
     setIsChecking(true)
 
     try {
-      if (!trackingRoutines || trackingRoutines.length === 0) {
+      if (!trackingData) return
+
+      if (trackingData.type === 'NO_SUBSCRIPTION') {
+        toast({
+          title: 'No Subscription',
+          description: 'Please purchase a plan to start tracking.',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      if (trackingData.type === 'WEEKLY_NO_LOG') {
+        toast({
+          title: 'Upgrade Required',
+          description:
+            'The current plan does not support daily tracking. Please upgrade to a Standard or Premium plan to access this feature.',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      if (trackingData.type === 'NO_LOG_TODAY') {
+        toast({
+          title: 'Not Ready Yet',
+          description: 'Your daily routine is not available yet. Please check back tomorrow!',
+          variant: 'destructive'
+        })
+        return
+      }
+
+      if (trackingData.routines.length === 0) {
         toast({
           title: 'No Routine Found',
           description: 'You need to create a routine before you can check in.',
@@ -60,36 +84,25 @@ const DailyRoutine = () => {
         return
       }
 
-      const todayStr = toDateOnlyString(new Date())
       const targetTime = activeTab.toUpperCase()
 
-      const targetRoutine = trackingRoutines.find((r) => r.routine_time === targetTime)
+      const targetRoutine = trackingData.routines.find((r) => r.routine_time === targetTime)
 
-      const todayLog = targetRoutine?.daily_logs.find((log) => {
-        const logDateStr = toDateOnlyString(new Date(log.log_date))
-        return logDateStr === todayStr
-      })
-
-      if (!todayLog?.id) {
-        if (targetRoutine) {
-          const start = new Date(targetRoutine.subscription_start_date)
-          const end = new Date(targetRoutine.subscription_end_date)
-          const diffInDays = Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24))
-
-          if (diffInDays <= 7) {
-            toast({
-              title: 'Upgrade Required',
-              description:
-                'The current plan does not support daily tracking. Please upgrade to a Standard or Premium plan to access this feature.',
-              variant: 'destructive'
-            })
-            return
-          }
-        }
-
+      if (!targetRoutine) {
         toast({
           title: 'Notice',
-          description: `You do not have any ${activeTab} routine scheduled for today. Check back tomorrow!`,
+          description: `You do not have any ${activeTab} routine scheduled for today.`,
+          variant: 'destructive'
+        })
+        return
+      }
+
+      const todayLog = targetRoutine.daily_log
+
+      if (!todayLog?.id) {
+        toast({
+          title: 'Notice',
+          description: 'No log found for today.',
           variant: 'destructive'
         })
         return
@@ -106,14 +119,22 @@ const DailyRoutine = () => {
 
       await updateDailyLog(todayLog.id, true)
 
-      setTrackingRoutines((prev) =>
-        prev.map((r) => ({
-          ...r,
-          daily_logs: r.daily_logs.map((log) =>
-            log.id === todayLog.id ? { ...log, is_completed: true } : log
+      setTrackingData((prev) => {
+        if (!prev) return prev
+
+        return {
+          ...prev,
+          routines: prev.routines.map((r) =>
+            r.routine_id === targetRoutine.routine_id
+              ? {
+                  ...r,
+                  daily_log: r.daily_log ? { ...r.daily_log, is_completed: true } : null,
+                  is_completed: true
+                }
+              : r
           )
-        }))
-      )
+        }
+      })
 
       toast({
         title: 'Routine Completed!',
@@ -164,10 +185,10 @@ const DailyRoutine = () => {
         return
       }
 
-      const [routinesData, logsData] = await Promise.all([getUserRoutines(), getDailyLogs()])
+      const [routinesData, logsData] = await Promise.all([getUserRoutines(), getLatestDailyLogs()])
 
       setRoutines(routinesData)
-      setTrackingRoutines(logsData.routines || [])
+      setTrackingData(logsData as TrackingDataResponse)
     } catch (err: unknown) {
       console.error('Error fetching data:', err)
 

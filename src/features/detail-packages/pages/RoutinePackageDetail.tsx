@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Loader2, Settings2, AlertTriangle } from 'lucide-react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import axios from 'axios'
 import { Button } from '@/shared/components/ui/button'
 import { getRoutinePackage, createDailyRoutine } from '../services/detail-packages.api'
@@ -11,6 +11,8 @@ import {
   createFreeTrial,
   updateSubscriptionCombo
 } from '../../payment/services/payment.api'
+import { getLatestSkinAnalysis } from '@/features/home/services/analysis.api'
+import { setAnalysisResult } from '@/features/home/store/analysis.slice'
 
 import type { RoutinePackage } from '../types/detail-routine'
 import type { RootState } from '@/shared/store'
@@ -21,9 +23,10 @@ import PackageHero from '../components/PackageHero'
 import PackageDetails from '../components/PackageDetails'
 import ComboSection from '../components/ComboSection'
 
-const DetailedRoutine = () => {
+const RoutinePackageDetail = () => {
   const { id: routinePackageId } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const [packageData, setPackageData] = useState<RoutinePackage | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -36,7 +39,9 @@ const DetailedRoutine = () => {
   const [activePackageName, setActivePackageName] = useState('')
 
   const analysisResult = useSelector((state: RootState) => state.analysis.currentResult)
-  const skinAnalysisId = analysisResult?.analysisId
+  const [skinAnalysisId, setSkinAnalysisId] = useState<string | null>(
+    analysisResult?.analysisId || null
+  )
 
   useEffect(() => {
     const fetchPackage = async () => {
@@ -53,6 +58,25 @@ const DetailedRoutine = () => {
 
     if (routinePackageId) fetchPackage()
   }, [routinePackageId])
+
+  useEffect(() => {
+    const checkAndRestoreAnalysis = async () => {
+      if (skinAnalysisId) return
+
+      try {
+        const response = await getLatestSkinAnalysis()
+        if (response.success && response.data?.analysisId) {
+          const latestId = response.data.analysisId
+          setSkinAnalysisId(latestId)
+          dispatch(setAnalysisResult(response.data))
+        }
+      } catch (error) {
+        console.error('Error fetching latest analysis for recovery:', error)
+      }
+    }
+
+    checkAndRestoreAnalysis()
+  }, [skinAnalysisId, dispatch])
 
   const handleError = (err: unknown) => {
     let message = 'An error occurred.'
@@ -280,4 +304,4 @@ const DetailedRoutine = () => {
   )
 }
 
-export default DetailedRoutine
+export default RoutinePackageDetail

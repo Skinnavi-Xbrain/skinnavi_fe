@@ -6,19 +6,16 @@ import { Toaster } from '@/shared/components/ui/toaster'
 import Home from '@/features/home/pages/Home'
 import AnalysisResult from './features/analysis-result/pages/AnalysisResult'
 import Tracking from '@/features/tracking/pages/Tracking'
-import DetailedRoutine from './features/detail-packages/pages/DetailedRoutine'
+import RoutinePackageDetail from './features/detail-packages/pages/RoutinePackageDetail'
 import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
-import PaymentResult from './features/payment/pages/PaymentResult'
-import AboutPage from '@/features/about-us/pages/AboutUs'
 import AdminDashboard from './features/admin/pages/AdminDashboard'
 import PlaceholderPage from './features/admin/components/PlaceholderPage'
 import AboutPage from '@/features/about-us/pages/AboutUs'
 import PaymentResult from './features/payment/pages/PaymentResult'
 import UserManagement from '@/features/user-management/pages/UserManagement'
-import ProductManagement from '@/features/product-management/pages/ProductManagement'
 
 function App() {
   return (
@@ -38,7 +35,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/analysis-result" element={<AnalysisResult />} />
-            <Route path="/routine-detail/:id" element={<DetailedRoutine />} />
+            <Route path="/routine-detail/:id" element={<RoutinePackageDetail />} />
             <Route path="/daily-routine" element={<DailyRoutine />} />
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
             <Route path="/tracking" element={<Tracking />} />

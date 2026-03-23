@@ -27,6 +27,11 @@ export const getDailyLogs = async (
   return res.data.data
 }
 
+export const getLatestDailyLogs = async (): Promise<DailyLogsResponse['data']> => {
+  const res = await apiClient.get<DailyLogsResponse>('/tracking/latest/daily-logs')
+  return res.data.data
+}
+
 export const compareAnalyses = async (
   request: CompareAnalysesRequest
 ): Promise<CompareAnalysesResponse['data']> => {

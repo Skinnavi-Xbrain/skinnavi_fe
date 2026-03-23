@@ -64,7 +64,8 @@ export interface DailyLogsResponse {
   statusCode: number
   data: {
     user_id: string
-    routines: Routine[]
+    type: TrackingType
+    routines: TrackingRoutineItem[]
   }
   message: string
   success: boolean
@@ -101,4 +102,46 @@ export interface UpdateDailyLogDto {
 
 export interface SkinCalendarProps {
   tracking?: TrackingOverview | null
+}
+
+export type TrackingType = 'NO_SUBSCRIPTION' | 'WEEKLY_NO_LOG' | 'NO_LOG_TODAY' | 'HAS_LOG'
+
+export interface DailyLog {
+  id: string
+  user_routine_id: string
+  log_date: string
+  is_completed: boolean
+}
+
+export interface TrackingRoutineItem {
+  routine_id: string
+  routine_time: string
+  routine_created_at: string
+  daily_log: DailyLog | null
+  is_completed: boolean
+}
+
+export interface TrackingDataResponse {
+  user_id: string
+  type: TrackingType
+  routines: TrackingRoutineItem[]
+}
+
+export interface MetricComparison {
+  metric_type: string
+  score1: number | null
+  score2: number | null
+  difference: number | null
+}
+
+export interface ComparisonResponse {
+  analysis1_id: string
+  analysis1_date: string
+  analysis1_score: number | null
+  analysis2_id: string
+  analysis2_date: string
+  analysis2_score: number | null
+  overall_score_difference: number | null
+  skin_type: string
+  metrics_comparison: MetricComparison[]
 }
