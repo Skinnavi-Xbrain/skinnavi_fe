@@ -14,7 +14,7 @@ import {
 } from '../services/admin.api'
 import type {
   AdminActiveSubscriptions,
-  AdminMonthlyProductStat,
+  AdminProductMonthlyStatsResponse,
   AdminRevenueStats,
   AdminUserStats
 } from '../types/stats'
@@ -26,12 +26,19 @@ const baseMetricStyles: Pick<Metric, 'bg' | 'iconColor'>[] = [
   { bg: '#F0EEFF', iconColor: '#7C6FE4' }
 ]
 
+const formatCompactVnd = (value: number) => {
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B `
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M `
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K `
+  return `${value.toLocaleString('vi-VN')} `
+}
+
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [users, setUsers] = useState<AdminUserStats | null>(null)
   const [subscriptions, setSubscriptions] = useState<AdminActiveSubscriptions | null>(null)
   const [revenue, setRevenue] = useState<AdminRevenueStats | null>(null)
-  const [productStats, setProductStats] = useState<AdminMonthlyProductStat[] | null>(null)
+  const [productStats, setProductStats] = useState<AdminProductMonthlyStatsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -64,18 +71,18 @@ const AdminDashboard = () => {
 
   const metrics: Metric[] = useMemo(() => {
     const totalUsers = users?.totalUsers
-    const activeUsers = users?.activeUsers
+    const totalProducts = productStats?.totalProducts
     const totalRevenue = revenue?.totals.total
     const activeSubs = subscriptions?.activeSubscriptions
 
     const values = [
       totalUsers != null ? totalUsers.toLocaleString() : '—',
-      activeUsers != null ? activeUsers.toLocaleString() : '—',
-      totalRevenue != null ? `${totalRevenue.toLocaleString()}` : '—',
+      totalProducts != null ? totalProducts.toLocaleString() : '—',
+      totalRevenue != null ? formatCompactVnd(totalRevenue) : '—',
       activeSubs != null ? activeSubs.toLocaleString() : '—'
     ]
 
-    return ['Total Users', 'Active Users', 'Total Revenue', 'Active Subscriptions'].map(
+    return ['Total Users', 'Total Products', 'Total Revenue', 'Active Subscriptions'].map(
       (title, idx) => ({
         title,
         value: values[idx],
@@ -85,7 +92,7 @@ const AdminDashboard = () => {
         iconColor: baseMetricStyles[idx].iconColor
       })
     )
-  }, [users, revenue, subscriptions])
+  }, [users, revenue, subscriptions, productStats])
 
   return (
     <div
@@ -130,7 +137,7 @@ const AdminDashboard = () => {
                 <RevenueBreakdownChart totals={revenue?.totals} />
               </div>
 
-              <RevenueTrendChart monthly={productStats} />
+              <RevenueTrendChart monthly={productStats?.monthly} />
             </>
           )}
         </div>

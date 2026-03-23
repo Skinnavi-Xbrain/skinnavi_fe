@@ -2,6 +2,13 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import type { RevenueItem } from '../types'
 import type { AdminRevenueTotals } from '../types/stats'
 
+const formatCompactVnd = (value: number) => {
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B `
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M `
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K `
+  return `${value.toLocaleString('vi-VN')} `
+}
+
 interface RevenueBreakdownChartProps {
   totals?: AdminRevenueTotals | null
 }
@@ -58,7 +65,7 @@ const RevenueBreakdownChart = ({ totals }: RevenueBreakdownChartProps) => {
               </div>
               <div className="pl-[17px]">
                 <span className="text-sm font-bold text-gray-900">
-                  {item.value.toLocaleString()}
+                  {formatCompactVnd(item.value)}
                 </span>
                 <span className="text-[11px] text-gray-400 ml-1.5">{item.pct}</span>
               </div>

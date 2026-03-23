@@ -16,18 +16,15 @@ interface RevenueTrendChartProps {
 type ProductChartRow = {
   month: string
   totalProducts: number
-  newProducts: number
 }
 
 const buildChartData = (monthly: AdminMonthlyProductStat[]): ProductChartRow[] => {
-  return monthly.map((entry, index) => {
+  return monthly.map((entry) => {
     const dateLabel = new Date(`${entry.month}-01`).toLocaleString('en-US', { month: 'short' })
-    const previousTotal = index > 0 ? monthly[index - 1].totalProducts : 0
 
     return {
       month: dateLabel,
-      totalProducts: entry.totalProducts,
-      newProducts: index === 0 ? entry.totalProducts : Math.max(entry.totalProducts - previousTotal, 0)
+      totalProducts: entry.totalProducts
     }
   })
 }
@@ -52,10 +49,6 @@ const ProductTooltip = ({
         <div className="flex items-center justify-between gap-6">
           <span className="text-gray-500">Total Products</span>
           <span className="font-semibold text-gray-900">{row.totalProducts.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center justify-between gap-6">
-          <span className="text-gray-500">New Products</span>
-          <span className="font-semibold text-gray-900">{row.newProducts.toLocaleString()}</span>
         </div>
       </div>
     </div>
