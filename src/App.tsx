@@ -15,8 +15,10 @@ import PaymentResult from './features/payment/pages/PaymentResult'
 import AboutPage from '@/features/about-us/pages/AboutUs'
 import AdminDashboard from './features/admin/pages/AdminDashboard'
 import PlaceholderPage from './features/admin/components/PlaceholderPage'
-import UserManagement from '@/features/admin/pages/UserManagement'
-import ProductManagement from '@/features/admin/pages/ProductManagement'
+import AboutPage from '@/features/about-us/pages/AboutUs'
+import PaymentResult from './features/payment/pages/PaymentResult'
+import UserManagement from '@/features/user-management/pages/UserManagement'
+import ProductManagement from '@/features/product-management/pages/ProductManagement'
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
       <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
         </Route>
@@ -40,7 +43,15 @@ function App() {
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
             <Route path="/tracking" element={<Tracking />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/about" element={<AboutPage />} />
           </Route>
+
+          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path="/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
+          <Route path="/revenue" element={<PlaceholderPage title="Revenue" />} />
+          <Route path="/product" element={<PlaceholderPage title="Product" />} />
+          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         </Route>
 
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

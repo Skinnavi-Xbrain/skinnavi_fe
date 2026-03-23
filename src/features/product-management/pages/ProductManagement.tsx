@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import TopBar from '../components/TopBar';
+import Sidebar from '../../admin/components/Sidebar';
+import TopBar from '../../admin/components/TopBar';
 import SingleProductTable from '../components/SingleProductTable';
 import ComboProductTable from '../components/ComboProductTable';
 import { 
