@@ -1,6 +1,7 @@
 import apiClient from '@/shared/lib/api-client'
 import type {
   AdminActiveSubscriptions,
+  AdminMonthlyProductStat,
   AdminRevenueStats,
   AdminUserGrowthEntry,
   AdminUserStats
@@ -24,6 +25,16 @@ export const getAdminRevenueStats = async (): Promise<AdminRevenueStats> => {
 export const getAdminUserGrowth = async (months = 12): Promise<AdminUserGrowthEntry[]> => {
   const res = await apiClient.get<AdminUserGrowthEntry[]>('/admin/users/growth', {
     params: { months }
+  })
+  return res.data
+}
+
+export const getAdminMonthlyProductStats = async (params?: {
+  from?: string
+  to?: string
+}): Promise<AdminMonthlyProductStat[]> => {
+  const res = await apiClient.get<AdminMonthlyProductStat[]>('/admin/products/stats/monthly', {
+    params
   })
   return res.data
 }

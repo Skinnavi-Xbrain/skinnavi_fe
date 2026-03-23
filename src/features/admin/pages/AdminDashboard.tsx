@@ -8,10 +8,16 @@ import RevenueTrendChart from '../components/RevenueTrendChart'
 import type { Metric } from '../types'
 import {
   getAdminActiveSubscriptions,
+  getAdminMonthlyProductStats,
   getAdminRevenueStats,
   getAdminUserStats
 } from '../services/admin.api'
-import type { AdminActiveSubscriptions, AdminRevenueStats, AdminUserStats } from '../types/stats'
+import type {
+  AdminActiveSubscriptions,
+  AdminMonthlyProductStat,
+  AdminRevenueStats,
+  AdminUserStats
+} from '../types/stats'
 
 const baseMetricStyles: Pick<Metric, 'bg' | 'iconColor'>[] = [
   { bg: '#EEF3FF', iconColor: '#6B9CF6' },
@@ -25,6 +31,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<AdminUserStats | null>(null)
   const [subscriptions, setSubscriptions] = useState<AdminActiveSubscriptions | null>(null)
   const [revenue, setRevenue] = useState<AdminRevenueStats | null>(null)
+  const [productStats, setProductStats] = useState<AdminMonthlyProductStat[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,15 +39,17 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const [userStats, subStats, revenueStats] = await Promise.all([
+        const [userStats, subStats, revenueStats, monthlyProductStats] = await Promise.all([
           getAdminUserStats(),
           getAdminActiveSubscriptions(),
-          getAdminRevenueStats()
+          getAdminRevenueStats(),
+          getAdminMonthlyProductStats()
         ])
 
         setUsers(userStats)
         setSubscriptions(subStats)
         setRevenue(revenueStats)
+        setProductStats(monthlyProductStats)
         setError(null)
       } catch (err) {
         console.error(err)
@@ -121,7 +130,7 @@ const AdminDashboard = () => {
                 <RevenueBreakdownChart totals={revenue?.totals} />
               </div>
 
-              <RevenueTrendChart monthly={revenue?.monthly} />
+              <RevenueTrendChart monthly={productStats} />
             </>
           )}
         </div>

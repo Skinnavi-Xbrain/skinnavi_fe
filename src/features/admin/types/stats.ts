@@ -50,3 +50,8 @@ export interface AdminUserGrowthEntry {
   month: string
   newUsers: number
 }
+
+export interface AdminMonthlyProductStat {
+  month: string
+  totalProducts: number
+}

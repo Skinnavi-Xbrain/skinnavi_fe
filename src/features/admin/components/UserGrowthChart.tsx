@@ -74,7 +74,13 @@ const UserGrowthChart = () => {
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+                tickFormatter={(value: number) => String(Math.round(value))}
+              />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
