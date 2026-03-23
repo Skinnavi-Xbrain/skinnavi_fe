@@ -8,10 +8,16 @@ import RevenueTrendChart from '../components/RevenueTrendChart'
 import type { Metric } from '../types'
 import {
   getAdminActiveSubscriptions,
+  getAdminMonthlyProductStats,
   getAdminRevenueStats,
   getAdminUserStats
 } from '../services/admin.api'
-import type { AdminActiveSubscriptions, AdminRevenueStats, AdminUserStats } from '../types/stats'
+import type {
+  AdminActiveSubscriptions,
+  AdminProductMonthlyStatsResponse,
+  AdminRevenueStats,
+  AdminUserStats
+} from '../types/stats'
 
 const baseMetricStyles: Pick<Metric, 'bg' | 'iconColor'>[] = [
   { bg: '#EEF3FF', iconColor: '#6B9CF6' },
@@ -20,11 +26,25 @@ const baseMetricStyles: Pick<Metric, 'bg' | 'iconColor'>[] = [
   { bg: '#F0EEFF', iconColor: '#7C6FE4' }
 ]
 
+const formatCompactVnd = (value: number) => {
+  if (value >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B `
+  }
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M `
+  }
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K `
+  }
+  return `${value.toLocaleString('vi-VN')} `
+}
+
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [users, setUsers] = useState<AdminUserStats | null>(null)
   const [subscriptions, setSubscriptions] = useState<AdminActiveSubscriptions | null>(null)
   const [revenue, setRevenue] = useState<AdminRevenueStats | null>(null)
+  const [productStats, setProductStats] = useState<AdminProductMonthlyStatsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,19 +52,21 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const [userStats, subStats, revenueStats] = await Promise.all([
+        const [userStats, subStats, revenueStats, monthlyProductStats] = await Promise.all([
           getAdminUserStats(),
           getAdminActiveSubscriptions(),
-          getAdminRevenueStats()
+          getAdminRevenueStats(),
+          getAdminMonthlyProductStats()
         ])
 
         setUsers(userStats)
         setSubscriptions(subStats)
         setRevenue(revenueStats)
+        setProductStats(monthlyProductStats)
         setError(null)
       } catch (err) {
         console.error(err)
-        setError('Không thể tải dữ liệu dashboard. Vui lòng thử lại sau.')
+        setError('Unable to load dashboard data. Please try again later.')
       } finally {
         setLoading(false)
       }
@@ -55,18 +77,18 @@ const AdminDashboard = () => {
 
   const metrics: Metric[] = useMemo(() => {
     const totalUsers = users?.totalUsers
-    const activeUsers = users?.activeUsers
+    const totalProducts = productStats?.totalProducts
     const totalRevenue = revenue?.totals.total
     const activeSubs = subscriptions?.activeSubscriptions
 
     const values = [
       totalUsers != null ? totalUsers.toLocaleString() : '—',
-      activeUsers != null ? activeUsers.toLocaleString() : '—',
-      totalRevenue != null ? `$${totalRevenue.toLocaleString()}` : '—',
+      totalProducts != null ? totalProducts.toLocaleString() : '—',
+      totalRevenue != null ? formatCompactVnd(totalRevenue) : '—',
       activeSubs != null ? activeSubs.toLocaleString() : '—'
     ]
 
-    return ['Total Users', 'Active Users', 'Total Revenue', 'Active Subscriptions'].map(
+    return ['Total Users', 'Total Products', 'Total Revenue', 'Active Subscriptions'].map(
       (title, idx) => ({
         title,
         value: values[idx],
@@ -76,7 +98,7 @@ const AdminDashboard = () => {
         iconColor: baseMetricStyles[idx].iconColor
       })
     )
-  }, [users, revenue, subscriptions])
+  }, [users, revenue, subscriptions, productStats])
 
   return (
     <div
@@ -121,7 +143,7 @@ const AdminDashboard = () => {
                 <RevenueBreakdownChart totals={revenue?.totals} />
               </div>
 
-              <RevenueTrendChart monthly={revenue?.monthly} />
+              <RevenueTrendChart monthly={productStats?.monthly} />
             </>
           )}
         </div>

@@ -1,5 +1,10 @@
 import apiClient from '@/shared/lib/api-client'
-import type { AdminActiveSubscriptions, AdminUserGrowthEntry, AdminUserStats } from '../types/stats'
+import type {
+  AdminActiveSubscriptions,
+  AdminUserGrowthEntry,
+  AdminUserStats,
+  AdminProductMonthlyStatsResponse
+} from '../types/stats'
 
 export type AdminRevenueStatsParams = {
   from?: string
@@ -56,5 +61,18 @@ export const getAdminUserGrowth = async (months = 12): Promise<AdminUserGrowthEn
   const res = await apiClient.get<AdminUserGrowthEntry[]>('/admin/users/growth', {
     params: { months }
   })
+  return res.data
+}
+
+export const getAdminMonthlyProductStats = async (params?: {
+  from?: string
+  to?: string
+}): Promise<AdminProductMonthlyStatsResponse> => {
+  const res = await apiClient.get<AdminProductMonthlyStatsResponse>(
+    '/admin/products/stats/monthly',
+    {
+      params
+    }
+  )
   return res.data
 }

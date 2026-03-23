@@ -15,6 +15,14 @@ const MetricIcon = ({ title, color }: MetricIconProps) => {
       </svg>
     )
 
+  if (title === 'Total Products')
+    return (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" {...s} />
+        <path d="M7 9h10M7 13h6M15 13h2" {...s} />
+      </svg>
+    )
+
   if (title === 'Active Users')
     return (
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
