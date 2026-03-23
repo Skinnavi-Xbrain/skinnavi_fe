@@ -1,6 +1,6 @@
 import { TrendingUp, ArrowLeftRight, CalendarDays, ChevronDown, Ban } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import type { TrackingOverview } from '../types'
+import type { ComparisonResponse, TrackingOverview } from '../types'
 import { compareAnalyses } from '../services/tracking.api'
 
 interface ComparisonSliderProps {
@@ -174,7 +174,9 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
 
   const [selectedBefore, setSelectedBefore] = useState<string>(defaultBeforeId)
   const [selectedAfter, setSelectedAfter] = useState<string>(defaultAfterId)
-  const [comparisonData, setComparisonData] = useState<any>(null)
+
+  // Thay thế any bằng ComparisonResponse
+  const [comparisonData, setComparisonData] = useState<ComparisonResponse | null>(null)
 
   const beforeAnalysis = skinAnalyses.find((a) => a.id === selectedBefore)
   const afterAnalysis = skinAnalyses.find((a) => a.id === selectedAfter)
@@ -187,24 +189,26 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
   const beforeImage = beforeAnalysis?.face_image_url
   const afterImage = afterAnalysis?.face_image_url
   const scoreImprovement = comparisonData?.overall_score_difference ?? 0
-  const keyChangeMetric = comparisonData?.metrics_comparison
-    ?.filter((m: any) => m.difference !== null)
-    ?.sort((a: any, b: any) => Math.abs(b.difference) - Math.abs(a.difference))[0]
-  const latestScore = afterAnalysis?.overall_score ?? 0
 
+  const keyChangeMetric = comparisonData?.metrics_comparison
+    ?.filter((m) => m.difference !== null)
+    ?.sort((a, b) => Math.abs(b.difference!) - Math.abs(a.difference!))[0]
+
+  const latestScore = afterAnalysis?.overall_score ?? 0
   const hasComparison = beforeAnalysis && afterAnalysis
 
   useEffect(() => {
     if (selectedBefore && selectedAfter && selectedBefore !== selectedAfter) {
       const fetchComparison = async () => {
         try {
-          const data = await compareAnalyses({
+          const data = (await compareAnalyses({
             analysisId1: selectedBefore,
             analysisId2: selectedAfter
-          })
+          })) as ComparisonResponse
           setComparisonData(data)
         } catch (error) {
           console.error('Error comparing analyses:', error)
+          setComparisonData(null)
         }
       }
       fetchComparison()
@@ -290,7 +294,15 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
               Before / After Comparison
             </p>
             <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
-              {afterAnalysis?.created_at.split('T')[0] ?? 'No data'}
+              {afterAnalysis?.created_at
+                ? new Date(afterAnalysis.created_at).toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : 'No data'}
             </p>
           </div>
           <div
@@ -525,7 +537,7 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
           <p style={{ color: '#1d4ed8', fontSize: 13, fontWeight: 700 }}>
             {keyChangeMetric
               ? `${formatMetricName(keyChangeMetric.metric_type)} ${
-                  keyChangeMetric.difference > 0 ? '+' : ''
+                  (keyChangeMetric.difference ?? 0) > 0 ? '+' : ''
                 }${keyChangeMetric.difference}`
               : 'No change'}
           </p>

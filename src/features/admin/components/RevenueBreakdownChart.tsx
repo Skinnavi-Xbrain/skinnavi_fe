@@ -3,9 +3,15 @@ import type { RevenueItem } from '../types'
 import type { AdminRevenueTotals } from '../types/stats'
 
 const formatCompactVnd = (value: number) => {
-  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B `
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M `
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K `
+  if (value >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B `
+  }
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M `
+  }
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K `
+  }
   return `${value.toLocaleString('vi-VN')} `
 }
 

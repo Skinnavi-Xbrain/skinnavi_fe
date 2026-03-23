@@ -38,7 +38,7 @@ const UserGrowthChart = () => {
         setError(null)
       } catch (err) {
         console.error('Failed to load user growth data', err)
-        setError('Không thể tải dữ liệu User Growth.')
+        setError('Failed to load User Growth data.')
       } finally {
         setLoading(false)
       }
@@ -62,7 +62,7 @@ const UserGrowthChart = () => {
           </div>
         ) : data.length === 0 ? (
           <div className="flex h-full items-center justify-center text-xs text-gray-400">
-            Không có dữ liệu User Growth.
+            No User Growth data available.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">

@@ -18,8 +18,8 @@ export interface User {
   id: string
   name: string
   email: string
-  status: 'Active' | 'Suspended' | 'Inactive' // Chỉ cho phép 1 trong 3 giá trị này
+  status: 'Active' | 'Suspended' | 'Inactive'
   subscription: 'Free' | 'Basic' | 'Pro' | 'Premium'
   lastActivity: string
-  avatar?: string // Dấu ? nghĩa là không bắt buộc phải có ảnh
+  avatar?: string
 }

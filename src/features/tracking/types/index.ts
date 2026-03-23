@@ -126,3 +126,22 @@ export interface TrackingDataResponse {
   type: TrackingType
   routines: TrackingRoutineItem[]
 }
+
+export interface MetricComparison {
+  metric_type: string
+  score1: number | null
+  score2: number | null
+  difference: number | null
+}
+
+export interface ComparisonResponse {
+  analysis1_id: string
+  analysis1_date: string
+  analysis1_score: number | null
+  analysis2_id: string
+  analysis2_date: string
+  analysis2_score: number | null
+  overall_score_difference: number | null
+  skin_type: string
+  metrics_comparison: MetricComparison[]
+}

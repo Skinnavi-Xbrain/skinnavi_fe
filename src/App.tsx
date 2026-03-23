@@ -11,11 +11,13 @@ import ScrollToTop from './shared/components/ui/ScrollToTop'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
-import AdminDashboard from './features/admin/pages/AdminDashboard'
-import PlaceholderPage from './features/admin/components/PlaceholderPage'
 import AboutPage from '@/features/about-us/pages/AboutUs'
 import PaymentResult from './features/payment/pages/PaymentResult'
 import UserManagement from '@/features/user-management/pages/UserManagement'
+import AdminDashboard from './features/admin/pages/AdminDashboard'
+import AdminRevenue from './features/admin/pages/AdminRevenue'
+import AdminSubscription from './features/admin/pages/AdminSubscription'
+import PlaceholderPage from './features/admin/components/PlaceholderPage'
 
 function App() {
   return (
@@ -43,8 +45,8 @@ function App() {
 
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
-          <Route path="/subscriptions" element={<PlaceholderPage title="Subscriptions" />} />
-          <Route path="/revenue" element={<PlaceholderPage title="Revenue" />} />
+          <Route path="/revenue" element={<AdminRevenue />} />
+          <Route path="/subscriptions" element={<AdminSubscription />} />
           <Route path="/product" element={<PlaceholderPage title="Product" />} />
           <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
         </Route>
