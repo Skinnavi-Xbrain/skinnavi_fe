@@ -6,7 +6,7 @@ export const PageHeader = ({ title }: { title: string }) => {
   return (
     <section className="bg-gradient-to-r from-blue-100 to-blue-50 py-12 md:py-16 animate-fadeIn">
       <div className="container mx-auto px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-3 animate-slideInRight">
+        <h1 className="text-4xl md:text-5xl font-bold text-blue-400 mb-3 animate-slideInRight uppercase">
           {title}
         </h1>
         <nav className="flex items-center justify-center gap-2 text-sm md:text-base">

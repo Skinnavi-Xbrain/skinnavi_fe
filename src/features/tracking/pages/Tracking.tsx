@@ -69,39 +69,55 @@ export default function Tracking() {
 
   return (
     <div className="min-h-screen bg-blue-50 font-sans">
-      <PageHeader title="Tracking" />
-      <StatusHeader />
+      <div className="animate-fadeIn">
+        <PageHeader title="Tracking" />
+      </div>
+
+      <div className="animate-slideInBottom">
+        <StatusHeader />
+      </div>
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <SkinCalendar tracking={tracking} />
+          <div className="animate-slideInLeft">
+            <SkinCalendar tracking={tracking} />
+          </div>
 
-          {skinAnalyses.length > 0 ? (
-            <HealthProgress
-              data={[...skinAnalyses]
-                .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-                .map((a) => ({
-                  label: new Date(a.created_at).toLocaleDateString('en', {
-                    month: 'short',
-                    day: 'numeric'
-                  }),
-                  date: a.created_at,
-                  score: a.overall_score ?? 0,
-                  pores: a.metrics.find((m) => m.metric_type === 'PORES')?.score ?? 0,
-                  acnes: a.metrics.find((m) => m.metric_type === 'ACNE')?.score ?? 0,
-                  darkCircles: a.metrics.find((m) => m.metric_type === 'DARK_CIRCLES')?.score ?? 0,
-                  darkPots: a.metrics.find((m) => m.metric_type === 'DARK_SPOTS')?.score ?? 0
-                }))}
-              onDateFilterChange={handleSkinFilterChange}
-            />
-          ) : (
-            <HealthProgress onDateFilterChange={handleSkinFilterChange} />
-          )}
+          <div className="animate-slideInBottom [animation-delay:200ms]">
+            {skinAnalyses.length > 0 ? (
+              <HealthProgress
+                data={[...skinAnalyses]
+                  .sort(
+                    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                  )
+                  .map((a) => ({
+                    label: new Date(a.created_at).toLocaleDateString('en', {
+                      month: 'short',
+                      day: 'numeric'
+                    }),
+                    date: a.created_at,
+                    score: a.overall_score ?? 0,
+                    pores: a.metrics.find((m) => m.metric_type === 'PORES')?.score ?? 0,
+                    acnes: a.metrics.find((m) => m.metric_type === 'ACNE')?.score ?? 0,
+                    darkCircles:
+                      a.metrics.find((m) => m.metric_type === 'DARK_CIRCLES')?.score ?? 0,
+                    darkPots: a.metrics.find((m) => m.metric_type === 'DARK_SPOTS')?.score ?? 0
+                  }))}
+                onDateFilterChange={handleSkinFilterChange}
+              />
+            ) : (
+              <HealthProgress onDateFilterChange={handleSkinFilterChange} />
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ComparisonSlider tracking={tracking} />
-          <AIInsights tracking={tracking} />
+          <div className="animate-slideInLeft [animation-delay:400ms]">
+            <ComparisonSlider tracking={tracking} />
+          </div>
+          <div className="animate-slideInBottom [animation-delay:600ms]">
+            <AIInsights tracking={tracking} />
+          </div>
         </div>
       </main>
     </div>

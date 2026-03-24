@@ -1,153 +1,189 @@
-import React from 'react';
-import { Star, Clock, Calendar, ChevronRight, ShieldCheck } from 'lucide-react';
-import { RoutinePackages } from '@/features/analysis-result/components/RoutinePackages';
+import { Sparkles, Droplets, Sun, Moon, TrendingUp, CheckCircle2, Loader2 } from 'lucide-react'
+import { RoutinePackages } from '../components/RoutinePackages'
+import { SkinMetricsCard } from '../components/SkinMetricsCard'
+import { RecommendedProducts } from '../components/RecommendedProducts'
+import { getLatestSkinAnalysis } from '@/features/home/services/analysis.api'
+import { useEffect, useState } from 'react'
+import type { AnalyzeResult } from '@/features/home/types/analysis'
 
-interface BillingHistory {
-  id: string;
-  planName: string;
-  amount: string;
-  paymentDate: string;
-}
+const AnalysisResult = () => {
+  const [analysisData, setAnalysisData] = useState<AnalyzeResult | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-const Subscription = () => {
-  const history: BillingHistory[] = [
-    { id: 'INV-2026-003', planName: 'Premium Monthly', amount: '$19.99', paymentDate: 'Mar 01, 2026' },
-    { id: 'INV-2026-002', planName: 'Premium Monthly', amount: '$19.99', paymentDate: 'Feb 01, 2026' },
-    { id: 'INV-2026-001', planName: 'Premium Monthly', amount: '$19.99', paymentDate: 'Jan 01, 2026' },
-  ];
+  useEffect(() => {
+    const fetchLatestResult = async () => {
+      try {
+        setIsLoading(true)
+        const response = await getLatestSkinAnalysis()
+
+        if (response.success && response.data) {
+          setAnalysisData(response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching latest skin analysis:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchLatestResult()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+      </div>
+    )
+  }
+
+  if (!analysisData || !analysisData.result?.isValidImage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-500 font-medium">
+          No valid analysis data found. Please scan again from the Home page.
+        </p>
+      </div>
+    )
+  }
+
+  const { result } = analysisData
+  const { metrics } = result
+
+  const analyzedImageUrl = analysisData.result.imageUrl || ''
+  const comboIds = result.recommendedCombos || []
+
+  const getStatus = (value: number) => {
+    if (value >= 85)
+      return {
+        text: 'Excellent',
+        color: 'text-emerald-600',
+        bgColor: 'bg-emerald-50',
+        barColor: 'from-emerald-400 to-teal-500'
+      }
+    if (value >= 70)
+      return {
+        text: 'Good',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+        barColor: 'from-blue-400 to-indigo-500'
+      }
+    if (value >= 50)
+      return {
+        text: 'Fair',
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-50',
+        barColor: 'from-amber-400 to-orange-500'
+      }
+    return {
+      text: 'Critical',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      barColor: 'from-red-500 to-rose-600'
+    }
+  }
+
+  const overallScore = Math.round(result.overallScore || 0)
+
+  const skinMetrics = [
+    {
+      label: 'Pores',
+      value: Math.round(metrics?.PORES || 0),
+      icon: Droplets,
+      description: 'Pore clarity & size'
+    },
+    {
+      label: 'Acne',
+      value: Math.round(metrics?.ACNE || 0),
+      icon: Sun,
+      description: 'Acne & breakout condition'
+    },
+    {
+      label: 'Dark Circles',
+      value: Math.round(metrics?.DARK_CIRCLES || 0),
+      icon: Moon,
+      description: 'Under-eye fatigue'
+    },
+    {
+      label: 'Dark Spots',
+      value: Math.round(metrics?.DARK_SPOTS || 0),
+      icon: Sparkles,
+      description: 'Pigmentation & spots'
+    }
+  ]
 
   return (
-    /* Áp dụng Nền Gradient nhẹ nhàng như bạn mong muốn */
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-12 font-['Poppins'] text-slate-900">
-      
-      {/* 1. Header Section - Trở nên trong suốt để lộ nền gradient */}
-      <section className="py-8 md:py-12 text-center animate-fadeIn">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4 tracking-tight uppercase italic">
-          Subscription
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-12">
+      <div className="mb-12 text-center">
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Skin Analysis Results
         </h1>
-        <nav className="flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em]">
-          <a href="/" className="text-slate-400 hover:text-blue-500 transition-colors">Home</a>
-          <ChevronRight size={12} className="text-slate-300" />
-          <a href="/profile" className="text-slate-400 hover:text-blue-500 transition-colors">Profile</a>
-          <ChevronRight size={12} className="text-slate-300" />
-          <span className="text-blue-500 font-black">Subscription</span>
-        </nav>
-      </section>
+      </div>
 
-      {/* Main Container */}
-      <div className="max-w-6xl mx-auto mt-4">
-        
-        {/* 2. Current Status Card - Trắng tinh khiết nổi trên nền gradient */}
-        <div className="bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-white p-8 md:p-10 mb-16 shadow-[0_10px_40px_rgba(0,0,0,0.03)] flex flex-col lg:flex-row lg:items-center justify-between gap-8 transition-all hover:shadow-xl hover:shadow-blue-200/20">
-          <div className="flex items-start gap-6 md:gap-8">
-            <div className="w-16 h-16 bg-gradient-to-tr from-blue-500 to-indigo-400 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-200">
-              <Star fill="white" size={30} />
-            </div>
-            <div>
-              <div className="flex items-center gap-4 mb-3">
-                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Premium Monthly</h2>
-                <span className="px-3.5 py-1 bg-emerald-500 text-white text-[9px] font-black rounded-full uppercase tracking-widest shadow-sm shadow-emerald-100">
-                  Active
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-x-8 gap-y-3">
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-blue-400" />
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Started: <span className="text-slate-800 ml-1">March 01, 2026</span>
-                  </span>
+      <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-2xl border border-white overflow-hidden mb-20">
+        <div className="flex flex-col">
+          <div className="p-8 md:p-12 bg-gradient-to-b from-blue-50/50 to-transparent border-b border-gray-100">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-pink-400 rounded-full blur-3xl opacity-20 animate-pulse" />
+                <div className="relative w-44 h-44 md:w-52 md:h-52 rounded-full overflow-hidden ring-[12px] ring-white shadow-2xl">
+                  <img
+                    src={analyzedImageUrl}
+                    alt="Analyzed Face"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      ;(e.target as HTMLImageElement).src =
+                        'https://via.placeholder.com/150?text=No+Image'
+                    }}
+                  />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-blue-400" />
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Expires: <span className="text-slate-800 ml-1">April 01, 2026</span>
-                  </span>
+                <div className="absolute -bottom-2 -right-2 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center shadow-xl ring-4 ring-white bg-gradient-to-br from-blue-600 to-indigo-600">
+                  <div className="text-center text-white">
+                    <div className="text-2xl md:text-3xl font-black">{overallScore}%</div>
+                    <div className="text-[9px] font-bold uppercase tracking-tighter opacity-80">
+                      Score
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="lg:border-l border-slate-100 lg:pl-10 flex flex-col gap-1.5">
-            <div className="flex items-center gap-2 text-blue-500">
-              <ShieldCheck size={16} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Premium Account</span>
-            </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-[240px]">
-              Enjoying full access to AI SkinAnalysis and custom routines.
-            </p>
-          </div>
-        </div>
 
-        {/* 3. Routine Plans Section */}
-        <div className="mb-20">
-          <div className="flex flex-col items-center mb-10">
-            <h2 className="text-xl font-extrabold text-slate-800 uppercase tracking-[0.3em] mb-3">Available Plans</h2>
-            <div className="w-10 h-1 bg-gradient-to-r from-blue-500 to-purple-400 rounded-full"></div>
-          </div>
-          <RoutinePackages />
-        </div>
-
-        {/* 4. Payment & History - Compact Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          
-          {/* Payment Method (VNPay Focus) */}
-          <div className="lg:col-span-4 space-y-6">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] px-1">Payment Method</h3>
-            <div className="bg-white/70 backdrop-blur-sm p-8 rounded-[2.5rem] border border-white hover:border-blue-200 transition-all shadow-sm group">
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-3">
-                   <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-[10px] italic shadow-md">VN</div>
-                   <span className="font-extrabold text-sm tracking-tighter text-slate-800">VNPay Wallet</span>
+              <div className="flex-1 space-y-6 text-center md:text-left">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 rounded-lg text-blue-700 text-xs font-bold uppercase tracking-wider">
+                    <TrendingUp className="w-4 h-4" />
+                    Expert Assessment
+                  </div>
+                  <h2 className="text-base md:text-lg font-normal italic text-gray-800 leading-tight">
+                    "{result.overallComment}"
+                  </h2>
                 </div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full group-hover:animate-ping"></div>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed font-medium mb-10 italic">
-                Securely linked for your automated monthly renewals.
-              </p>
-              <div className="flex items-center gap-2 text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] bg-blue-50 w-fit px-3 py-1 rounded-full border border-blue-100">
-                <ShieldCheck size={14} />
-                Encrypted Connection
+
+                <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    <span className="text-sm font-bold text-emerald-700">
+                      Skin Type: {result.skinType}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-2xl border border-purple-100">
+                    <Sparkles className="w-5 h-5 text-purple-500" />
+                    <span className="text-sm font-bold text-purple-700">AI Verified Analysis</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Billing History */}
-          <div className="lg:col-span-8 space-y-6">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] px-1">Billing History</h3>
-            <div className="bg-white/70 backdrop-blur-sm rounded-[2.5rem] border border-white overflow-hidden shadow-sm">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50/50 border-b border-slate-100">
-                    <th className="px-8 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Plan</th>
-                    <th className="px-8 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Amount</th>
-                    <th className="px-8 py-6 text-right text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {history.map((item) => (
-                    <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
-                      <td className="px-8 py-6">
-                        <span className="text-sm font-bold text-slate-700">{item.planName}</span>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="text-sm font-black text-blue-600">{item.amount}</span>
-                      </td>
-                      <td className="px-8 py-6 text-right font-medium italic">
-                        <span className="text-xs text-slate-500 tracking-tight italic">
-                          {item.paymentDate}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="p-8 md:p-12">
+            <SkinMetricsCard metrics={skinMetrics} getStatus={getStatus} isNested={true} />
           </div>
-
         </div>
       </div>
-    </div>
-  );
-};
 
-export default Subscription;
+      <RecommendedProducts comboIds={comboIds} />
+      <RoutinePackages />
+    </div>
+  )
+}
+
+export default AnalysisResult
