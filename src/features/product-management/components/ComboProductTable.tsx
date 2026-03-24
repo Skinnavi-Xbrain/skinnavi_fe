@@ -1,259 +1,257 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Edit3, Trash2, ExternalLink, AlertTriangle, Plus, ShoppingBag } from 'lucide-react';
+import { ChevronDown, Edit3, Trash2, ExternalLink, Plus, ShoppingBag, Loader2 } from 'lucide-react';
 import { comboApi } from '../services/product.api';
-import { type Combo, type Product } from '../types/product';
-// Đảm bảo Hằng đã có 2 Modal này ở file cùng thư mục hoặc sửa đường dẫn import
-// import { EditComboModal, EditProductModal } from './ComboModals'; 
+import { EditComboModal, EditProductModal, DeleteConfirmModal } from './ComboModals';
+import { toast } from '@/shared/hooks/use-toast';
 
-/* ─── Constants ─── */
+/* ─── Skin Map Pastel ─── */
 const SKIN_MAP: Record<string, any> = {
-  'e42d3c01-dffd-4730-8c7d-f6a0aa0248c2': { label: 'OILY', bg: '#FFF1E7', color: '#B04500', border: '#FDDCC4' },
-  'default': { label: 'NORMAL', bg: '#EBFBEE', color: '#1A7A2F', border: '#C3F0CC' }
+  'OILY': { label: 'OILY', bg: '#FFF4ED', color: '#C2410C', border: '#FFEDD5' },
+  'DRY': { label: 'DRY', bg: '#EFF6FF', color: '#1D4ED8', border: '#DBEAFE' },
+  'COMBINATION': { label: 'COMBINATION', bg: '#F5F3FF', color: '#6D28D9', border: '#EDE9FE' },
+  'SENSITIVE': { label: 'SENSITIVE', bg: '#FFF1F2', color: '#BE123C', border: '#FFE4E6' },
+  'NORMAL': { label: 'NORMAL', bg: '#F0FDF4', color: '#15803D', border: '#DCFCE7' },
+  'default': { label: 'SKIN TYPE', bg: '#F9FAFB', color: '#374151', border: '#F3F4F6' }
 };
 
+/* ─── Category Styles - Pastel Palette ─── */
 const CAT_STYLES: Record<string, any> = {
-  'Cleanser': { bg: '#F0F9FF', color: '#0369A1' },
-  'Makeup Remover': { bg: '#FFF1F2', color: '#9D174D' },
-  'Toner': { bg: '#F5F3FF', color: '#6D28D9' },
-  'Serum': { bg: '#FAF5FF', color: '#7C3AED' },
-  'Sunscreen': { bg: '#FEFCE8', color: '#854D0E' },
-  'Moisturizer': { bg: '#F0FDF4', color: '#15803D' },
+  'Cleanser': { bg: '#E0F2FE', color: '#0369A1' },      
+  'Makeup Remover': { bg: '#FAE8FF', color: '#A21CAF' }, 
+  'Toner': { bg: '#E0E7FF', color: '#4338CA' },        
+  'Serum': { bg: '#FEF9C3', color: '#A16207' },        
+  'Sunscreen': { bg: '#FFEDD5', color: '#C2410C' },    
+  'Moisturizer': { bg: '#DCFCE7', color: '#15803D' },  
 };
 
-/* ─── Main Component ─── */
-const ComboProductTable: React.FC<any> = ({ currentPage, itemsPerPage, refreshKey, onTotalPagesChange }) => {
-  const [combos, setCombos] = useState<Combo[]>([]);
+const ComboProductTable = ({ currentPage, itemsPerPage, refreshKey, onTotalPagesChange }: any) => {
+  const [combos, setCombos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // States cho Modals
-  const [editCombo, setEditCombo] = useState<Combo | null>(null);
+  const [editCombo, setEditCombo] = useState<any>(null);
   const [addProductToCId, setAddProductToCId] = useState<string | null>(null);
+  const [editProduct, setEditProduct] = useState<{ cId: string, p: any, idx: number } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
 
   const fetchCombos = async () => {
     setLoading(true);
     try {
-      // Vì service trả về res.data nên response chính là object chứa { items, totalPages }
       const response = await comboApi.getCombos(currentPage, itemsPerPage);
-      
-      // Map đúng theo kết quả Postman
-      const rawData = response?.items || [];
-      const totalPages = response?.totalPages || 1;
+      setCombos(response.items || []);
+      if (onTotalPagesChange) onTotalPagesChange(response.totalPages || 1);
+    } catch (error) { 
+      toast({ title: "Fetch Error", description: "Could not load skincare combos.", variant: "destructive" });
+    } finally { setLoading(false); }
+  };
 
-      setCombos(rawData);
-      
-      if (onTotalPagesChange) {
-        onTotalPagesChange(totalPages);
-      }
-    } catch (error) {
-      console.error("Lỗi fetch dữ liệu combo:", error);
-      setCombos([]);
-    } finally {
-      setLoading(false);
+  useEffect(() => { fetchCombos(); }, [currentPage, refreshKey]);
+
+  const saveComboProducts = async (comboId: string, newProductsList: any[]) => {
+    const productsPayload = newProductsList.map((item, index) => ({
+      product_id: item.product_id || item.product.id,
+      step_order: index + 1
+    }));
+    
+    try {
+      await comboApi.updateCombo(comboId, { products: productsPayload });
+      toast({ title: 'Success', description: 'Combo components updated successfully.', variant: 'success' });
+      fetchCombos();
+    } catch (err) { 
+      toast({ title: 'Update Failed', description: 'Could not save combo components.', variant: 'destructive' });
     }
   };
 
-  useEffect(() => { 
-    fetchCombos(); 
-  }, [currentPage, refreshKey]);
-
-  // Xử lý Cập nhật Combo Info
-  const handleUpdateComboInfo = async (updated: Combo) => {
+  const handleUpdateComboInfo = async (updated: any) => {
     try {
-      await comboApi.updateCombo(updated.id, updated);
-      await fetchCombos();
+      await comboApi.updateCombo(updated.id, { 
+        combo_name: updated.combo_name, 
+        display_price: Number(updated.display_price),
+        image_url: updated.image_url,
+        affiliate_url: updated.affiliate_url
+      });
+      toast({ title: 'Success', description: 'Combo updated successfully.', variant: 'success' });
+      fetchCombos();
       setEditCombo(null);
-    } catch (err) { alert("Cập nhật combo thất bại!"); }
+    } catch (err: any) { 
+      toast({ title: 'Update Failed', description: err?.response?.data?.message || 'Error occurred.', variant: 'destructive' });
+    }
   };
 
-  // Xử lý Thêm sản phẩm vào Combo
-  const handleAddProduct = async (newP: Product) => {
+  const handleAddProduct = async (data: any) => {
     if (!addProductToCId) return;
     const target = combos.find(c => c.id === addProductToCId);
-    if (!target) return;
-
-    const newComboProducts = [
-      ...(target.combo_products || []), 
-      { step_order: (target.combo_products?.length || 0) + 1, product: newP }
-    ];
-    
-    try {
-      await comboApi.updateCombo(addProductToCId, { combo_products: newComboProducts as any });
-      await fetchCombos();
-      setAddProductToCId(null);
-    } catch (err) { alert("Thêm sản phẩm thất bại!"); }
+    const newList = [...target.combo_products, data];
+    await saveComboProducts(addProductToCId, newList);
+    setAddProductToCId(null);
   };
 
-  // Xử lý Xóa
+  const handleEditProductInCombo = async (data: any) => {
+    if (!editProduct) return;
+    const target = combos.find(c => c.id === editProduct.cId);
+    const newList = [...target.combo_products];
+    newList[editProduct.idx] = { ...newList[editProduct.idx], product_id: data.product_id };
+    await saveComboProducts(editProduct.cId, newList);
+    setEditProduct(null);
+  };
+
   const finalDelete = async () => {
     if (!deleteTarget) return;
     try {
       if (deleteTarget.type === 'combo') {
         await comboApi.deleteCombo(deleteTarget.id);
+        toast({ title: 'Success', description: 'Combo deleted successfully.', variant: 'success' });
       } else {
         const target = combos.find(c => c.id === deleteTarget.cId);
-        if (target) {
-          const filtered = target.combo_products.filter(cp => cp.product.name !== deleteTarget.name);
-          await comboApi.updateCombo(deleteTarget.cId, { combo_products: filtered as any });
-        }
+        const newList = target.combo_products.filter((_: any, i: number) => i !== deleteTarget.idx);
+        await saveComboProducts(deleteTarget.cId, newList);
       }
-      await fetchCombos();
+      fetchCombos();
       setDeleteTarget(null);
-    } catch (err) { alert("Xóa thất bại!"); }
+    } catch (err) {
+      toast({ title: 'Error', description: 'Failed to delete combo.', variant: 'destructive' });
+    }
   };
 
   if (loading) return (
     <div className="p-20 text-center font-['Poppins']">
-      <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#67AEFF] mb-4"></div>
-      <p className="text-[#67AEFF] font-medium">Đang tải dữ liệu SkinNavi...</p>
+      <Loader2 className="inline-block animate-spin text-[#67AEFF] mb-4" size={32} />
+      <p className="text-gray-400 font-medium tracking-wide">Loading SkinNavi data...</p>
     </div>
   );
 
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden font-['Poppins']">
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60 text-left">
-              {['#', 'Skin Type', 'Combo Details', 'Price', 'Source', 'Actions'].map((h, i) => (
-                <th key={h} className={`px-4 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest ${i === 4 ? 'text-center' : ''}`}>{h}</th>
-              ))}
+            <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-400">
+              <th className="px-4 py-5 font-bold uppercase tracking-widest text-[10px]">#</th>
+              <th className="px-4 py-5 font-bold uppercase tracking-widest text-[10px]">Skin Type</th>
+              <th className="px-4 py-5 font-bold uppercase tracking-widest text-[10px]">Combo Details</th>
+              <th className="px-4 py-5 font-bold uppercase tracking-widest text-[10px]">Price</th>
+              <th className="px-4 py-5 font-bold uppercase tracking-widest text-[10px] text-center">Link</th>
+              <th className="px-4 py-5 font-bold uppercase tracking-widest text-[10px] text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
-            {combos.length > 0 ? (
-              combos.map((c, i) => (
-                <ComboRow 
-                  key={c.id} 
-                  combo={c} 
-                  index={(currentPage - 1) * itemsPerPage + i + 1}
-                  onEdit={setEditCombo}
-                  onAddProduct={setAddProductToCId}
-                  onDelete={(combo: any) => setDeleteTarget({ type: 'combo', id: combo.id, name: combo.combo_name })}
-                  onDeleteProduct={(cId: string, pName: string) => setDeleteTarget({ type: 'product', cId, name: pName })}
-                />
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="p-10 text-center text-gray-400 italic">Không tìm thấy combo nào.</td>
-              </tr>
-            )}
+          <tbody className="divide-y divide-gray-50">
+            {combos.map((c, i) => (
+              <ComboRow 
+                key={c.id} combo={c} index={(currentPage - 1) * itemsPerPage + i + 1}
+                onEdit={setEditCombo}
+                onAddProduct={setAddProductToCId}
+                onEditProduct={(cId: string, p: any, idx: number) => setEditProduct({ cId, p, idx })}
+                onDelete={(combo: any) => setDeleteTarget({ type: 'combo', id: combo.id, name: combo.combo_name })}
+                onDeleteProduct={(cId: string, pName: string, idx: number) => setDeleteTarget({ type: 'product', cId, name: pName, idx })}
+              />
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Delete Popup */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white p-8 rounded-2xl max-w-sm w-full text-center shadow-xl border border-gray-100 animate-in zoom-in duration-200">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><AlertTriangle size={30}/></div>
-            <h3 className="text-lg font-bold mb-2">Xác nhận xóa?</h3>
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed">Bạn có chắc muốn xóa <span className="font-bold text-gray-700">"{deleteTarget.name}"</span>? Thao tác này không thể hoàn tác.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteTarget(null)} className="flex-1 py-3 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Hủy</button>
-              <button onClick={finalDelete} className="flex-1 py-3 bg-red-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-red-100 hover:bg-red-700 transition-colors">Xóa ngay</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditComboModal isOpen={!!editCombo} combo={editCombo} onSave={handleUpdateComboInfo} onClose={() => setEditCombo(null)} />
+      <EditProductModal 
+        isOpen={!!addProductToCId || !!editProduct} product={editProduct?.p || null} isNew={!!addProductToCId}
+        onSave={addProductToCId ? handleAddProduct : handleEditProductInCombo}
+        onClose={() => { setAddProductToCId(null); setEditProduct(null); }}
+      />
+      <DeleteConfirmModal isOpen={!!deleteTarget} title={deleteTarget?.type === 'combo' ? 'Delete Combo' : 'Remove Component'} name={deleteTarget?.name} onConfirm={finalDelete} onClose={() => setDeleteTarget(null)} />
     </div>
   );
 };
 
-/* ─── Component Hàng (Row) ─── */
-const ComboRow = ({ combo: c, index, onEdit, onAddProduct, onDelete, onDeleteProduct }: any) => {
-    const [open, setOpen] = useState(false);
-    const skinStyle = SKIN_MAP[c.skin_type_id] || SKIN_MAP['default'];
-    
-    return (
-        <>
-            <tr className={`hover:bg-slate-50/80 transition-colors duration-200 ${open ? 'bg-slate-50/80' : ''}`}>
-                <td className="px-4 py-4 text-xs font-mono text-gray-400 text-center">{String(index).padStart(2, '0')}</td>
-                <td className="px-4 py-4">
-                    <span style={{ backgroundColor: skinStyle.bg, color: skinStyle.color, borderColor: skinStyle.border }} className="px-3 py-1 rounded-full text-[10px] font-bold border uppercase">
-                        {skinStyle.label}
-                    </span>
-                </td>
-                <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <img src={c.image_url} className="w-12 h-12 rounded-xl object-cover border border-gray-100 shadow-sm" alt={c.combo_name} />
-                            <span className="absolute -top-1 -right-1 bg-[#67AEFF] text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
-                                {c.combo_products?.length || 0}
-                            </span>
+const ComboRow = ({ combo: c, index, onEdit, onAddProduct, onEditProduct, onDelete, onDeleteProduct }: any) => {
+  const [open, setOpen] = useState(false);
+  const skinStyle = SKIN_MAP[c.skin_type?.code] || SKIN_MAP['default'];
+  
+  return (
+    <>
+      <tr className={`group transition-all duration-200 hover:bg-blue-50/50 ${open ? 'bg-blue-50/50' : ''}`}>
+        <td className="px-4 py-4 text-xs text-gray-300 font-mono text-center w-10">{String(index).padStart(2, '0')}</td>
+        <td className="px-4 py-4 w-28">
+          <span style={{ backgroundColor: skinStyle.bg, color: skinStyle.color, borderColor: skinStyle.border }} className="px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider">
+            {skinStyle.label}
+          </span>
+        </td>
+        <td className="px-4 py-4 text-left">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0 flex items-center justify-center">
+              <img src={c.image_url} className="w-12 h-12 rounded-xl object-cover border border-gray-100 shadow-sm" alt="" />
+              <span className="absolute -top-1.5 -right-1.5 bg-[#67AEFF] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-md z-10">
+                {c.combo_products?.length || 0}
+              </span>
+            </div>
+            <div className="min-w-0">
+              {/* FIX: Bỏ class transition-colors group-hover:text-[#67AEFF] */}
+              <div className="text-[13px] font-medium text-gray-800 line-clamp-1">{c.combo_name}</div>
+              <div className="text-[10px] text-gray-400 mt-0.5 italic line-clamp-1 font-normal tracking-tight">
+                {c.combo_products?.map((cp: any) => cp.product?.usage_role).join(' • ')}
+              </div>
+            </div>
+          </div>
+        </td>
+        <td className="px-4 py-4 text-left font-semibold text-gray-900 text-[13px] whitespace-nowrap">{Number(c.display_price).toLocaleString()}đ</td>
+        <td className="px-4 py-4 text-center">
+            <a href={c.affiliate_url} target="_blank" rel="noreferrer" className="p-2 inline-flex text-[#67AEFF] bg-blue-50/50 rounded-lg hover:bg-blue-100 transition-all border border-blue-100/50 shadow-sm">
+                <ExternalLink size={14}/>
+            </a>
+        </td>
+        <td className="px-4 py-4 text-right">
+          <div className="flex gap-2 justify-end opacity-80 group-hover:opacity-100 transition-opacity">
+            <button onClick={() => onAddProduct(c.id)} title="Add Product" className="p-2 bg-white border border-blue-100 text-[#67AEFF] rounded-lg shadow-sm hover:bg-[#67AEFF] hover:text-white transition-all"><Plus size={16}/></button>
+            <button onClick={() => onEdit(c)} title="Edit Info" className="p-2 bg-white border border-blue-100 text-[#67AEFF] rounded-lg shadow-sm hover:bg-[#67AEFF] hover:text-white transition-all"><Edit3 size={14}/></button>
+            <button onClick={() => onDelete(c)} title="Delete Combo" className="p-2 bg-white border border-red-50 text-red-400 rounded-lg shadow-sm hover:bg-red-500 hover:text-white transition-all"><Trash2 size={14}/></button>
+            <button onClick={() => setOpen(!open)} className={`p-2 rounded-lg border shadow-sm transition-all ${open ? 'bg-gray-800 border-gray-800 text-white' : 'bg-white text-gray-400 hover:border-gray-800'}`}>
+              <ChevronDown size={16} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`}/>
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      {open && (
+        <tr className="animate-in fade-in slide-in-from-top-1 duration-300">
+          <td colSpan={6} className="bg-slate-50/50 p-0 border-t border-gray-100 text-left">
+            <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2 text-gray-400 uppercase tracking-widest text-[9px] font-bold">
+              <ShoppingBag size={12} /> Components ({c.combo_products?.length})
+            </div>
+            <div className="p-4 flex flex-col gap-2.5">
+              {c.combo_products?.length > 0 ? (
+                c.combo_products.map((cp: any, idx: number) => {
+                  const catStyle = CAT_STYLES[cp.product?.usage_role] || { bg: '#F3F4F6', color: '#6B7280' };
+                  return (
+                    <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:border-blue-200 transition-colors">
+                      <div className="flex items-center gap-4 text-left">
+                        <span className="text-[10px] font-mono text-gray-300 w-5">{(idx + 1).toString().padStart(2, '0')}</span>
+                        <img src={cp.product?.image_url} className="w-10 h-10 rounded-xl object-cover border border-gray-50 flex-shrink-0" alt="" />
+                        <div>
+                          <div className="text-[13px] font-medium text-gray-800 leading-tight mb-1">{cp.product?.name}</div>
+                          <span style={{ backgroundColor: catStyle.bg, color: catStyle.color }} className="text-[9px] px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                            {cp.product?.usage_role}
+                          </span>
                         </div>
-                        <div className="min-w-0">
-                            <div className="text-[13px] font-bold text-gray-800 line-clamp-1">{c.combo_name}</div>
-                            <div className="text-[10px] text-gray-400 mt-0.5 italic line-clamp-1">
-                                {c.combo_products?.map((cp: any) => cp.product.usage_role).join(' • ')}
-                            </div>
+                      </div>
+                      <div className="flex items-center gap-5">
+                        <div className="text-right">
+                          <span className="text-xs font-semibold text-gray-900">{Number(cp.product?.display_price).toLocaleString()}đ</span>
                         </div>
+                        <div className="flex gap-1.5">
+                          {/* FIX: Bỏ hover:text-[#67AEFF] ở icon nút sửa và link */}
+                          <button onClick={() => onEditProduct(c.id, cp.product, idx)} className="p-2 text-gray-400 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"><Edit3 size={13}/></button>
+                          <a href={cp.product?.affiliate_url} target="_blank" rel="noreferrer" className="p-2 text-gray-400 bg-gray-50 rounded-lg hover:bg-blue-50"><ExternalLink size={13}/></a>
+                          <button onClick={() => onDeleteProduct(c.id, cp.product?.name, idx)} className="p-2 text-gray-400 hover:text-red-500 bg-gray-50 rounded-lg hover:bg-red-50"><Trash2 size={13}/></button>
+                        </div>
+                      </div>
                     </div>
-                </td>
-                <td className="px-4 py-4">
-                    <span className="text-sm font-bold text-gray-900">{Number(c.display_price).toLocaleString('vi-VN')} <small className="text-[10px] font-normal text-gray-400">VND</small></span>
-                </td>
-                <td className="px-4 py-4 text-center">
-                    <a href={c.affiliate_url} target="_blank" rel="noreferrer" className="p-2 inline-flex text-[#67AEFF] bg-[#67AEFF]/10 rounded-lg hover:bg-[#67AEFF]/20 transition-all border border-[#67AEFF]/10">
-                        <ExternalLink size={14}/>
-                    </a>
-                </td>
-                <td className="px-4 py-4 text-right">
-                    <div className="flex gap-2 justify-end">
-                        <button onClick={() => onAddProduct(c.id)} className="p-2 bg-white border border-[#67AEFF]/20 text-[#67AEFF] rounded-lg hover:bg-[#67AEFF] hover:text-white transition-all shadow-sm"><Plus size={16}/></button>
-                        <button onClick={() => onEdit(c)} className="p-2 bg-white border border-[#67AEFF]/20 text-[#67AEFF] rounded-lg hover:bg-[#67AEFF] hover:text-white transition-all shadow-sm"><Edit3 size={14}/></button>
-                        <button onClick={() => onDelete(c)} className="p-2 bg-white border border-red-100 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"><Trash2 size={14}/></button>
-                        <button onClick={() => setOpen(!open)} className={`p-2 rounded-lg border transition-all shadow-sm ${open ? 'bg-gray-800 border-gray-800 text-white' : 'bg-white text-gray-400 hover:border-gray-800 hover:text-gray-800'}`}>
-                            <ChevronDown size={16} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`}/>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            
-            {/* Expanded Content: Chi tiết sản phẩm con */}
-            {open && (
-                <tr className="animate-in fade-in duration-300">
-                    <td colSpan={6} className="bg-slate-50/50 p-0 border-t border-gray-100">
-                        <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2 text-gray-500">
-                            <ShoppingBag size={14} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Bộ sản phẩm chi tiết</span>
-                        </div>
-                        <div className="p-4 flex flex-col gap-2.5">
-                            {c.combo_products?.length > 0 ? (
-                                c.combo_products.map((cp: any, idx: number) => (
-                                    <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 shadow-sm hover:border-[#67AEFF]/30 transition-colors">
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-[10px] font-mono text-gray-300 w-5">{(cp.step_order || idx + 1).toString().padStart(2, '0')}</span>
-                                            <img src={cp.product.image_url} className="w-10 h-10 rounded-lg object-cover border border-gray-50" alt="" />
-                                            <div>
-                                                <div className="text-[13px] font-semibold text-gray-800">{cp.product.name}</div>
-                                                <div className="flex gap-2 mt-0.5">
-                                                    <span style={{ backgroundColor: (CAT_STYLES[cp.product.usage_role]?.bg || '#f3f4f6'), color: (CAT_STYLES[cp.product.usage_role]?.color || '#6b7280') }} className="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase">
-                                                        {cp.product.usage_role}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-5">
-                                            <div className="text-right">
-                                                <span className="text-xs font-bold text-gray-900">{Number(cp.product.display_price).toLocaleString()}đ</span>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <a href={cp.product.affiliate_url} target="_blank" rel="noreferrer" className="p-1.5 text-gray-400 hover:text-[#67AEFF] transition-colors"><ExternalLink size={14}/></a>
-                                                <button onClick={() => onDeleteProduct(c.id, cp.product.name)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-center py-4 text-[11px] text-gray-400 italic">Combo này chưa có sản phẩm thành phần.</div>
-                            )}
-                        </div>
-                    </td>
-                </tr>
-            )}
-        </>
-    );
+                  );
+                })
+              ) : (
+                <div className="text-center py-6 text-xs text-gray-400 italic font-medium tracking-tight">This combo is empty. Add products to start!</div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
 }
 
 export default ComboProductTable;
