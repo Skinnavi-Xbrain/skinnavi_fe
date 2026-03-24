@@ -47,7 +47,7 @@ const Header = () => {
         description: 'You have been successfully logged out.',
         variant: 'success'
       })
-      navigate('/login')
+      navigate('/profile')
     } catch {
       toast({
         title: 'Logout Failed',
@@ -117,45 +117,36 @@ const Header = () => {
           <div className="relative hidden md:block">
             <motion.div
               whileTap={{ scale: 0.95 }}
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              onClick={() => {
+                // Nhấn vào avatar sẽ chuyển hướng sang trang profile
+                if (isAuthenticated) {
+                  navigate('/profile')
+                } else {
+                  setIsProfileOpen(!isProfileOpen)
+                }
+              }}
               className="h-10 w-10 shrink-0 cursor-pointer overflow-hidden rounded-full border-2 border-[#67AEFF30] hover:border-[#67AEFF] transition-all flex items-center justify-center bg-slate-50"
             >
               <User className="w-6 h-6 text-slate-400" />
             </motion.div>
 
             <AnimatePresence>
-              {isProfileOpen && (
+              {isProfileOpen && !isAuthenticated && (
                 <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 overflow-hidden"
                 >
-                  {isAuthenticated ? (
-                    <>
-                      <div className="px-4 py-2 border-b border-slate-50 mb-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          Account
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" /> Log out
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setIsProfileOpen(false)
-                        navigate('/login')
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#67AEFF] hover:bg-blue-50 transition-colors"
-                    >
-                      <LogIn className="w-4 h-4" /> Log in
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      navigate('/login')
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#67AEFF] hover:bg-blue-50 transition-colors"
+                  >
+                    <LogIn className="w-4 h-4" /> Log in
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -199,7 +190,16 @@ const Header = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto px-6 py-8 bg-gradient-to-b from-white to-[#F0F7FF50]">
-                <div className="flex items-center gap-4 mb-8 p-5 rounded-[2rem] bg-white border border-[#67AEFF20] shadow-[0_10px_25px_-10px_rgba(103,174,255,0.3)]">
+                {/* Mobile: Nhấn vào khung User Account cũng về trang Profile */}
+                <div 
+                  onClick={() => {
+                    if(isAuthenticated) {
+                      navigate('/profile')
+                      setIsMobileMenuOpen(false)
+                    }
+                  }}
+                  className="flex items-center gap-4 mb-8 p-5 rounded-[2rem] bg-white border border-[#67AEFF20] shadow-[0_10px_25px_-10px_rgba(103,174,255,0.3)] cursor-pointer active:scale-95 transition-transform"
+                >
                   <div className="h-14 w-14 rounded-2xl bg-[#67AEFF] flex items-center justify-center shadow-lg shadow-[#67AEFF30]">
                     <UserCircle className="w-9 h-9 text-white" strokeWidth={1.5} />
                   </div>
@@ -208,7 +208,7 @@ const Header = () => {
                       {isAuthenticated ? 'User Account' : 'Guest'}
                     </h4>
                     <p className="text-xs font-bold mt-1 tracking-wide uppercase text-[#67AEFF]">
-                      {isAuthenticated ? 'Member' : 'Welcome to SkinNavi'}
+                      {isAuthenticated ? 'Member - View Profile' : 'Welcome to SkinNavi'}
                     </p>
                   </div>
                 </div>

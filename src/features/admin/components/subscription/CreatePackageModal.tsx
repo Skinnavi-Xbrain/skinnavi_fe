@@ -162,7 +162,7 @@ const CreatePackageModal = ({ isOpen, onClose, onSubmit }: Props) => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Price (VNĐ)
+                      Price (VND)
                     </label>
                     <input
                       required

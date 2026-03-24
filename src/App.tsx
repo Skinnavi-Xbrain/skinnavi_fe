@@ -13,6 +13,8 @@ import DailyRoutine from './features/routine/pages/DailyRoutine'
 import RoutineStepDetail from './features/detail-step-routine/pages/RoutineStepDetail'
 import AboutPage from '@/features/about-us/pages/AboutUs'
 import PaymentResult from './features/payment/pages/PaymentResult'
+import Profile from './features/profile/pages/Profile'
+import Subscription from './features/subscription/pages/Subscription'
 import UserManagement from '@/features/user-management/pages/UserManagement'
 import AdminDashboard from './features/admin/pages/AdminDashboard'
 import AdminRevenue from './features/admin/pages/AdminRevenue'
@@ -41,6 +43,8 @@ function App() {
             <Route path="/step-detail/:stepId" element={<RoutineStepDetail />} />
             <Route path="/tracking" element={<Tracking />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/user-subscription" element={<Subscription />} />
           </Route>
 
           <Route path="/dashboard" element={<AdminDashboard />} />

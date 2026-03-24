@@ -68,7 +68,7 @@ export default function HealthProgress({
 
   const n = displayData.length
 
-  const CHART_HEIGHT = 180
+  const CHART_HEIGHT = 305
   const LABEL_HEIGHT = 36
   const SCROLLBAR_SPACE = 8
   const Y_AXIS_WIDTH = 32
@@ -83,6 +83,15 @@ export default function HealthProgress({
 
   const svgW = contentWidth
   const svgH = CHART_HEIGHT
+
+  const STEP = 10
+  const yAxisTicks = useMemo(() => {
+    const ticks = []
+    for (let i = 100; i >= 0; i -= STEP) {
+      ticks.push(i)
+    }
+    return ticks
+  }, [STEP])
 
   const xScale = (i: number) =>
     n === 1 ? (svgW - padL - padR) / 2 + padL : padL + (i / (n - 1)) * (svgW - padL - padR)
@@ -122,22 +131,23 @@ export default function HealthProgress({
 
   return (
     <div
-      className="bg-white rounded-2xl shadow-sm border border-slate-100"
+      className="bg-white rounded-2xl shadow-sm border border-slate-100 h-full"
       style={{ padding: '20px 20px 16px' }}
     >
-      <div className="flex justify-between items-start mb-4">
-        <div>
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+        <div className="w-full sm:w-auto">
           <p style={{ fontWeight: 700, color: '#1e293b', fontSize: 16, marginBottom: 2 }}>
             Skin Health Progress
           </p>
           <p style={{ fontSize: 13, color: '#94a3b8' }}>Daily skin health scores</p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ position: 'relative', userSelect: 'none' }}>
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+          <div style={{ position: 'relative', userSelect: 'none' }} className="flex-1 sm:flex-none">
             <button
               type="button"
               onClick={() => setDropdownOpen((v) => !v)}
+              className="w-full sm:w-auto justify-between"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -204,14 +214,6 @@ export default function HealthProgress({
                         transition: 'background 0.1s',
                         gap: 8
                       }}
-                      onMouseEnter={(e) => {
-                        if (!isActive)
-                          (e.currentTarget as HTMLDivElement).style.background = '#eff6ff'
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isActive)
-                          (e.currentTarget as HTMLDivElement).style.background = 'transparent'
-                      }}
                     >
                       <span>{opt.label}</span>
                       {isActive && <Check size={12} color="#2563eb" strokeWidth={2.5} />}
@@ -258,7 +260,7 @@ export default function HealthProgress({
             paddingBottom: padB
           }}
         >
-          {[100, 75, 50, 25, 0].map((v) => (
+          {yAxisTicks.map((v) => (
             <span key={v} style={{ fontSize: 10, color: '#cbd5e1', lineHeight: 1 }}>
               {v}
             </span>
@@ -298,7 +300,7 @@ export default function HealthProgress({
                     </linearGradient>
                   </defs>
 
-                  {[0, 25, 50, 75, 100].map((v) => (
+                  {yAxisTicks.map((v) => (
                     <line
                       key={v}
                       x1={padL}
