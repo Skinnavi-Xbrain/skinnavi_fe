@@ -293,17 +293,6 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
             <p style={{ fontWeight: 700, fontSize: 15, color: 'rgb(96, 165, 250)', margin: 0 }}>
               Before / After Comparison
             </p>
-            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
-              {afterAnalysis?.created_at
-                ? new Date(afterAnalysis.created_at).toLocaleDateString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })
-                : 'No data'}
-            </p>
           </div>
           <div
             style={{

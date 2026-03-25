@@ -1,18 +1,15 @@
 import apiClient from '@/shared/lib/api-client'
-import { type Product, type Combo, type ApiResponse } from '../types/product'
+import type { Product, ApiResponse, ProductListResponse, Combo } from '../types/product'
+
 export const productApi = {
-  getProducts: async (page: number = 1, limit: number = 10): Promise<ApiResponse<Product[]>> => {
-    const res = await apiClient.get<ApiResponse<Product[]>>(
-      `/admin/products?page=${page}&limit=${limit}`
-    )
+  getProducts: async (page: number = 1, limit: number = 10) => {
+    const res = await apiClient.get<ApiResponse<ProductListResponse>>('/admin/products', {
+      params: { page, limit }
+    })
     return res.data
   },
-  getProductById: async (id: string): Promise<Product | null> => {
-    const res = await apiClient.get<ApiResponse<Product>>(`/admin/products/${id}`)
-    return res.data?.success ? res.data.data : null
-  },
 
-  createProduct: async (data: Partial<Product>) => {
+  createProduct: async (data: Omit<Product, 'id'>) => {
     return apiClient.post<ApiResponse<Product>>('/admin/products', data)
   },
 
@@ -21,7 +18,7 @@ export const productApi = {
   },
 
   deleteProduct: async (id: string) => {
-    return apiClient.delete(`/admin/products/${id}`)
+    return apiClient.delete<ApiResponse<null>>(`/admin/products/${id}`)
   },
 
   getCombos: async (page: number = 1, limit: number = 10): Promise<ApiResponse<Combo[]>> => {
@@ -29,10 +26,6 @@ export const productApi = {
       `/admin/combos?page=${page}&limit=${limit}`
     )
     return res.data
-  },
-  getComboById: async (id: string): Promise<Combo | null> => {
-    const res = await apiClient.get<ApiResponse<Combo>>(`/admin/combos/${id}`)
-    return res.data?.success ? res.data.data : null
   },
 
   createCombo: async (data: Partial<Combo>) => {
@@ -47,4 +40,5 @@ export const productApi = {
     return apiClient.delete(`/admin/combos/${id}`)
   }
 }
+
 export const comboApi = productApi

@@ -170,7 +170,7 @@ export const RoutinePackages = () => {
               <div className="mb-5 flex flex-col gap-0.5">
                 {isFreeTrial ? (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-slate-900">0đ</span>
+                    <span className="text-3xl font-black text-slate-900">0d</span>
                     <span className="text-sm text-slate-400 line-through font-medium">
                       {formatPrice(pkg.price)}
                     </span>

@@ -3,3 +3,10 @@ export interface ApiErrorResponse {
   error?: string
   statusCode?: number
 }
+
+export interface SimpleResponse<T> {
+  statusCode: number
+  data: T
+  message: string
+  success: boolean
+}
