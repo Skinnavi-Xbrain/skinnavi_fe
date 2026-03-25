@@ -13,6 +13,7 @@ export class CombosService {
         skip,
         take: limit,
         include: {
+          skin_type: true,
           combo_products: {
             include: {
               product: true,
