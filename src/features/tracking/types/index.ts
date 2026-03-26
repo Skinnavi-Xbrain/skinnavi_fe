@@ -145,3 +145,21 @@ export interface ComparisonResponse {
   skin_type: string
   metrics_comparison: MetricComparison[]
 }
+
+export interface ComparisonSliderProps {
+  tracking?: TrackingOverview | null
+}
+
+export interface DropdownOption {
+  value: string
+  label: string
+  disabled?: boolean
+}
+
+export interface CustomSelectProps {
+  id?: string
+  value: string
+  options: DropdownOption[]
+  placeholder?: string
+  onChange: (value: string) => void
+}

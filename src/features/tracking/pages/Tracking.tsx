@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { PageHeader } from '../components/Pageheader'
 import { SkinCalendar } from '../components/SkinCalendar'
 import HealthProgress from '../components/HealthProgress'
@@ -13,21 +13,39 @@ import type { ValidateSubscriptionResponse } from '@/features/payment/types'
 
 export default function Tracking() {
   const [skinAnalyses, setSkinAnalyses] = useState<SkinAnalysis[]>([])
+  const [allSkinAnalyses, setAllSkinAnalyses] = useState<SkinAnalysis[]>([])
   const [dailyLogs, setDailyLogs] = useState<Routine[]>([])
-
   const [subscription, setSubscription] = useState<ValidateSubscriptionResponse>()
 
-  const tracking: TrackingOverview | null =
-    skinAnalyses.length > 0 || dailyLogs.length > 0
-      ? {
-          user_id: '',
-          full_name: '',
-          email: '',
-          avatar_url: null,
-          skin_analyses: skinAnalyses,
-          routines: dailyLogs
-        }
-      : null
+  const tracking: TrackingOverview | null = useMemo(
+    () =>
+      skinAnalyses.length > 0 || dailyLogs.length > 0
+        ? {
+            user_id: '',
+            full_name: '',
+            email: '',
+            avatar_url: null,
+            skin_analyses: skinAnalyses,
+            routines: dailyLogs
+          }
+        : null,
+    [skinAnalyses, dailyLogs]
+  )
+
+  const fullTracking: TrackingOverview | null = useMemo(
+    () =>
+      allSkinAnalyses.length > 0 || dailyLogs.length > 0
+        ? {
+            user_id: '',
+            full_name: '',
+            email: '',
+            avatar_url: null,
+            skin_analyses: allSkinAnalyses,
+            routines: dailyLogs
+          }
+        : null,
+    [allSkinAnalyses, dailyLogs]
+  )
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +66,9 @@ export default function Tracking() {
 
         setSkinAnalyses(skinData.skin_analyses)
         setDailyLogs(logsData.routines)
+
+        const allData = await getUserSkinAnalyses(365)
+        setAllSkinAnalyses(allData.skin_analyses)
       } catch (error) {
         console.error('Error fetching tracking data:', error)
       }
@@ -84,39 +105,32 @@ export default function Tracking() {
           </div>
 
           <div className="animate-slideInBottom [animation-delay:200ms]">
-            {skinAnalyses.length > 0 ? (
-              <HealthProgress
-                data={[...skinAnalyses]
-                  .sort(
-                    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                  )
-                  .map((a) => ({
-                    label: new Date(a.created_at).toLocaleDateString('en', {
-                      month: 'short',
-                      day: 'numeric'
-                    }),
-                    date: a.created_at,
-                    score: a.overall_score ?? 0,
-                    pores: a.metrics.find((m) => m.metric_type === 'PORES')?.score ?? 0,
-                    acnes: a.metrics.find((m) => m.metric_type === 'ACNE')?.score ?? 0,
-                    darkCircles:
-                      a.metrics.find((m) => m.metric_type === 'DARK_CIRCLES')?.score ?? 0,
-                    darkPots: a.metrics.find((m) => m.metric_type === 'DARK_SPOTS')?.score ?? 0
-                  }))}
-                onDateFilterChange={handleSkinFilterChange}
-              />
-            ) : (
-              <HealthProgress onDateFilterChange={handleSkinFilterChange} />
-            )}
+            <HealthProgress
+              data={skinAnalyses
+                .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                .map((a) => ({
+                  label: new Date(a.created_at).toLocaleDateString('en', {
+                    month: 'short',
+                    day: 'numeric'
+                  }),
+                  date: a.created_at,
+                  score: a.overall_score ?? 0,
+                  pores: a.metrics.find((m) => m.metric_type === 'PORES')?.score ?? 0,
+                  acnes: a.metrics.find((m) => m.metric_type === 'ACNE')?.score ?? 0,
+                  darkCircles: a.metrics.find((m) => m.metric_type === 'DARK_CIRCLES')?.score ?? 0,
+                  darkPots: a.metrics.find((m) => m.metric_type === 'DARK_SPOTS')?.score ?? 0
+                }))}
+              onDateFilterChange={handleSkinFilterChange}
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="animate-slideInLeft [animation-delay:400ms]">
-            <ComparisonSlider tracking={tracking} />
+            <ComparisonSlider tracking={fullTracking} />
           </div>
           <div className="animate-slideInBottom [animation-delay:600ms]">
-            <AIInsights tracking={tracking} />
+            <AIInsights tracking={fullTracking} />
           </div>
         </div>
       </main>

@@ -97,7 +97,7 @@ const Profile = () => {
             <div
               onClick={() => navigate('/user-subscription')}
               className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-3xl text-white 
-                         cursor-pointer shadow-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1"
+                         cursor-pointer shadow-md hover:shadow-xl transition-all duration-500 transform hover:-translate-y-1 flex-1"
             >
               <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12" />
 
@@ -115,7 +115,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center font-medium relative z-10 text-sm">
+              <div className="mt-8 flex items-center font-medium relative z-10 text-md">
                 View Plans
                 <ChevronRight
                   size={18}

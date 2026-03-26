@@ -8,7 +8,7 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
   let dataYear = new Date().getFullYear()
 
   const { completedDates, partialDates, incompleteDates } = useMemo(() => {
-    const dateMap = new Map<string, { total: number; completed: number }>()
+    const dayRoutineMap = new Map<string, Map<string, boolean>>()
 
     if (tracking?.routines) {
       tracking.routines.forEach((routine) => {
@@ -27,16 +27,13 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
 
           const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
-          if (!dateMap.has(key)) {
-            dateMap.set(key, { total: 0, completed: 0 })
+          if (!dayRoutineMap.has(key)) {
+            dayRoutineMap.set(key, new Map())
           }
 
-          const current = dateMap.get(key)!
-          current.total += 1
-
-          if (log.is_completed) {
-            current.completed += 1
-          }
+          const routinesForDay = dayRoutineMap.get(key)!
+          const currentStatus = routinesForDay.get(routine.routine_id) || false
+          routinesForDay.set(routine.routine_id, currentStatus || log.is_completed)
         })
       })
     }
@@ -45,10 +42,14 @@ export const SkinCalendar = ({ tracking }: SkinCalendarProps) => {
     const partialDates = new Set<string>()
     const incompleteDates = new Set<string>()
 
-    dateMap.forEach((value, key) => {
-      if (value.completed === value.total) {
+    dayRoutineMap.forEach((routinesStatus, key) => {
+      const statuses = Array.from(routinesStatus.values())
+      const totalRoutines = statuses.length
+      const completedCount = statuses.filter(Boolean).length
+
+      if (completedCount === totalRoutines && totalRoutines > 0) {
         completedDates.add(key)
-      } else if (value.completed > 0) {
+      } else if (completedCount > 0) {
         partialDates.add(key)
       } else {
         incompleteDates.add(key)
