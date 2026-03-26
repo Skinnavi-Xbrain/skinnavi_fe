@@ -26,7 +26,7 @@ export const LogoutConfirmDialog = ({
 }: LogoutConfirmDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onClose}>
-      <AlertDialogContent className="w-[92%] max-w-[420px] rounded-[1.5rem] p-6 bg-white border-0 shadow-xl">
+      <AlertDialogContent className="w-[92%] max-w-[420px] rounded-[1.5rem] sm:rounded-[2rem] p-6 bg-white border-0 shadow-xl">
         <AlertDialogHeader className="flex flex-col items-center text-center gap-4">
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-50">
             <LogOut className="w-8 h-8 text-red-500" />
