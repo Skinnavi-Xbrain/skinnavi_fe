@@ -96,8 +96,8 @@ const Subscription = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-5 md:px-6 mt-10 md:mt-16">
-        <div className="mb-12">
+      <div className="mx-auto md:p-12 mt-10 md:mt-16">
+        <div className="mb-12 px-5 md:px-0">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">
@@ -120,7 +120,7 @@ const Subscription = () => {
           <RoutinePackages />
         </div>
 
-        <div className="pt-10 border-t border-slate-100">
+        <div className="pt-10 px-5 md:px-0 border-t border-slate-100">
           <div className="flex items-center gap-3 mb-8">
             <Receipt className="text-blue-500 w-5 h-5" />
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">

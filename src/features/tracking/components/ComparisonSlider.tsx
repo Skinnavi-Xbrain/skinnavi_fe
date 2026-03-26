@@ -1,25 +1,12 @@
 import { TrendingUp, ArrowLeftRight, CalendarDays, ChevronDown, Ban } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import type { ComparisonResponse, TrackingOverview } from '../types'
+import type {
+  ComparisonResponse,
+  ComparisonSliderProps,
+  CustomSelectProps,
+  DropdownOption
+} from '../types'
 import { compareAnalyses } from '../services/tracking.api'
-
-interface ComparisonSliderProps {
-  tracking?: TrackingOverview | null
-}
-
-interface DropdownOption {
-  value: string
-  label: string
-  disabled?: boolean
-}
-
-interface CustomSelectProps {
-  id?: string
-  value: string
-  options: DropdownOption[]
-  placeholder?: string
-  onChange: (value: string) => void
-}
 
 const CustomSelect = ({
   id,
@@ -164,20 +151,23 @@ const CustomSelect = ({
 }
 
 export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
-  const skinAnalyses = tracking?.skin_analyses || []
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = String(date.getFullYear()).slice(-2) // Lấy 2 số cuối của năm
+    return `${day}/${month}/${year}`
+  }
 
+  const skinAnalyses = tracking?.skin_analyses || []
   const sortedAnalyses = [...skinAnalyses].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
   const defaultAfterId = sortedAnalyses[0]?.id || ''
   const defaultBeforeId = sortedAnalyses[1]?.id || ''
-
   const [selectedBefore, setSelectedBefore] = useState<string>(defaultBeforeId)
   const [selectedAfter, setSelectedAfter] = useState<string>(defaultAfterId)
-
-  // Thay thế any bằng ComparisonResponse
   const [comparisonData, setComparisonData] = useState<ComparisonResponse | null>(null)
-
   const beforeAnalysis = skinAnalyses.find((a) => a.id === selectedBefore)
   const afterAnalysis = skinAnalyses.find((a) => a.id === selectedAfter)
 
@@ -245,7 +235,7 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
       }
       return {
         value: analysis.id,
-        label: new Date(analysis.created_at).toLocaleDateString(),
+        label: formatDate(analysis.created_at),
         disabled
       }
     })
@@ -256,7 +246,7 @@ export const ComparisonSlider = ({ tracking }: ComparisonSliderProps) => {
       const disabled = beforeAnalysis ? !isAfterDate(analysis, beforeAnalysis) : false
       return {
         value: analysis.id,
-        label: new Date(analysis.created_at).toLocaleDateString(),
+        label: formatDate(analysis.created_at),
         disabled
       }
     })
