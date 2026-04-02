@@ -24,6 +24,13 @@ export class PackageSubscriptionsService {
     const latestSub = await this.prisma.user_package_subscriptions.findFirst({
       where: {
         user_id: userId,
+        status: {
+          in: [
+            subscription_status_enum.ACTIVE,
+            subscription_status_enum.CANCELED,
+            subscription_status_enum.EXPIRED,
+          ],
+        },
       },
       orderBy: {
         created_at: Order.DESC,
@@ -99,7 +106,7 @@ export class PackageSubscriptionsService {
     });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleExpireSubscriptions() {
     const now = new Date();
 
