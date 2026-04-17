@@ -47,9 +47,14 @@ RUN npx prisma generate
 # Copy ONLY the built "dist" bundle from the builder stage
 COPY --from=builder /app/dist ./dist
 
+# Create start script
+RUN echo "#!/bin/sh" > /app/start.sh && \
+    echo "npx prisma migrate deploy" >> /app/start.sh && \
+    echo "node dist/src/main.js" >> /app/start.sh && \
+    chmod +x /app/start.sh
+
 # Expose the application port (as requested)
 EXPOSE 5000
 
 # Start the application 
-# Note: NestJS builds to dist/src/main.js by default
-CMD ["node", "dist/src/main.js"]
+CMD ["/app/start.sh"]
