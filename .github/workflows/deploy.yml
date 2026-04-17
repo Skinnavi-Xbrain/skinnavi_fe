@@ -11,6 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -36,17 +45,22 @@ jobs:
             --task-definition ${{ secrets.ECS_TASK_DEFINITION }} \
             --query taskDefinition)
 
-          # Replace image with the new one
+          # Replace image with the new one dynamically by container name
           NEW_TASK_DEF=$(echo $TASK_DEF | jq \
             --arg IMAGE "${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}" \
-            '.containerDefinitions[0].image=$IMAGE')
+            --arg CONTAINER_NAME "skinnavi-backend" \
+            '.containerDefinitions |= map(if .name == $CONTAINER_NAME then .image = $IMAGE else . end)')
 
           # Remove properties that cannot be included when registering a new task definition
           CLEANED_TASK_DEF=$(echo $NEW_TASK_DEF | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
 
           echo "$CLEANED_TASK_DEF" > new-task-def.json
 
-          # Register new task definition
+      - name: Print new task def
+        run: cat new-task-def.json
+
+      - name: Register new task definition
+        run: |
           NEW_TASK_INFO=$(aws ecs register-task-definition --cli-input-json file://new-task-def.json)
           NEW_REVISION=$(echo $NEW_TASK_INFO | jq -r '.taskDefinition.revision')
           echo "NEW_TASK_REVISION=$NEW_REVISION" >> $GITHUB_ENV
@@ -58,3 +72,9 @@ jobs:
             --service ${{ secrets.ECS_SERVICE }} \
             --task-definition ${{ secrets.ECS_TASK_DEFINITION }}:${{ env.NEW_TASK_REVISION }} \
             --force-new-deployment
+
+      - name: Wait for service stable
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --services ${{ secrets.ECS_SERVICE }}
