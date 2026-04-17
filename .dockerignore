@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+.github
+
+# Node & Package Managers
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build Outputs
+dist
+out
+build
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Development configs
+.husky
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Linter & Formatting
+.prettierrc
+.prettierignore
+.eslintignore
+eslint.config.js
+commitlint.config.js
+
+# Testing
+coverage/
+test/
+tests/
+__tests__/
+
+# Local mocks
+mock-server/
+
+# Config files (if you don't want them in runtime container, but Vite needs them during build)
+# We keep tailwind.config, vite.config, postcss.config, and tsconfigs since they are needed in the build stage.
+
+# Markdown/Docs
+README.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
