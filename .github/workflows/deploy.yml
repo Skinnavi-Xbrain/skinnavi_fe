@@ -36,11 +36,7 @@ jobs:
       # You can comment this out or modify based on how you load env variables in Vite
       - name: Setup Environment Variables
         run: |
-          # Example 1: Creating line by line if you have individual secrets
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
-          
-          # Example 2: If you put your entire .env content into a single GitHub Secret named ENV_FILE
-          # echo "${{ secrets.ENV_FILE }}" > .env
+          echo "VITE_API_URL=http://api.paduy.tech/api" >> .env
 
       - name: Build Project
         # Vite will build output into the "dist" directory by default
