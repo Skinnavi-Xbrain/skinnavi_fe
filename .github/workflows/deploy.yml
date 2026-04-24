@@ -36,7 +36,7 @@ jobs:
       # You can comment this out or modify based on how you load env variables in Vite
       - name: Setup Environment Variables
         run: |
-          echo "VITE_API_URL=http://api.paduy.tech/api" >> .env
+          echo "VITE_API_URL=https://api.paduy.tech/api" >> .env
 
       - name: Build Project
         # Vite will build output into the "dist" directory by default
