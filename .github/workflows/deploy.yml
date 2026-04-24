@@ -49,16 +49,16 @@ jobs:
       - name: Configure AWS Credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::654654287720:role/skinnavi-frontend-deploy
-          aws-region: ap-southeast-1
+          role-to-assume: arn:aws:iam::832950311791:role/skinnavi-frontend-deploy-role
+          aws-region: us-west-2
 
       - name: Sync Files to S3 Bucket
         # The --delete flag ensures files removed from the repository are also removed from S3
-        run: aws s3 sync dist s3://skinnavi-fe-bucket --delete
+        run: aws s3 sync dist s3://static-bucket-group-15 --delete
 
       - name: Invalidate CloudFront Cache
         # Forces CloudFront to fetch the latest files from S3 rather than serving older cached versions
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id E1HQ3UXKZ7BFTH \
+            --distribution-id E325G04IFOOUTC \
             --paths "/*"
