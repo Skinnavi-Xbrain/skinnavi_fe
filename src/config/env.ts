@@ -1,4 +1,7 @@
 export const env = {
-  API_URL:
-    import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3000/api')
+  // Force relative path in production for CloudFront routing.
+  // Use VITE_API_URL or localhost only for local development.
+  API_URL: import.meta.env.PROD
+    ? '/api'
+    : import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 }
